@@ -1,0 +1,163 @@
+[
+  {
+    "code": "poon-hill",
+    "region": "Annapurna",
+    "base_difficulty": "easy",
+    "permits": ["TIMS", "ACAP"],
+    "name": {"en": "Ghorepani Poon Hill Trek", "ne": "घोरेपानी पुनहिल पदयात्रा"},
+    "overview": {
+      "en": "A short teahouse trek through Gurung and Magar villages and rhododendron forest to the Poon Hill viewpoint, famous for sunrise over Dhaulagiri and the Annapurnas. Good for first-time trekkers and families.",
+      "ne": "गुरुङ र मगर गाउँ तथा लालीगुराँसको वन हुँदै पुन हिल दृश्यस्थलसम्म जाने छोटो पदयात्रा, जहाँबाट धौलागिरि र अन्नपूर्णमा सूर्योदय देखिन्छ। पहिलोपटक पदयात्रा गर्नेहरू र परिवारका लागि उपयुक्त।"
+    },
+    "stages": [
+      {"day": 1, "from": "nayapul", "to": "tikhedhunga", "distance_km": 9, "walk_hours": 4.5, "notes": "Gentle walk up the Modi and Bhurungdi valleys via Birethanti (ACAP check post)."},
+      {"day": 2, "from": "tikhedhunga", "to": "ghorepani", "distance_km": 10, "walk_hours": 6.5, "notes": "Long stone staircase to Ulleri, then forest to Ghorepani."},
+      {"day": 3, "from": "ghorepani", "to": "tadapani", "distance_km": 10, "walk_hours": 6.5, "highest_point_m": 3210, "notes": "Sunrise at Poon Hill, then along the ridge over Deurali to Tadapani."},
+      {"day": 4, "from": "tadapani", "to": "ghandruk", "distance_km": 6, "walk_hours": 2.5, "notes": "Downhill through forest to Ghandruk; jeep back to Pokhara."}
+    ]
+  },
+  {
+    "code": "annapurna-base-camp",
+    "region": "Annapurna",
+    "base_difficulty": "moderate",
+    "permits": ["TIMS", "ACAP"],
+    "name": {"en": "Annapurna Base Camp Trek", "ne": "अन्नपूर्ण आधार शिविर पदयात्रा"},
+    "overview": {
+      "en": "A classic trek up the Modi Khola gorge into the Annapurna Sanctuary, a natural amphitheatre of peaks above 6,000 m, with Annapurna I and Machhapuchhre close at hand.",
+      "ne": "मोदी खोलाको गल्छी हुँदै अन्नपूर्ण अभयारण्यसम्म पुग्ने प्रसिद्ध पदयात्रा, जहाँ ६,००० मिटरभन्दा अग्ला हिमालहरूले घेरेको दृश्य देखिन्छ।"
+    },
+    "stages": [
+      {"day": 1, "from": "nayapul", "to": "ghandruk", "distance_km": 12, "walk_hours": 5.5, "notes": "Via Birethanti and Kimche, or by jeep most of the way."},
+      {"day": 2, "from": "ghandruk", "to": "chhomrong", "distance_km": 9, "walk_hours": 6, "notes": "Over Komrong Danda and down to the Kimrong Khola, then up to Chhomrong."},
+      {"day": 3, "from": "chhomrong", "to": "bamboo", "distance_km": 8, "walk_hours": 5, "notes": "Down the Chhomrong stairs, across the river and through Sinuwa."},
+      {"day": 4, "from": "bamboo", "to": "deurali_abc", "distance_km": 7, "walk_hours": 5, "notes": "Through Dovan and Himalaya; watch for avalanche warnings in spring."},
+      {"day": 5, "from": "deurali_abc", "to": "annapurna_base_camp", "distance_km": 5, "walk_hours": 4.5, "notes": "Via Machhapuchhre Base Camp (3,700 m) into the Sanctuary."},
+      {"day": 6, "from": "annapurna_base_camp", "to": "bamboo", "distance_km": 12, "walk_hours": 7, "notes": "Sunrise at base camp, then a long descent."},
+      {"day": 7, "from": "bamboo", "to": "jhinu_danda", "distance_km": 10, "walk_hours": 6, "notes": "Back over Chhomrong to the hot springs at Jhinu."},
+      {"day": 8, "from": "jhinu_danda", "to": "nayapul", "distance_km": 12, "walk_hours": 5, "notes": "Walk out to Siwai or Nayapul and drive to Pokhara."}
+    ]
+  },
+  {
+    "code": "everest-base-camp",
+    "region": "Khumbu",
+    "base_difficulty": "hard",
+    "permits": ["SNP", "KPLRM"],
+    "name": {"en": "Everest Base Camp Trek", "ne": "सगरमाथा आधार शिविर पदयात्रा"},
+    "overview": {
+      "en": "Fly to Lukla and walk through Sherpa villages and monasteries to the foot of the world's highest mountain, with two acclimatisation days and a sunrise climb of Kala Patthar.",
+      "ne": "लुक्लासम्म उडेर शेर्पा गाउँ र गुम्बाहरू हुँदै विश्वको सर्वोच्च शिखरको फेदसम्म पुग्ने पदयात्रा, जसमा दुई दिन उचाइ अनुकूलनका लागि आराम गरिन्छ।"
+    },
+    "stages": [
+      {"day": 1, "from": "lukla", "to": "phakding", "distance_km": 8, "walk_hours": 3.5, "notes": "Mostly downhill along the Dudh Koshi after the flight from Kathmandu."},
+      {"day": 2, "from": "phakding", "to": "namche_bazaar", "distance_km": 10, "walk_hours": 6, "notes": "Enter Sagarmatha National Park at Monjo; steep climb after the Hillary Bridge."},
+      {"day": 3, "from": "namche_bazaar", "to": "namche_bazaar", "distance_km": 5, "walk_hours": 3, "highest_point_m": 3880, "notes": "Acclimatisation day: hike to the Everest View Hotel and sleep in Namche again."},
+      {"day": 4, "from": "namche_bazaar", "to": "tengboche", "distance_km": 10, "walk_hours": 5.5, "notes": "Balcony trail to Phunki Tenga, then a steep climb to the monastery."},
+      {"day": 5, "from": "tengboche", "to": "dingboche", "distance_km": 11, "walk_hours": 5.5, "notes": "Through Pangboche into the Imja valley."},
+      {"day": 6, "from": "dingboche", "to": "dingboche", "distance_km": 4, "walk_hours": 4, "highest_point_m": 5083, "notes": "Acclimatisation day: climb Nangkartshang Peak and sleep in Dingboche."},
+      {"day": 7, "from": "dingboche", "to": "lobuche", "distance_km": 8, "walk_hours": 5, "notes": "Past Thukla and the climbers' memorials."},
+      {"day": 8, "from": "lobuche", "to": "gorak_shep", "distance_km": 15, "walk_hours": 8, "highest_point_m": 5364, "notes": "To Gorak Shep, then a return walk to Everest Base Camp."},
+      {"day": 9, "from": "gorak_shep", "to": "pheriche", "distance_km": 14, "walk_hours": 7, "highest_point_m": 5644, "notes": "Sunrise on Kala Patthar, then descend to Pheriche."},
+      {"day": 10, "from": "pheriche", "to": "namche_bazaar", "distance_km": 20, "walk_hours": 7, "notes": "Long descent via Pangboche and Tengboche."},
+      {"day": 11, "from": "namche_bazaar", "to": "lukla", "distance_km": 18, "walk_hours": 7, "notes": "Back down the Dudh Koshi to Lukla for the flight out."}
+    ]
+  },
+  {
+    "code": "langtang-valley",
+    "region": "Langtang",
+    "base_difficulty": "moderate",
+    "permits": ["TIMS", "LNP"],
+    "name": {"en": "Langtang Valley Trek", "ne": "लाङटाङ उपत्यका पदयात्रा"},
+    "overview": {
+      "en": "The closest major trek to Kathmandu, following the Langtang Khola through forest to Tamang villages and yak pastures under Langtang Lirung.",
+      "ne": "काठमाडौँबाट सबैभन्दा नजिकको ठूलो पदयात्रा, लाङटाङ खोलाको किनारै किनार वन हुँदै लाङटाङ लिरुङ हिमालमुनिका तामाङ गाउँसम्म।"
+    },
+    "stages": [
+      {"day": 1, "from": "syabrubesi", "to": "lama_hotel", "distance_km": 11, "walk_hours": 6, "notes": "Through Bamboo along the Langtang Khola."},
+      {"day": 2, "from": "lama_hotel", "to": "langtang_village", "distance_km": 14, "walk_hours": 6.5, "notes": "Out of the forest at Ghodatabela into the open valley."},
+      {"day": 3, "from": "langtang_village", "to": "kyanjin_gompa", "distance_km": 7, "walk_hours": 3, "notes": "Short day past mani walls and prayer wheels."},
+      {"day": 4, "from": "kyanjin_gompa", "to": "kyanjin_gompa", "distance_km": 6, "walk_hours": 5, "highest_point_m": 4773, "notes": "Acclimatisation hike to Kyanjin Ri, back to Kyanjin Gompa."},
+      {"day": 5, "from": "kyanjin_gompa", "to": "lama_hotel", "distance_km": 21, "walk_hours": 7, "notes": "Long descent back down the valley."},
+      {"day": 6, "from": "lama_hotel", "to": "syabrubesi", "distance_km": 11, "walk_hours": 5, "notes": "Back to the road head; bus or jeep to Kathmandu next day."}
+    ]
+  },
+  {
+    "code": "mardi-himal",
+    "region": "Annapurna",
+    "base_difficulty": "moderate",
+    "permits": ["TIMS", "ACAP"],
+    "name": {"en": "Mardi Himal Trek", "ne": "मर्दी हिमाल पदयात्रा"},
+    "overview": {
+      "en": "A quieter ridge trek near Pokhara that climbs through rhododendron forest to open grassy ridges right under Machhapuchhre and Mardi Himal.",
+      "ne": "पोखरा नजिकको शान्त पदयात्रा, लालीगुराँसको वन हुँदै माछापुच्छ्रे र मर्दी हिमालको फेदसम्मको खुला डाँडामा पुगिन्छ।"
+    },
+    "stages": [
+      {"day": 1, "from": "kande", "to": "forest_camp", "distance_km": 10, "walk_hours": 6, "notes": "Via Australian Camp, Pothana and Deurali."},
+      {"day": 2, "from": "forest_camp", "to": "low_camp", "distance_km": 4, "walk_hours": 3, "notes": "Short forest climb; first close view of Machhapuchhre."},
+      {"day": 3, "from": "low_camp", "to": "high_camp_mardi", "distance_km": 4, "walk_hours": 3, "notes": "Above the tree line via Badal Danda."},
+      {"day": 4, "from": "high_camp_mardi", "to": "low_camp", "distance_km": 11, "walk_hours": 7, "highest_point_m": 4200, "notes": "Early climb to the upper viewpoint, then back down to Low Camp."},
+      {"day": 5, "from": "low_camp", "to": "siding", "distance_km": 7, "walk_hours": 4, "notes": "Steep descent to Siding; jeep to Pokhara."}
+    ]
+  },
+  {
+    "code": "annapurna-circuit",
+    "region": "Annapurna",
+    "base_difficulty": "hard",
+    "permits": ["TIMS", "ACAP"],
+    "name": {"en": "Annapurna Circuit Trek", "ne": "अन्नपूर्ण सर्किट पदयात्रा"},
+    "overview": {
+      "en": "A journey from green Marsyangdi valleys to the dry Tibetan-style villages of Manang and Mustang, crossing the 5,416 m Thorong La. This version starts at Dharapani, where the jeep road from Besisahar ends.",
+      "ne": "हरियो मर्स्याङ्दी उपत्यकादेखि मनाङ र मुस्ताङका सुख्खा गाउँसम्म, ५,४१६ मिटर अग्लो थोराङ ला पार गर्ने पदयात्रा।"
+    },
+    "stages": [
+      {"day": 1, "from": "dharapani", "to": "chame", "distance_km": 15, "walk_hours": 6, "notes": "Through Danaque and Timang with views of Manaslu."},
+      {"day": 2, "from": "chame", "to": "upper_pisang", "distance_km": 15, "walk_hours": 6, "notes": "Past the curved Paungda Danda rock face."},
+      {"day": 3, "from": "upper_pisang", "to": "manang", "distance_km": 17, "walk_hours": 7, "notes": "Upper route via Ghyaru and Ngawal for big Annapurna views."},
+      {"day": 4, "from": "manang", "to": "manang", "distance_km": 10, "walk_hours": 6, "highest_point_m": 4600, "notes": "Acclimatisation day: hike towards Ice Lake (or Gangapurna Lake) and sleep in Manang."},
+      {"day": 5, "from": "manang", "to": "yak_kharka", "distance_km": 10, "walk_hours": 4, "notes": "Gradual climb through Gunsang."},
+      {"day": 6, "from": "yak_kharka", "to": "thorong_phedi", "distance_km": 7, "walk_hours": 3.5, "notes": "Short day via Ledar; rest for the pass."},
+      {"day": 7, "from": "thorong_phedi", "to": "muktinath", "distance_km": 15, "walk_hours": 8.5, "highest_point_m": 5416, "notes": "Start before dawn; cross Thorong La and descend 1,600 m to Muktinath."},
+      {"day": 8, "from": "muktinath", "to": "jomsom", "distance_km": 20, "walk_hours": 6, "notes": "Down the Kali Gandaki via Kagbeni; fly or drive to Pokhara."}
+    ]
+  },
+  {
+    "code": "gosaikunda",
+    "region": "Langtang",
+    "base_difficulty": "moderate",
+    "permits": ["TIMS", "LNP"],
+    "name": {"en": "Gosaikunda Lake Trek", "ne": "गोसाइँकुण्ड पदयात्रा"},
+    "overview": {
+      "en": "A short but steep trek from Dhunche to the sacred Gosaikunda lakes, with views of Langtang, Ganesh Himal and Manaslu from the Laurebina ridge.",
+      "ne": "धुन्चेबाट पवित्र गोसाइँकुण्ड तालसम्मको छोटो तर ठाडो पदयात्रा, लौरीबिना डाँडाबाट लाङटाङ, गणेश हिमाल र मनास्लु देखिन्छन्।"
+    },
+    "stages": [
+      {"day": 1, "from": "dhunche", "to": "chandanbari", "distance_km": 11, "walk_hours": 6, "notes": "Steady climb through forest via Deurali."},
+      {"day": 2, "from": "chandanbari", "to": "laurebina", "distance_km": 5, "walk_hours": 3, "notes": "Up the ridge; short day to help acclimatise."},
+      {"day": 3, "from": "laurebina", "to": "gosaikunda", "distance_km": 4, "walk_hours": 3, "notes": "Past Saraswati and Bhairav Kunda to the main lake."},
+      {"day": 4, "from": "gosaikunda", "to": "chandanbari", "distance_km": 9, "walk_hours": 5, "notes": "Back down the ridge."},
+      {"day": 5, "from": "chandanbari", "to": "dhunche", "distance_km": 11, "walk_hours": 4, "notes": "Descend to Dhunche; bus to Kathmandu."}
+    ]
+  },
+  {
+    "code": "manaslu-circuit",
+    "region": "Manaslu",
+    "base_difficulty": "hard",
+    "permits": ["MRAP", "MCAP", "ACAP"],
+    "name": {"en": "Manaslu Circuit Trek", "ne": "मनास्लु सर्किट पदयात्रा"},
+    "overview": {
+      "en": "A remote restricted-area trek around the world's eighth-highest mountain, up the Budhi Gandaki gorge and over the Larkya La into the Annapurna region. A licensed guide and agency permit are required.",
+      "ne": "विश्वको आठौँ अग्लो हिमाल मनास्लु वरिपरि घुम्ने दुर्गम पदयात्रा, बुढीगण्डकीको गल्छी हुँदै लार्के ला पार गरेर अन्नपूर्ण क्षेत्रमा झरिन्छ। लाइसेन्स भएका गाइड र एजेन्सीमार्फत अनुमति आवश्यक छ।"
+    },
+    "stages": [
+      {"day": 1, "from": "machha_khola", "to": "jagat", "distance_km": 22, "walk_hours": 7, "notes": "Along the Budhi Gandaki past the Tatopani hot spring."},
+      {"day": 2, "from": "jagat", "to": "deng", "distance_km": 20, "walk_hours": 7, "notes": "Through Philim and the Nupri gorge."},
+      {"day": 3, "from": "deng", "to": "namrung", "distance_km": 19, "walk_hours": 7, "notes": "Into Tibetan Buddhist villages with mani walls."},
+      {"day": 4, "from": "namrung", "to": "samagaun", "distance_km": 16, "walk_hours": 6.5, "notes": "Via Lho with views of Manaslu."},
+      {"day": 5, "from": "samagaun", "to": "samagaun", "distance_km": 10, "walk_hours": 6, "highest_point_m": 4000, "notes": "Acclimatisation hike to Pungyen Gompa or Birendra Lake; sleep in Samagaun."},
+      {"day": 6, "from": "samagaun", "to": "samdo", "distance_km": 8, "walk_hours": 3.5, "notes": "Short climb up the valley."},
+      {"day": 7, "from": "samdo", "to": "dharamsala_larkya", "distance_km": 6, "walk_hours": 4, "notes": "Rest early for the pass."},
+      {"day": 8, "from": "dharamsala_larkya", "to": "bimthang", "distance_km": 16, "walk_hours": 9, "highest_point_m": 5106, "notes": "Cross the Larkya La and descend to Bimthang."},
+      {"day": 9, "from": "bimthang", "to": "tilije", "distance_km": 14, "walk_hours": 6, "notes": "Down through forest to the Dudh Khola."},
+      {"day": 10, "from": "tilije", "to": "dharapani", "distance_km": 7, "walk_hours": 3, "notes": "Join the Annapurna Circuit; jeep to Besisahar."}
+    ]
+  }
+]

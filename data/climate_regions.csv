@@ -1,0 +1,16 @@
+district,rain_factor,note
+Kathmandu,1.0,baseline (Kathmandu airport normals)
+Lalitpur,1.0,
+Bhaktapur,1.0,
+Kaski,2.6,Pokhara and the southern Annapurna slopes are among the wettest places in Nepal
+Myagdi,2.0,
+Solukhumbu,0.7,
+Rasuwa,1.2,
+Gorkha,1.3,
+Manang,0.35,rain shadow north of the Annapurnas
+Mustang,0.15,rain shadow (trans-Himalayan desert)
+Mugu,0.6,
+Chitwan,1.4,
+Bardiya,1.2,
+Rupandehi,1.2,
+Dhanusha,0.9,

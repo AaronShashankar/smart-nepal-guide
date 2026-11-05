@@ -1,0 +1,28 @@
+# Local services: PostgreSQL 16 (with pg_trgm, created by the migration) and Redis.
+#   docker compose up -d
+# If PostgreSQL already runs on this machine (e.g. Homebrew), stop it or set POSTGRES_PORT=5433
+# and change DATABASE_URL in backend/.env to match.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: snguide
+      POSTGRES_PASSWORD: snguide
+      POSTGRES_DB: snguide
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U snguide"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+volumes:
+  pgdata:
