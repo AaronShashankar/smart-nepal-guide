@@ -11,6 +11,8 @@ dependencies = [
     "bcrypt>=5.0.0",
     "fastapi>=0.162.0",
     "google-auth>=2.62.1",
+    "joblib>=1.6.0",
+    "numpy>=2.5.4",
     "psycopg[binary]>=3.3.8",
     "pydantic-settings>=2.16.2",
     "pydantic[email]>=2.14.3",
@@ -28,9 +30,16 @@ dev = [
     "python-dotenv>=1.2.4",
     "ruff>=0.17.3",
 ]
+ml = [
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "scikit-learn>=1.9.1",
+]
 
 [tool.uv]
 package = false
+# "ml" (scikit-learn, matplotlib, ipykernel) is only for evaluation, not for serving the API.
+default-groups = ["dev", "ml"]
 
 [tool.ruff]
 line-length = 100

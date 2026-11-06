@@ -41,14 +41,15 @@ cp backend/.env.example backend/.env    # then put a random value in JWT_SECRET
 ```
 
 This runs:
-- **backend:** ruff lint and format check, a check that the migrations match the models, and the 51 pytest tests;
+- **backend:** ruff lint and format check, a check that the migrations match the models, and the 81 pytest tests;
 - **mobile:** the TypeScript typecheck and ESLint;
 - **admin:** the build and lint.
 
 The run is good if it ends with **"All checks passed."**
 The tests cover register/login, the wrong-password case, the expired-token case, profile save and load,
-the fuzzy search cases ("punhill", "anapurna", "अन्नपूर्ण"), the English fallback, and the Haversine
-distance from Kathmandu to Pokhara.
+the fuzzy search cases ("punhill", "anapurna", "अन्नपूर्ण"), the English fallback, the Haversine
+distance from Kathmandu to Pokhara, and (Phase 2) the acclimatisation rules on the EBC itinerary,
+`gini`, the tree and forest, our accuracy against scikit-learn's, and `/predict-risk`.
 
 ---
 
@@ -58,6 +59,7 @@ distance from Kathmandu to Pokhara.
 cd backend
 uv sync                                   # install Python packages (first time / after changes)
 uv run python -m app.seed                 # migrate the schema and load data/ (safe to re-run)
+uv run python -m app.ml.train             # train the risk model (once, and after the data changes)
 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 `--host 0.0.0.0` lets your phone reach the API over Wi-Fi. Keep this terminal open.
@@ -127,6 +129,17 @@ npx expo run:android                      # builds and installs the app, then st
 - [ ] Log out → log in again with a **wrong password** → you see an error message
 - [ ] Stop the backend (Ctrl+C) and pull to refresh a list → you see an error with a **Try again** button
 
+### Check the Phase 2 demo (mid-term)
+- [ ] Explore → **Everest Base Camp Trek** → **Day-by-day itinerary** → 11 day cards; days 3 and 6 are rest days
+- [ ] Days 2, 5 and 7 have an orange **Caution** badge; the summary box at the top is orange (passes)
+- [ ] **Annapurna Base Camp Trek** → itinerary → day 5 is red (**Add rest**) and the box suggests a rest day at Deurali
+- [ ] Profile: fitness *Medium*, experience *None* → EBC → **Check my risk** → January → **Risky** with 3 reasons
+- [ ] Profile: fitness *High*, experience *Experienced* → EBC → October → **Hard**, with different reasons
+- [ ] Settings → **My risk checks** → both checks, newest first
+- [ ] Register a new account, tap **Skip for now** on the profile → **Check my risk** asks you to complete the profile first
+- [ ] Switch to नेपाली → itinerary and reasons are in Nepali, numbers in Devanagari digits
+- [ ] `cd backend && uv run python -m app.ml.evaluate` → the table and figures appear in `docs/ml/`
+
 "Continue with Google" will show *"Google sign-in is not set up in this build"* until you do
 section 6.
 
@@ -154,6 +167,8 @@ Place and trek editing comes in Phase 3. Until then, edit the files in `data/` a
 |---|---|
 | Start everything | Terminal 1: backend `uvicorn …` · Terminal 2: `cd mobile && npx expo start` · Terminal 3: `cd admin && npm run dev` |
 | Changed `data/*.csv` or `treks.json` | `cd backend && uv run python -m app.seed` |
+| Changed treks or survey data → retrain | `uv run python -m app.ml.dataset [--survey form.csv]`, `uv run python -m app.seed`, `uv run python -m app.ml.train`, `uv run python -m app.ml.evaluate` |
+| "No trained model yet" (503) in the app | `cd backend && uv run python -m app.ml.train` (no restart needed) |
 | Changed a model in `backend/app/models` | `uv run alembic revision --autogenerate -m "what changed"`, review the new file, then `uv run alembic upgrade head` |
 | Added an npm package with native code to mobile | `npx expo install <pkg>` then `npx expo run:android` again (rebuild) |
 | Before every commit | `./scripts/verify.sh` |

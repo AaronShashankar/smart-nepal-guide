@@ -77,8 +77,11 @@ export default function RootLayout() {
         <Stack.Protected guard={!!language && !!token}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="place/[id]" options={{ title: '' }} />
-          <Stack.Screen name="trek/[id]" options={{ title: '' }} />
+          <Stack.Screen name="trek/[id]/index" options={{ title: '' }} />
+          <Stack.Screen name="trek/[id]/itinerary" options={{ title: t('itinerary.title') }} />
+          <Stack.Screen name="trek/[id]/risk" options={{ title: t('risk.title') }} />
           <Stack.Screen name="profile" options={{ title: t('profile.title') }} />
+          <Stack.Screen name="predictions" options={{ title: t('risk.history') }} />
         </Stack.Protected>
       </Stack>
     </QueryClientProvider>

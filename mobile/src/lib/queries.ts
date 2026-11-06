@@ -5,15 +5,19 @@ import { useSettings } from '@/store/settings';
 
 import { api } from './api';
 import type {
+  Acclimatisation,
   Category,
   Interest,
+  Itinerary,
   Me,
   Page,
   PlaceDetail,
   PlaceSummary,
+  Prediction,
   Profile,
   ProfileInput,
   RiskLevel,
+  RiskResult,
   SearchResult,
   TrekDetail,
   TrekSummary,
@@ -97,6 +101,41 @@ export function useTrek(id: string | undefined) {
     queryKey: ['trek', id, lang],
     queryFn: () => get<TrekDetail>(`/treks/${id}`),
     enabled: !!id,
+  });
+}
+
+export function useItinerary(id: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['itinerary', id, lang],
+    queryFn: () => get<Itinerary>(`/treks/${id}/stages`),
+    enabled: !!id,
+  });
+}
+
+export function useAcclimatisation(id: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['acclimatisation', id, lang],
+    queryFn: () => get<Acclimatisation>(`/treks/${id}/acclimatisation`),
+    enabled: !!id,
+  });
+}
+
+export function usePredictRisk() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { trek_id: string; month: number }) =>
+      (await api.post<RiskResult>('/predict-risk', body)).data,
+    onSuccess: () => client.invalidateQueries({ queryKey: ['predictions'] }),
+  });
+}
+
+export function usePredictions() {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['predictions', lang],
+    queryFn: () => get<Prediction[]>('/me/predictions'),
   });
 }
 

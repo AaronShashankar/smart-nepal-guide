@@ -84,7 +84,10 @@ export default function PlaceDetailScreen() {
                       href={{ pathname: '/place/[id]', params: { id: n.id } }}
                       asChild
                     >
-                      <Pressable style={[styles.card, styles.row]} accessibilityRole="button">
+                      <Pressable
+                        style={StyleSheet.flatten([styles.card, styles.row])}
+                        accessibilityRole="button"
+                      >
                         <CategoryIcon category={n.category} />
                         <View style={{ flex: 1 }}>
                           <AppText variant="subheading">{n.name}</AppText>

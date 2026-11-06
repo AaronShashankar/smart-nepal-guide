@@ -39,9 +39,22 @@ export default function SettingsScreen() {
           {me.data?.full_name && <AppText muted>{me.data.email}</AppText>}
         </View>
         <Link href="/profile" asChild>
-          <Pressable style={[styles.card, styles.row]} accessibilityRole="button">
+          <Pressable
+            style={StyleSheet.flatten([styles.card, styles.row])}
+            accessibilityRole="button"
+          >
             <MaterialCommunityIcons name="account-edit-outline" size={22} color={colors.accent} />
             <AppText style={{ flex: 1 }}>{t('settings.profile')}</AppText>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+          </Pressable>
+        </Link>
+        <Link href="/predictions" asChild>
+          <Pressable
+            style={StyleSheet.flatten([styles.card, styles.row])}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons name="shield-check-outline" size={22} color={colors.accent} />
+            <AppText style={{ flex: 1 }}>{t('settings.predictions')}</AppText>
             <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
           </Pressable>
         </Link>

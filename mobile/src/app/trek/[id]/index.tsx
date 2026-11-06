@@ -1,9 +1,10 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { Button } from '@/components/Button';
 import { DifficultyBadge, Section } from '@/components/Cards';
 import { QueryState } from '@/components/StateViews';
 import { days, km, meters, npr } from '@/lib/format';
@@ -124,11 +125,29 @@ export default function TrekDetailScreen() {
               </Section>
             )}
 
-            <View style={[styles.card, styles.note]}>
-              <MaterialCommunityIcons name="information-outline" size={20} color={colors.accent} />
-              <AppText variant="caption" style={{ flex: 1 }}>
-                {t('trek.itinerarySoon')}
+            <View style={styles.actions}>
+              <Button
+                title={t('trek.checkRisk')}
+                icon={<MaterialCommunityIcons name="shield-check-outline" size={20} color="#fff" />}
+                onPress={() => router.push({ pathname: '/trek/[id]/risk', params: { id: tr.id } })}
+              />
+              <AppText variant="caption" muted>
+                {t('trek.checkRiskHint')}
               </AppText>
+              <Button
+                title={t('trek.viewItinerary')}
+                variant="secondary"
+                icon={
+                  <MaterialCommunityIcons
+                    name="calendar-text-outline"
+                    size={20}
+                    color={colors.primary}
+                  />
+                }
+                onPress={() =>
+                  router.push({ pathname: '/trek/[id]/itinerary', params: { id: tr.id } })
+                }
+              />
             </View>
           </>
         )}
@@ -158,5 +177,5 @@ const styles = StyleSheet.create({
     gap: spacing(1.5),
   },
   fees: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing(4) },
-  note: { flexDirection: 'row', gap: spacing(2), alignItems: 'flex-start' },
+  actions: { gap: spacing(2.5) },
 });

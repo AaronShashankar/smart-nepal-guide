@@ -13,6 +13,7 @@ derived from the slugs/codes, so updates happen in place).
 | `permits.csv` | 7 | TIMS, ACAP, SNP, KPLRM, LNP, MCAP, MRAP with Nepali/SAARC/foreign fees |
 | `photos.csv` | 36 | Wikimedia Commons photos with **author, licence and source page** (for the report) |
 | `climate_baseline.csv`, `climate_regions.csv` | | inputs to the approximate climate model below |
+| `training_samples.csv` | 592 | risk-model training rows (Phase 2): 32 `agency` + 560 `rule` (+ `survey` rows when added). **Generated** by `cd backend && uv run python -m app.ml.dataset [--survey form.csv]`, don't edit by hand; the labelling rules are in `backend/app/ml/dataset.py` |
 
 Trek totals (days, distance, max altitude) are computed from the stages, not typed in.
 A rest/acclimatisation day is a stage whose `from` and `to` are the same place.

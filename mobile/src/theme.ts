@@ -13,11 +13,18 @@ export const colors = {
   chip: '#EFEFEC',
 };
 
+// Difficulty / risk: green -> yellow -> orange -> red (dark enough to read on white).
 export const difficultyColors: Record<string, string> = {
   easy: '#2E7D32',
-  moderate: '#B26A00',
-  hard: '#C8102E',
-  risky: '#6A1B9A',
+  moderate: '#9A7B00',
+  hard: '#D9480F',
+  risky: '#B3261E',
+};
+
+export const statusColors: Record<string, string> = {
+  ok: '#2E7D32',
+  caution: '#B26A00',
+  danger: '#B3261E',
 };
 
 export const categoryColors: Record<string, string> = {

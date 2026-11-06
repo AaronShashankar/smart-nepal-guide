@@ -9,7 +9,15 @@ from app.core.i18n import get_lang, pick
 from app.models import Trek, TrekStage, TrekTranslation
 from app.models.enums import Lang, RiskLevel
 from app.schemas.content import Page, PermitOut, TrekDetail, TrekSummary
+from app.schemas.risk import AcclimatisationOut, ItineraryOut
 from app.services.content import localised_name_order, place_ref, published_treks, trek_summary
+from app.services.itinerary import (
+    acclimatisation,
+    acclimatisation_out,
+    itinerary_out,
+    load_trek,
+    stage_facts,
+)
 
 router = APIRouter(prefix="/treks", tags=["treks"])
 
@@ -92,3 +100,20 @@ def get_trek(
         end_place=place_ref(last.to_place, lang) if last else None,
         stage_count=len(trek.stages),
     )
+
+
+@router.get("/{trek_id}/stages", response_model=ItineraryOut)
+def get_stages(
+    trek_id: uuid.UUID, db: Session = Depends(get_db), lang: Lang = Depends(get_lang)
+) -> ItineraryOut:
+    """Day-by-day itinerary (sleeping altitude, gain, distance, hours) and the trek summary
+    computed from it (start, end, days, max altitude, max daily gain)."""
+    return itinerary_out(load_trek(db, trek_id), lang)
+
+
+@router.get("/{trek_id}/acclimatisation", response_model=AcclimatisationOut)
+def get_acclimatisation(
+    trek_id: uuid.UUID, db: Session = Depends(get_db), lang: Lang = Depends(get_lang)
+) -> AcclimatisationOut:
+    """Rule-based acclimatisation check: per-day ok / caution / danger and suggested rest days."""
+    return acclimatisation_out(acclimatisation(stage_facts(load_trek(db, trek_id), lang)))

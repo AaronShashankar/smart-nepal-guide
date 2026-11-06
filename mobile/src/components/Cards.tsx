@@ -82,7 +82,10 @@ export function PlaceCard({ place }: { place: PlaceSummary }) {
 export function TrekCard({ trek }: { trek: TrekSummary }) {
   return (
     <Link href={{ pathname: '/trek/[id]', params: { id: trek.id } }} asChild>
-      <Pressable style={[styles.card, styles.trekCard]} accessibilityRole="button">
+      <Pressable
+        style={StyleSheet.flatten([styles.card, styles.trekCard])}
+        accessibilityRole="button"
+      >
         <View style={styles.body}>
           <AppText variant="subheading" numberOfLines={2}>
             {trek.name}

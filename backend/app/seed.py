@@ -34,6 +34,7 @@ from app.models import (
     PlacePhoto,
     PlaceTranslation,
     StageTranslation,
+    TrainingSample,
     Trek,
     TrekPermit,
     TrekStage,
@@ -287,6 +288,33 @@ def seed_treks(
     return len(seeded)
 
 
+def seed_training_samples(db: Session, data: Path) -> int:
+    """Replace all rows from training_samples.csv (made by `python -m app.ml.dataset`)."""
+    path = data / "training_samples.csv"
+    if not path.exists():
+        return 0
+    db.execute(delete(TrainingSample))
+    rows = read_csv(path)
+    db.add_all(
+        TrainingSample(
+            id=sid("sample", str(i)),  # stable ids keep the train/test split reproducible
+            max_altitude_m=int(r["max_altitude_m"]),
+            max_daily_gain_m=int(r["max_daily_gain_m"]),
+            total_days=int(r["total_days"]),
+            distance_per_day_km=Decimal(r["distance_per_day_km"]),
+            month=int(r["month"]),
+            age=int(r["age"]),
+            fitness_level=r["fitness_level"],
+            trek_experience=r["trek_experience"],
+            has_health_issue=r["has_health_issue"] == "true",
+            label=r["label"],
+            source=r["source"],
+        )
+        for i, r in enumerate(rows)
+    )
+    return len(rows)
+
+
 def run(data: Path, migrate: bool = True) -> dict[str, int]:
     if migrate:
         cfg = Config(str(BACKEND_DIR / "alembic.ini"))
@@ -298,6 +326,7 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         permits = seed_permits(db, data)
         places = seed_places(db, data, categories)
         treks = seed_treks(db, data, places, permits)
+        samples = seed_training_samples(db, data)
         photos = db.scalar(select(PlacePhoto.id).limit(1)) is not None
     return {
         "categories": len(categories),
@@ -305,6 +334,7 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         "permits": len(permits),
         "places": len(places),
         "treks": treks,
+        "training_samples": samples,
         "has_photos": int(photos),
     }
 

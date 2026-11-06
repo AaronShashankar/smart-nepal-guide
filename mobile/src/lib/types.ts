@@ -127,3 +127,100 @@ export interface SearchResult {
   places: SearchHit[];
   treks: SearchHit[];
 }
+
+// ------------------------------------------------------------ Phase 2: itinerary & risk
+
+export interface Stage {
+  day: number;
+  from_place: PlaceRef;
+  to_place: PlaceRef;
+  sleep_altitude_m: number;
+  gain_m: number;
+  distance_km: number;
+  walk_hours: number;
+  highest_point_m: number | null;
+  is_rest_day: boolean;
+  notes: string | null;
+}
+
+export interface Itinerary {
+  summary: {
+    start_place: PlaceRef | null;
+    end_place: PlaceRef | null;
+    total_days: number;
+    total_distance_km: number;
+    max_altitude_m: number;
+    max_sleep_altitude_m: number;
+    max_daily_gain_m: number;
+    max_daily_gain_day: number | null;
+    rest_days: number;
+  };
+  stages: Stage[];
+}
+
+export type AcclimatisationStatus = 'ok' | 'caution' | 'danger';
+export type AcclimatisationCode = 'GAIN_OVER_500' | 'NEEDS_REST' | 'REST_DAY';
+
+export interface Acclimatisation {
+  status: AcclimatisationStatus;
+  passes: boolean;
+  days: {
+    day: number;
+    status: AcclimatisationStatus;
+    gain_m: number;
+    codes: AcclimatisationCode[];
+  }[];
+  suggested_rest_days: { before_day: number; place: string; altitude_m: number }[];
+}
+
+export type ReasonCode =
+  | 'HIGH_ALTITUDE'
+  | 'HIGH_DAILY_GAIN'
+  | 'HEALTH_ISSUE'
+  | 'NO_EXPERIENCE'
+  | 'BEGINNER'
+  | 'LOW_FITNESS'
+  | 'WINTER_MONTH'
+  | 'MONSOON_MONTH'
+  | 'AGE_RISK'
+  | 'LONG_DAYS';
+
+export interface Reason {
+  code: ReasonCode;
+  params: Record<string, number | null>;
+}
+
+export interface RiskResult {
+  id: string;
+  trek_id: string;
+  trek_name: string;
+  month: number;
+  level: RiskLevel;
+  confidence: number;
+  reasons: Reason[];
+  acclimatisation: Acclimatisation;
+  model: { version: string; algorithm: 'decision_tree' | 'random_forest' } | null;
+  input: {
+    max_altitude_m: number;
+    max_daily_gain_m: number;
+    total_days: number;
+    distance_per_day_km: number;
+    month: number;
+    age: number;
+    fitness_level: FitnessLevel;
+    trek_experience: TrekExperience;
+    has_health_issue: boolean;
+  };
+  created_at: string;
+}
+
+export interface Prediction {
+  id: string;
+  trek_id: string;
+  trek_name: string;
+  month: number;
+  level: RiskLevel;
+  confidence: number;
+  reasons: Reason[];
+  created_at: string;
+}

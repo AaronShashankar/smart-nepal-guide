@@ -16,6 +16,10 @@ import { categoryColors, colors, spacing } from '@/theme';
 // tile provider or your own tile server, per the OSM tile usage policy.
 const OSM_STYLE: StyleSpecification = {
   version: 8,
+  // Fonts for the text labels (symbol layers). Without a glyphs URL MapLibre Native tries to
+  // load an empty URL ("Unable to parse resourceUrl"). OpenFreeMap's Noto Sans also has the
+  // Devanagari range, so Nepali place names render.
+  glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
   sources: {
     osm: {
       type: 'raster',
@@ -83,6 +87,7 @@ export default function MapScreen() {
             minzoom={9}
             layout={{
               'text-field': ['get', 'name'],
+              'text-font': ['Noto Sans Regular'], // must exist on the glyphs server above
               'text-size': 12,
               'text-offset': [0, 1.2],
               'text-anchor': 'top',
