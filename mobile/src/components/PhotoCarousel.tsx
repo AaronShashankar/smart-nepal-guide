@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useTranslation } from 'react-i18next';
 
 import type { Category } from '@/lib/types';
+import { photoUrl } from '@/lib/api';
 import { colors, spacing } from '@/theme';
 
 import { AppText } from './AppText';
@@ -44,7 +45,7 @@ export function PhotoCarousel({
         {photos.map((p) => (
           <Image
             key={p.url}
-            source={{ uri: p.url }}
+            source={{ uri: photoUrl(p.url) }}
             style={{ width, height: HEIGHT }}
             contentFit="cover"
             transition={200}

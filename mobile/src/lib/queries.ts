@@ -21,6 +21,8 @@ import type {
   SearchResult,
   TrekDetail,
   TrekSummary,
+  TripDetail,
+  TripSummary,
 } from './types';
 
 // The language is part of every content query key, so switching language refetches.
@@ -179,5 +181,71 @@ export function useUpdateMe() {
     mutationFn: async (body: Partial<Pick<Me, 'full_name' | 'phone' | 'preferred_lang'>>) =>
       (await api.patch<Me>('/me', body)).data,
     onSuccess: (me) => client.setQueryData(['me'], me),
+  });
+}
+
+// ------------------------------------------------------------------ trips
+
+export function useTrips() {
+  return useQuery({ queryKey: ['trips'], queryFn: () => get<TripSummary[]>('/trips') });
+}
+
+export function useTrip(id: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['trip', id, lang],
+    queryFn: () => get<TripDetail>(`/trips/${id}`),
+    enabled: !!id,
+  });
+}
+
+/** Every trip change returns the whole trip: store it and refresh the list. */
+function useTripMutation<V>(fn: (vars: V) => Promise<TripDetail>) {
+  const client = useQueryClient();
+  const lang = useLang();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: (trip) => {
+      client.setQueryData(['trip', trip.id, lang], trip);
+      client.invalidateQueries({ queryKey: ['trips'] });
+    },
+  });
+}
+
+export const useCreateTrip = () =>
+  useTripMutation(
+    async (body: { title: string; start_date?: string | null; place_ids?: string[] }) =>
+      (await api.post<TripDetail>('/trips', body)).data,
+  );
+
+export const useUpdateTrip = () =>
+  useTripMutation(
+    async ({ id, ...body }: { id: string; title?: string; start_date?: string | null }) =>
+      (await api.patch<TripDetail>(`/trips/${id}`, body)).data,
+  );
+
+export const useAddStop = () =>
+  useTripMutation(
+    async ({ tripId, placeId }: { tripId: string; placeId: string }) =>
+      (await api.post<TripDetail>(`/trips/${tripId}/stops`, { place_id: placeId })).data,
+  );
+
+export const useRemoveStop = () =>
+  useTripMutation(
+    async ({ tripId, stopId }: { tripId: string; stopId: string }) =>
+      (await api.delete<TripDetail>(`/trips/${tripId}/stops/${stopId}`)).data,
+  );
+
+export const useOptimiseTrip = () =>
+  useTripMutation(
+    async ({ tripId }: { tripId: string }) =>
+      (await api.post<TripDetail>(`/trips/${tripId}/optimise`, {})).data,
+  );
+
+export function useDeleteTrip() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => api.delete(`/trips/${id}`),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['trips'] }),
   });
 }

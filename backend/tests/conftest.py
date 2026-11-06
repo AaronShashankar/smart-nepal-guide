@@ -1,6 +1,7 @@
 """Test setup: a separate database, rebuilt from the migrations and seed files on every run."""
 
 import os
+import tempfile
 import uuid
 
 import pytest
@@ -13,6 +14,7 @@ TEST_DB = _env.get(
 )
 os.environ["DATABASE_URL"] = TEST_DB
 os.environ.setdefault("JWT_SECRET", "test-secret-" + "x" * 32)
+os.environ["UPLOADS_DIR"] = tempfile.mkdtemp(prefix="bato-test-uploads-")  # not backend/uploads
 
 from alembic.config import Config  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

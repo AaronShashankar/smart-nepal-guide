@@ -41,7 +41,7 @@ cp backend/.env.example backend/.env    # then put a random value in JWT_SECRET
 ```
 
 This runs:
-- **backend:** ruff lint and format check, a check that the migrations match the models, and the 81 pytest tests;
+- **backend:** ruff lint and format check, a check that the migrations match the models, and the 129 pytest tests;
 - **mobile:** the TypeScript typecheck and ESLint;
 - **admin:** the build and lint.
 
@@ -49,7 +49,9 @@ The run is good if it ends with **"All checks passed."**
 The tests cover register/login, the wrong-password case, the expired-token case, profile save and load,
 the fuzzy search cases ("punhill", "anapurna", "अन्नपूर्ण"), the English fallback, the Haversine
 distance from Kathmandu to Pokhara, and (Phase 2) the acclimatisation rules on the EBC itinerary,
-`gini`, the tree and forest, our accuracy against scikit-learn's, and `/predict-risk`.
+`gini`, the tree and forest, our accuracy against scikit-learn's, and `/predict-risk`; (Phase 3) nearest
+neighbour, 2-opt against brute force, the day split, the trips API, every admin route, photo upload,
+and blocking. The manual test cases for the report are in [docs/testing.md](docs/testing.md).
 
 ---
 
@@ -140,6 +142,14 @@ npx expo run:android                      # builds and installs the app, then st
 - [ ] Switch to नेपाली → itinerary and reasons are in Nepali, numbers in Devanagari digits
 - [ ] `cd backend && uv run python -m app.ml.evaluate` → the table and figures appear in `docs/ml/`
 
+### Check the Phase 3 demo (trip planner)
+- [ ] **Pashupatinath Temple** → **Add to My Trip** → type "Valley" → **New trip with this place**
+- [ ] Add **Boudhanath Stupa**, **Swayambhunath Stupa**, **Patan Durbar Square**, **Bhaktapur Durbar Square**, **Nagarkot** to "Valley"
+- [ ] **Trips** tab → Valley → 6 stops and markers on the map
+- [ ] **Optimise** → Day 1 and Day 2, 31.3 km; "Nearest neighbour gave 38.8 km; 2-opt shortened it to 31.3 km."
+- [ ] Remove a stop → the plan disappears until you optimise again
+- [ ] Add the same place twice → "This place is already in the trip"
+
 "Continue with Google" will show *"Google sign-in is not set up in this build"* until you do
 section 6.
 
@@ -152,12 +162,19 @@ cd admin
 npm install
 npm run dev                               # http://localhost:5173
 ```
-- [ ] Log in as `admin@example.com` / `admin-pass-2026` → the welcome page appears
+- [ ] Log in as `admin@example.com` / `admin-pass-2026` → the dashboard shows the counts and the bar chart
 - [ ] Log in with a traveller account (one registered in the app) → "This account is not an admin"
-- [ ] Switching the language to नेपाली changes the page text
+- [ ] **EN / ने** in the header switches the panel to Nepali
+- [ ] **Places → New place**: English name, नेपाली tab name, category, click the map → **Save** → upload a photo
+      → in the app pull to refresh Explore / search for it: it is there with the photo
+- [ ] **Places → Namche Bazaar → Delete** → refused (a trek uses it)
+- [ ] **Treks → Everest Base Camp Trek**: remove days 3 and 6 (the rest days) → **Save** → Days = 9;
+      in the app the itinerary shows **Add rest** warnings. Then add them back, or run `app.seed`.
+- [ ] **Users** → **Block** your traveller account → the app logs out; logging in says the account is blocked → **Unblock**
+- [ ] **Reviews** shows "No reviews yet" (writing reviews in the app is Version 2)
 
-Place and trek editing comes in Phase 3. Until then, edit the files in `data/` and run
-`uv run python -m app.seed` again.
+If you create the admin with a different email, use that. Running `app.seed` again resets seeded places
+and treks to the files in `data/` (admin edits to them are lost; places the admin added are kept).
 
 ---
 
@@ -166,7 +183,7 @@ Place and trek editing comes in Phase 3. Until then, edit the files in `data/` a
 | Task | Command |
 |---|---|
 | Start everything | Terminal 1: backend `uvicorn …` · Terminal 2: `cd mobile && npx expo start` · Terminal 3: `cd admin && npm run dev` |
-| Changed `data/*.csv` or `treks.json` | `cd backend && uv run python -m app.seed` |
+| Changed `data/*.csv` or `treks.json` | `cd backend && uv run python -m app.seed` (overwrites admin edits to seeded content) |
 | Changed treks or survey data → retrain | `uv run python -m app.ml.dataset [--survey form.csv]`, `uv run python -m app.seed`, `uv run python -m app.ml.train`, `uv run python -m app.ml.evaluate` |
 | "No trained model yet" (503) in the app | `cd backend && uv run python -m app.ml.train` (no restart needed) |
 | Changed a model in `backend/app/models` | `uv run alembic revision --autogenerate -m "what changed"`, review the new file, then `uv run alembic upgrade head` |
@@ -195,6 +212,16 @@ Place and trek editing comes in Phase 3. Until then, edit the files in `data/` a
 5. **Take screenshots** of every screen in both languages, plus the Swagger page, and save them in
    `docs/screenshots/`.
 6. **Push to GitHub.** Commit and push to a private repository (see the README).
+7. **App icon and splash.** `mobile/assets/images/icon.png`, the `android-icon-*.png` files and
+   `splash-icon.png` are still Expo's defaults. Replace them with a Bato icon (1024×1024 PNG; the
+   Android foreground needs a transparent background), then rebuild.
+8. **Run the manual test table** in [docs/testing.md](docs/testing.md) on two Android phones of
+   different sizes and fill in *Actual result* and *Pass/Fail*.
+9. **Release Version 1** (Phase 3 §6): backend + database on Render/Railway or your laptop; admin on
+   Vercel/Netlify (set `VITE_API_URL`, and add its URL to `CORS_ORIGINS`); the APK with
+   `eas build -p android --profile preview`; a 3–5 minute demo video; then the git tag `v1.0`.
+   On Render's free plan the disk is reset on every deploy, so photos uploaded from the admin panel
+   are lost. For the defense, run locally or re-upload them.
 
 ---
 

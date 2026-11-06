@@ -224,3 +224,38 @@ export interface Prediction {
   reasons: Reason[];
   created_at: string;
 }
+
+// ------------------------------------------------------------ Phase 3: trip planner
+
+export interface TripSummary {
+  id: string;
+  title: string;
+  start_date: string | null;
+  stop_count: number;
+  total_days: number | null;
+  total_km: number | null;
+  updated_at: string;
+}
+
+export interface TripStop {
+  id: string;
+  place: PlaceSummary;
+  visit_order: number | null;
+  day_no: number | null;
+  visit_hours: number;
+}
+
+export interface TripDay {
+  day_no: number;
+  stop_ids: string[];
+  km: number;
+  travel_hours: number;
+  visit_hours: number;
+}
+
+export interface TripDetail extends TripSummary {
+  is_optimised: boolean;
+  stops: TripStop[];
+  days: TripDay[];
+  nearest_neighbour_km: number | null;
+}

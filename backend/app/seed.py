@@ -54,6 +54,18 @@ def sid(kind: str, key: str) -> uuid.UUID:
     return uuid.uuid5(NAMESPACE, f"{kind}:{key}")
 
 
+def _soft_delete_missing(db: Session, model, seeded: set[uuid.UUID]) -> None:
+    """Soft-delete seeded rows that disappeared from the files.
+
+    Only rows the seed created are touched (their ids are UUIDv5); places and treks added in
+    the admin panel have random UUIDv4 ids and are left alone.
+    """
+    live = db.scalars(select(model.id).where(model.deleted_at.is_(None))).all()
+    gone = [i for i in live if i.version == 5 and i not in seeded]
+    if gone:
+        db.execute(update(model).where(model.id.in_(gone)).values(deleted_at=datetime.now(UTC)))
+
+
 def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open(encoding="utf-8", newline="") as f:
         return [{k: (v or "").strip() for k, v in row.items()} for row in csv.DictReader(f)]
@@ -216,11 +228,7 @@ def seed_places(db: Session, data: Path, categories: dict[str, uuid.UUID]) -> di
             )
         )
     # Places removed from the CSV are soft-deleted (so offline clients learn about it).
-    db.execute(
-        update(Place)
-        .where(Place.id.not_in([p["id"] for p in by_slug.values()]), Place.deleted_at.is_(None))
-        .values(deleted_at=datetime.now(UTC))
-    )
+    _soft_delete_missing(db, Place, {p["id"] for p in by_slug.values()})
     return by_slug
 
 
@@ -280,11 +288,7 @@ def seed_treks(
             db.add(stage)
         db.add_all(TrekPermit(trek_id=tid, permit_id=permits[code]) for code in t["permits"])
         seeded.append(tid)
-    db.execute(
-        update(Trek)
-        .where(Trek.id.not_in(seeded), Trek.deleted_at.is_(None))
-        .values(deleted_at=datetime.now(UTC))
-    )
+    _soft_delete_missing(db, Trek, set(seeded))
     return len(seeded)
 
 

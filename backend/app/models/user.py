@@ -36,6 +36,10 @@ class User(Base):
         pg_enum(AuthProvider, "auth_provider"), nullable=False, default=AuthProvider.email
     )
     preferred_lang: Mapped[Lang] = mapped_column(LANG, nullable=False, default=Lang.en)
+    # Set by an admin: a blocked user cannot log in, refresh tokens or call the API (403).
+    is_blocked: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 

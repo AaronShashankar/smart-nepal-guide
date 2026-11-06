@@ -1,3 +1,4 @@
+import { Alert, Button, Center, Paper, PasswordInput, Stack, TextInput, Title } from '@mantine/core';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
@@ -29,32 +30,37 @@ export default function Login() {
   }
 
   return (
-    <main className="center">
-      <form className="card" onSubmit={submit}>
-        <h1>{t('title')}</h1>
-        <label>
-          {t('email')}
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-        </label>
-        <label>
-          {t('password')}
-          <input
-            type="password"
+    <Center mih="100vh" p="md">
+      <Paper withBorder p="xl" w={380} maw="100%" component="form" onSubmit={submit}>
+        <Stack>
+          <Title order={3} c="crimson.7">
+            {t('title')}
+          </Title>
+          <TextInput
+            label={t('email')}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.currentTarget.value)}
+            required
+            autoComplete="email"
+          />
+          <PasswordInput
+            label={t('password')}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.currentTarget.value)}
             required
             autoComplete="current-password"
           />
-        </label>
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-        <button type="submit" disabled={busy}>
-          {busy ? '…' : t('login')}
-        </button>
-      </form>
-    </main>
+          {error && (
+            <Alert color="red" role="alert">
+              {error}
+            </Alert>
+          )}
+          <Button type="submit" loading={busy}>
+            {t('login')}
+          </Button>
+        </Stack>
+      </Paper>
+    </Center>
   );
 }

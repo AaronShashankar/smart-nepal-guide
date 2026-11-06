@@ -3,6 +3,7 @@ import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { AddToTrip } from '@/components/AddToTrip';
 import { AppText } from '@/components/AppText';
 import { CategoryIcon, InfoRow, Section } from '@/components/Cards';
 import { Chip } from '@/components/Chip';
@@ -53,6 +54,8 @@ export default function PlaceDetailScreen() {
                   value={npr(p.entry_fee_npr)}
                 />
               </View>
+
+              <AddToTrip placeId={p.id} placeName={p.name} />
 
               {p.description && (
                 <Section title={t('place.about')}>

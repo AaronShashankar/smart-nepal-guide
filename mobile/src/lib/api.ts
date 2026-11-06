@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
+import i18n from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { currentLang } from '@/store/settings';
 
@@ -10,6 +11,9 @@ import type { Tokens } from './types';
  * (set EXPO_PUBLIC_API_URL in mobile/.env).
  */
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8000';
+
+/** Photos uploaded in the admin panel are stored as "/uploads/..." on our API server. */
+export const photoUrl = (url: string) => (url.startsWith('/') ? `${API_URL}${url}` : url);
 
 export const api = axios.create({ baseURL: API_URL, timeout: 15000 });
 
@@ -43,6 +47,12 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   const original = error.config as
     (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
   const isAuthCall = original?.url?.startsWith('/auth/');
+  // 403 outside /auth means an admin blocked this account (the app never calls /admin):
+  // log out, so the login screen shows the "blocked" message on the next try.
+  if (error.response?.status === 403 && !isAuthCall) {
+    await useAuth.getState().logout();
+    throw error;
+  }
   if (error.response?.status !== 401 || !original || original._retried || isAuthCall) {
     throw error;
   }
@@ -62,7 +72,7 @@ export function errorMessage(error: unknown, fallback: string): string {
     const detail = (error.response?.data as { detail?: unknown } | undefined)?.detail;
     if (typeof detail === 'string') return detail;
     if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg);
-    if (!error.response) return `Cannot reach the server (${API_URL})`;
+    if (!error.response) return `${i18n.t('common.offline')} (${API_URL})`;
   }
   return fallback;
 }

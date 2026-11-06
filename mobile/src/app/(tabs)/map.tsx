@@ -1,5 +1,4 @@
 import { Camera, GeoJSONSource, Layer, Map } from '@maplibre/maplibre-react-native';
-import type { StyleSpecification } from '@maplibre/maplibre-react-native';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -9,28 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/AppText';
 import { Chip } from '@/components/Chip';
 import { ErrorState, Loading } from '@/components/StateViews';
+import { MAP_FONT, OSM_STYLE } from '@/lib/mapStyle';
 import { useCategories, usePlaces } from '@/lib/queries';
 import { categoryColors, colors, spacing } from '@/theme';
-
-// OpenStreetMap raster tiles (XYZ tile protocol). For heavy/production use, switch to a
-// tile provider or your own tile server, per the OSM tile usage policy.
-const OSM_STYLE: StyleSpecification = {
-  version: 8,
-  // Fonts for the text labels (symbol layers). Without a glyphs URL MapLibre Native tries to
-  // load an empty URL ("Unable to parse resourceUrl"). OpenFreeMap's Noto Sans also has the
-  // Devanagari range, so Nepali place names render.
-  glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-  sources: {
-    osm: {
-      type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      maxzoom: 19,
-      attribution: '© OpenStreetMap contributors',
-    },
-  },
-  layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
-};
 
 const NEPAL_CENTER: [number, number] = [84.1, 28.3];
 
@@ -87,7 +67,7 @@ export default function MapScreen() {
             minzoom={9}
             layout={{
               'text-field': ['get', 'name'],
-              'text-font': ['Noto Sans Regular'], // must exist on the glyphs server above
+              'text-font': MAP_FONT,
               'text-size': 12,
               'text-offset': [0, 1.2],
               'text-anchor': 'top',

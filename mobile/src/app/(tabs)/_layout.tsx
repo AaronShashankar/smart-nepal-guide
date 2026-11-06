@@ -49,6 +49,10 @@ export default function TabsLayout() {
         options={{ title: t('tabs.search'), tabBarIcon: icon('magnify') }}
       />
       <Tabs.Screen
+        name="trips"
+        options={{ title: t('tabs.trips'), tabBarIcon: icon('map-marker-path') }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{ title: t('tabs.settings'), tabBarIcon: icon('cog-outline') }}
       />

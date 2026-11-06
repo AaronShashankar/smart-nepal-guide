@@ -11,7 +11,9 @@
     "no": "No",
     "notSay": "Prefer not to say",
     "any": "Any",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "cancel": "Cancel",
+    "offline": "No internet connection. Check Wi-Fi or mobile data and try again."
   },
   "units": {
     "m": "{{value}} m",
@@ -50,7 +52,8 @@
     "explore": "Explore",
     "map": "Map",
     "search": "Search",
-    "settings": "Settings"
+    "settings": "Settings",
+    "trips": "Trips"
   },
   "explore": {
     "title": "Explore Nepal",
@@ -206,6 +209,35 @@
     "MONSOON_MONTH": "Monsoon: rain, leeches and landslides",
     "AGE_RISK": "Age {{age}} increases altitude risk",
     "LONG_DAYS": "Long walking days (about {{km}} a day)"
+  },
+  "trips": {
+    "title": "My Trips",
+    "intro": "Collect places, then tap “Optimise” for the best visiting order, split into days.",
+    "newTrip": "New trip",
+    "titlePlaceholder": "e.g. Kathmandu valley weekend",
+    "create": "Create trip",
+    "empty": "No trips yet. Create one, or open a place and tap “Add to My Trip”.",
+    "stops_one": "{{value}} place",
+    "stops_other": "{{value}} places",
+    "stopsTitle": "Places",
+    "visitHours": "Visit about {{value}} h",
+    "remove": "Remove from trip",
+    "noStops": "This trip is empty. Open a place (Explore, Search or Map) and tap “Add to My Trip”.",
+    "optimise": "Optimise",
+    "reoptimise": "Optimise again",
+    "plan": "Day-by-day plan",
+    "dayFacts": "{{km}} in a straight line · {{travel}} h travel · {{visit}} h visiting",
+    "improvement": "Nearest neighbour gave {{before}}; 2-opt shortened it to {{after}}.",
+    "straightLines": "Lines are straight, not roads",
+    "addPlaces": "Add more places",
+    "delete": "Delete trip",
+    "deleteTitle": "Delete this trip?",
+    "deleteBody": "The trip and its plan will be removed.",
+    "addToTrip": "Add to My Trip",
+    "chooseTrip": "Add to which trip?",
+    "createWithPlace": "New trip with this place",
+    "defaultTitle": "My trip",
+    "added": "{{place}} added to “{{trip}}”."
   },
   "months": {
     "1": "Jan",

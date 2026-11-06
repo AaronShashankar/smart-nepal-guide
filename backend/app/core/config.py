@@ -1,6 +1,7 @@
 """Application settings, read from environment variables / the .env file."""
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -23,12 +24,19 @@ class Settings(BaseSettings):
     # (web client ID + Android client ID).
     google_client_ids: str = ""
 
+    # Uploaded photos (admin panel) are saved here and served at /uploads/...
+    uploads_dir: str = str(Path(__file__).resolve().parents[2] / "uploads")
+
     # Comma-separated origins allowed to call the API from a browser (admin panel).
     cors_origins: str = "http://localhost:5173"
 
     @property
     def google_client_id_list(self) -> list[str]:
         return [c.strip() for c in self.google_client_ids.split(",") if c.strip()]
+
+    @property
+    def uploads_path(self) -> Path:
+        return Path(self.uploads_dir)
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.api.deps import BLOCKED
 from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.security import (
@@ -27,6 +28,11 @@ def _tokens(user: User) -> TokenOut:
         refresh_token=create_token(user.id, REFRESH),
         expires_in=get_settings().access_token_minutes * 60,
     )
+
+
+def _check_not_blocked(user: User) -> None:
+    if user.is_blocked:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, BLOCKED)
 
 
 def _find_by_email(db: Session, email: str) -> User | None:
@@ -55,6 +61,7 @@ def login(body: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
     # Same message for "no such user" and "wrong password": don't reveal which emails exist.
     if user is None or not verify_password(body.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
+    _check_not_blocked(user)
     return _tokens(user)
 
 
@@ -75,6 +82,7 @@ def google_login(body: GoogleIn, db: Session = Depends(get_db)) -> TokenOut:
             user.preferred_lang = body.preferred_lang
         db.add(user)
         db.commit()
+    _check_not_blocked(user)
     return _tokens(user)
 
 
@@ -87,4 +95,5 @@ def refresh(body: RefreshIn, db: Session = Depends(get_db)) -> TokenOut:
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
+    _check_not_blocked(user)
     return _tokens(user)

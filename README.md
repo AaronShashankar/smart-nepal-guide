@@ -5,18 +5,19 @@
 BCA 6th semester Project II. A mobile app to discover places in Nepal, explore treks day by day and
 get a personal trek difficulty & risk rating with a "Why this rating?" explanation, in English or Nepali.
 
-**Status:** Phase 1 (users, explore, search, map) and Phase 2 (itinerary, acclimatisation checker,
-AI risk predictor) are done. Phase 3 (trip planner, admin CRUD, release) is next.
+**Status:** Version 1 code is complete: Phase 1 (users, explore, search, map), Phase 2 (itinerary,
+acclimatisation checker, AI risk predictor) and Phase 3 (trip planner, admin panel). Still to do by
+hand: the manual test table ([docs/testing.md](docs/testing.md)), hosting, the APK and the demo video.
 
 | Folder | What | Stack |
 |---|---|---|
 | [backend/](backend/) | REST API, database migrations, seed loader, tests | FastAPI, SQLAlchemy 2, Alembic, PostgreSQL 16 + pg_trgm |
 | [mobile/](mobile/) | Traveller app (Android/iOS) | React Native + Expo (SDK 58), Expo Router, TanStack Query, Zustand, i18next, MapLibre |
-| [admin/](admin/) | Admin panel (Phase 1: login skeleton only) | React + Vite + TypeScript |
+| [admin/](admin/) | Admin panel: content, users, reviews, stats | React + Vite + TypeScript, Mantine, MapLibre GL |
 | [data/](data/) | Seed data (places, treks with stages, permits…) | CSV / JSON, see [data/README.md](data/README.md) |
 | [backend/app/ml/](backend/app/ml/) | Risk model: our own CART decision tree + random forest, training, evaluation | NumPy (scikit-learn only to compare) |
 | [ml/](ml/) | Evaluation notebook for the report | Jupyter |
-| [docs/](docs/) | Report material (screenshots, ML figures in `docs/ml/`) | |
+| [docs/](docs/) | Report material (screenshots, ML figures, route benchmark, test cases) | |
 
 **To run and check everything locally, follow [runlocal.md](runlocal.md).** One command runs all automated checks: `./scripts/verify.sh`.
 
@@ -45,7 +46,7 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Tests (they rebuild the `snguide_test` database from the migration and seed files on every run):
 
 ```bash
-uv run pytest            # 81 tests
+uv run pytest            # 129 tests
 uv run ruff check . && uv run ruff format --check .
 ```
 
@@ -69,6 +70,12 @@ uv run ruff check . && uv run ruff format --check .
 | GET | `/treks/{id}/acclimatisation` | **Phase 2.** Per-day `ok` / `caution` / `danger`, reason codes, suggested rest days |
 | POST | `/predict-risk` | **Phase 2.** `{trek_id, month}` → `{level, confidence, reasons[], acclimatisation, input}`; needs a profile with date of birth, fitness and experience (else 409 `PROFILE_INCOMPLETE`); saved to history |
 | GET | `/me/predictions` | **Phase 2.** The user's risk history, newest first |
+| GET / POST | `/trips` | **Phase 3.** The user's trips / new trip (`title`, optional `start_date`, `place_ids`) |
+| GET / PATCH / DELETE | `/trips/{id}` | **Phase 3.** Trip with stops and day plan / rename, start date / soft delete. Only the owner sees a trip (others get 404) |
+| POST | `/trips/{id}/stops` | **Phase 3.** Add a place (`visit_hours`, default 1.5); the same place twice → 409. Changing stops clears the plan |
+| DELETE | `/trips/{id}/stops/{stop_id}` | **Phase 3.** Remove a stop |
+| POST | `/trips/{id}/optimise` | **Phase 3.** Optional `{start_lat, start_lng}` → visiting order (nearest neighbour + 2-opt), days (greedy, 8 h/day), `total_km`, and `nearest_neighbour_km` for comparison |
+| * | `/admin/...` | **Phase 3, admins only (403 otherwise).** `stats`; CRUD for `categories`, `places` (+ `photos` upload), `permits`, `treks` (whole stage list); `users` (search, `PUT /users/{id}/block`); `reviews` (`PUT /reviews/{id}/status`). Full list in Swagger |
 
 **Localisation rule** ([app/core/i18n.py](backend/app/core/i18n.py)): read `Accept-Language` (`en`/`ne`),
 use the matching `*_translation` row, and fall back to English for a missing row *or* a missing field.
@@ -83,6 +90,7 @@ use the matching `*_translation` row, and fall back to English for a missing row
 - **Random forest (bootstrap + √n features + vote), from scratch:** [backend/app/ml/forest.py](backend/app/ml/forest.py)
 - "Why this rating?" (decision-path tracing): [backend/app/ml/reasons.py](backend/app/ml/reasons.py)
 - Metrics, stratified split, k-fold CV (hand-written): [backend/app/ml/metrics.py](backend/app/ml/metrics.py)
+- **Trip planner (distance matrix, nearest neighbour, 2-opt, brute force, greedy day split):** [backend/app/algorithms/route.py](backend/app/algorithms/route.py); 2-opt vs exact benchmark: [route_benchmark.py](backend/app/algorithms/route_benchmark.py) → [docs/route_gap.md](docs/route_gap.md)
 
 ### Risk model (Phase 2)
 
@@ -136,7 +144,9 @@ markers coloured by category, tap → detail) · search with trek filters (regio
 · settings (language switch, profile, risk history, log out). **Phase 2:** day-by-day itinerary with a
 coloured acclimatisation badge per day and a summary box · "Check my risk" (month picker → level,
 confidence, "Why this rating?", acclimatisation warnings; asks to complete the profile first) · risk
-history (Settings → My risk checks). All text is in `src/i18n/locales/en.json` / `ne.json`;
+history (Settings → My risk checks). **Phase 3:** "Add to My Trip" on place detail (choose a trip or
+make a new one) · Trips tab · trip screen (map with numbered stops coloured by day, remove stops,
+**Optimise** → day-by-day plan and "down from X km" comparison, delete). All text is in `src/i18n/locales/en.json` / `ne.json`;
 Noto Sans Devanagari is used everywhere.
 
 **Google sign-in setup** (only needed for that button): in Google Cloud Console create an OAuth
@@ -148,8 +158,23 @@ signing key). Put the web client ID in `mobile/.env` (`EXPO_PUBLIC_GOOGLE_WEB_CL
 
 ```bash
 cd admin && npm install && cp .env.example .env && npm run dev   # http://localhost:5173
+npm run build && npm run lint                                    # checks
 ```
-Only admins (see `create_admin` above) can log in. Content CRUD comes in Phase 3.
+Only admins (see `create_admin` above) can log in. Screens (English / नेपाली switch in the header):
+
+- **Dashboard:** counts (users, places, treks, trips, reviews, risk predictions) and a bar chart of predictions per level.
+- **Places:** search and category filter → form with **English / नेपाली tabs**, map picker (click or drag
+  the pin), aliases, optional 12-month climate, photo upload (JPEG/PNG/WebP, 5 MB) and delete.
+- **Treks:** form + **stage editor** (add day, from/to place, km, hours, highest point, notes, move up/down,
+  remove; same from and to = rest day) and permits. Totals (days, km, highest point) are worked out from the stages.
+- **Categories, Permits:** table + form. A category with places, a permit used by a trek, or a place used in a
+  trek stage cannot be deleted (409).
+- **Users:** search, block / unblock (a blocked user is logged out at once and cannot log in again).
+- **Reviews:** filter, hide / show. (Writing reviews in the app is Version 2.)
+
+Notes: uploaded photos go to `backend/uploads/` (not committed) and are served at `/uploads/...`.
+Deletes are soft (`deleted_at`). **Running `app.seed` again overwrites admin edits to seeded places and
+treks** (it never deletes what the admin added), so after the panel is in use, edit content there.
 
 ## Demo script (Phase 1)
 1. Open the app → choose a language → register with email.
@@ -172,3 +197,15 @@ Only admins (see `create_admin` above) can log in. Content CRUD comes in Phase 3
 5. Settings → **My risk checks** shows both results.
 6. Show `docs/ml/comparison.md`, the confusion matrices and `feature_importance.png` (or run
    `ml/evaluation.ipynb`): our tree and forest against scikit-learn on the same split.
+
+## Demo script (Phase 3, final defense)
+1. App → **Pashupatinath** → **Add to My Trip** → new trip "Valley". Add Boudhanath, Swayambhunath,
+   Patan Durbar Square, Bhaktapur Durbar Square and Nagarkot the same way.
+2. **Trips** tab → Valley → **Optimise** → 2 days, 31.3 km ("Nearest neighbour gave 38.8 km; 2-opt
+   shortened it to 31.3 km."); the map shows numbered stops in order, coloured by day.
+3. Admin panel → **Places → New place**, English and नेपाली names, click the map, save, upload a photo
+   → in the app pull to refresh: the place is in Explore and in search.
+4. Admin → **Treks → Everest Base Camp** → remove the two rest days → save → in the app the itinerary
+   has 9 days and shows **Add rest** warnings. (Put them back afterwards, or run `app.seed`.)
+5. Admin → **Users** → block the traveller → the app logs out, and logging in says the account is blocked.
+6. Show [docs/route_gap.md](docs/route_gap.md) (2-opt vs exact answer) and [docs/testing.md](docs/testing.md).

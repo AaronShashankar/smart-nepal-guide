@@ -4,6 +4,7 @@ import { Link } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { photoUrl } from '@/lib/api';
 import { days, km, meters } from '@/lib/format';
 import type { Category, PlaceSummary, RiskLevel, TrekSummary } from '@/lib/types';
 import { categoryColors, colors, difficultyColors, spacing } from '@/theme';
@@ -43,7 +44,14 @@ export function DifficultyBadge({ level }: { level: RiskLevel }) {
 
 function Thumbnail({ uri, category }: { uri: string | null; category: Category }) {
   if (uri) {
-    return <Image source={{ uri }} style={styles.thumb} contentFit="cover" transition={150} />;
+    return (
+      <Image
+        source={{ uri: photoUrl(uri) }}
+        style={styles.thumb}
+        contentFit="cover"
+        transition={150}
+      />
+    );
   }
   return (
     <View style={[styles.thumb, styles.thumbPlaceholder]}>
