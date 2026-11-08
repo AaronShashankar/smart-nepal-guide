@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><clipPath id="window"><circle cx="512" cy="512" r="330"/></clipPath></defs><g transform="translate(512 512) scale(0.8164324324324324) translate(-512 -512)">
+          <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+            <rect width="1024" height="1024" fill="white"/>
+            <circle cx="512" cy="512" r="342" fill="none" stroke="black" stroke-width="12"/>
+            <g clip-path="url(#window)">
+              <circle cx="512" cy="600" r="200" fill="#808080"/>
+              <polygon points="150,700 380,450 500,580 640,410 880,700" fill="black"/>
+              <g fill="white"><rect x="150" y="696" width="730" height="220"/></g>
+              <path d="M 450 900 C 600 830, 420 770, 540 700" fill="none" stroke="black" stroke-width="26" stroke-linecap="round"/>
+            </g>
+          </mask>
+          <circle cx="512" cy="512" r="370" fill="#FFFFFF" mask="url(#cut)"/>
+        </g></svg>

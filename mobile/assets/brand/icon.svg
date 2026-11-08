@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><clipPath id="window"><circle cx="512" cy="512" r="330"/></clipPath></defs><rect width="1024" height="1024" fill="#F6EAD3"/><g transform="translate(512 512) scale(1.0) translate(-512 -512)">
+      <circle cx="512" cy="512" r="370" fill="#1F6F78"/>
+      <circle cx="512" cy="512" r="342" fill="none" stroke="#F6EAD3" stroke-width="10"/>
+      <g clip-path="url(#window)">
+        <g fill="#F28C38"><circle cx="512" cy="600" r="200"/></g><rect x="300" y="500" width="424" height="7" fill="#1F6F78"/><rect x="300" y="528" width="424" height="10" fill="#1F6F78"/><rect x="300" y="556" width="424" height="13" fill="#1F6F78"/>
+        <polygon points="150,700 380,450 500,580 640,410 880,700" fill="#F6EAD3"/><polygon points="640,410 880,700 740,700 680,520" fill="#E2CDA6"/><polygon points="380,450 500,580 440,700 400,560" fill="#E2CDA6"/>
+        <g fill="#174F55"><rect x="150" y="696" width="730" height="220"/></g>
+        <path d="M 450 900 C 600 830, 420 770, 540 700" fill="none" stroke="#F6EAD3" stroke-width="24" stroke-linecap="round"/>
+      </g>
+    </g></svg>
