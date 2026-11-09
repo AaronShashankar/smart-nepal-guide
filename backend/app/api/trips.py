@@ -1,7 +1,8 @@
+import secrets
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -10,8 +11,11 @@ from app.core.db import get_db
 from app.core.i18n import get_lang
 from app.models import Trip, User
 from app.models.enums import Lang
+from app.schemas.community import BudgetOut, ShareOut
 from app.schemas.trip import OptimiseIn, StopIn, TripDetail, TripIn, TripSummary, TripUpdate
 from app.services import trips as svc
+from app.services.budget import trip_budget
+from app.services.sharing import share_links
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 
@@ -131,3 +135,45 @@ def optimise_trip(
     nn_km = svc.optimise(trip, start, body.max_hours_per_day)
     db.commit()
     return svc.trip_detail(db, trip, lang, nn_km)
+
+
+@router.post("/{trip_id}/budget", response_model=BudgetOut)
+def estimate_budget(
+    trip_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    lang: Lang = Depends(get_lang),
+) -> BudgetOut:
+    """Estimate the cost per person and save the total on the trip. The trip must be optimised
+    (days and km are known), else 409 NOT_OPTIMISED."""
+    trip = svc.get_trip(db, user, trip_id)
+    budget = trip_budget(db, trip, user.profile, lang)
+    trip.estimated_budget_npr = budget.total_npr
+    db.commit()
+    return budget
+
+
+@router.post("/{trip_id}/share", response_model=ShareOut)
+def share_trip(
+    trip_id: uuid.UUID,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ShareOut:
+    """Make a read-only link (owner only). Sharing again returns the same link."""
+    trip = svc.get_trip(db, user, trip_id)
+    if trip.share_token is None:
+        trip.share_token = secrets.token_urlsafe(16)  # 128 random bits
+        db.commit()
+    return share_links(request, trip.share_token)
+
+
+@router.delete("/{trip_id}/share", status_code=status.HTTP_204_NO_CONTENT)
+def stop_sharing(
+    trip_id: uuid.UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)
+) -> Response:
+    """Old links stop working at once (the token is cleared)."""
+    trip = svc.get_trip(db, user, trip_id)
+    trip.share_token = None
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

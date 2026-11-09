@@ -58,6 +58,8 @@ class TripSummary(BaseModel):
 
 class TripDetail(TripSummary):
     is_optimised: bool
+    estimated_budget_npr: int | None = None  # V2: saved by POST /trips/{id}/budget
+    is_shared: bool = False  # V2: a share link exists
     stops: list[StopOut]  # in visiting order once optimised, else in the order added
     days: list[DayOut]
     nearest_neighbour_km: float | None = None  # only in the /optimise response

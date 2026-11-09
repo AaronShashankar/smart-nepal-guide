@@ -445,6 +445,7 @@ def list_reviews(
                 target_name=name,
                 rating=r.rating,
                 comment=r.comment,
+                lang=r.lang,
                 status=r.status,
                 created_at=r.created_at,
             )
@@ -469,6 +470,7 @@ def set_review_status(
         target_name=next((t.name for t in target.translations if t.lang == Lang.en), "?"),
         rating=r.rating,
         comment=r.comment,
+        lang=r.lang,
         status=r.status,
         created_at=r.created_at,
     )

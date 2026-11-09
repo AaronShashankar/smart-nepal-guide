@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -68,6 +68,27 @@ function DayCard({ stage, check }: { stage: Stage; check?: DayCheck }) {
         <AppText variant="caption" muted>
           {stage.notes}
         </AppText>
+      )}
+      {stage.teahouse_count > 0 && (
+        <Pressable
+          style={styles.teahouses}
+          accessibilityRole="button"
+          onPress={() =>
+            router.push({
+              pathname: '/teahouses/[placeId]',
+              params: { placeId: stage.to_place.id, name: stage.to_place.name },
+            })
+          }
+        >
+          <MaterialCommunityIcons name="home-city-outline" size={18} color={colors.accent} />
+          <AppText variant="label" style={{ color: colors.accent, flex: 1 }}>
+            {t('teahouses.link', {
+              count: stage.teahouse_count,
+              value: formatNumber(stage.teahouse_count),
+            })}
+          </AppText>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={colors.accent} />
+        </Pressable>
       )}
     </View>
   );
@@ -151,6 +172,15 @@ export default function ItineraryScreen() {
 }
 
 const styles = StyleSheet.create({
+  teahouses: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(2),
+    marginTop: spacing(1),
+    paddingVertical: spacing(2),
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
   list: { padding: spacing(4), gap: spacing(3), paddingBottom: spacing(10) },
   card: {
     padding: spacing(3.5),

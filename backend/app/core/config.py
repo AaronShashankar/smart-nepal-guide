@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # Uploaded photos (admin panel) are saved here and served at /uploads/...
     uploads_dir: str = str(Path(__file__).resolve().parents[2] / "uploads")
 
+    # Base of the share links (e.g. http://192.168.1.10:8000). Empty = the address the phone
+    # used to reach the API, which is right for the laptop-hosted demo.
+    public_base_url: str = ""
+
     # Comma-separated origins allowed to call the API from a browser (admin panel).
     cors_origins: str = "http://localhost:5173"
 

@@ -34,10 +34,10 @@ def get_place(db: Session, place_id: uuid.UUID) -> Place:
 
 
 def clear_plan(trip: Trip) -> None:
-    """The stops changed, so the stored order and days are no longer valid."""
+    """The stops changed, so the stored order, days and budget are no longer valid."""
     for s in trip.stops:
         s.visit_order = s.day_no = None
-    trip.total_days = trip.total_km = None
+    trip.total_days = trip.total_km = trip.estimated_budget_npr = None
     trip.updated_at = datetime.now(UTC)
 
 
@@ -113,6 +113,8 @@ def trip_detail(db: Session, trip: Trip, lang: Lang, nn_km: float | None = None)
     return TripDetail(
         **trip_summary(trip).model_dump(),
         is_optimised=bool(stops) and all(s.visit_order is not None for s in stops),
+        estimated_budget_npr=trip.estimated_budget_npr,
+        is_shared=trip.share_token is not None,
         stops=[
             StopOut(
                 id=s.id,

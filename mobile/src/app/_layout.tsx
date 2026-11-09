@@ -83,6 +83,11 @@ export default function RootLayout() {
           <Stack.Screen name="trip/[id]" options={{ title: '' }} />
           <Stack.Screen name="profile" options={{ title: t('profile.title') }} />
           <Stack.Screen name="predictions" options={{ title: t('risk.history') }} />
+          <Stack.Screen name="teahouses/[placeId]" options={{ title: '' }} />
+        </Stack.Protected>
+        {/* A shared trip link works logged in or not (only the language must be chosen) */}
+        <Stack.Protected guard={!!language}>
+          <Stack.Screen name="shared/[token]" options={{ title: '' }} />
         </Stack.Protected>
       </Stack>
     </QueryClientProvider>

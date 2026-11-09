@@ -34,7 +34,7 @@ export default function Reviews() {
           items.length === 0 ? (
             <Text c="dimmed">{t('reviews.empty')}</Text>
           ) : (
-            <Table.ScrollContainer minWidth={820}>
+            <Table.ScrollContainer minWidth={900}>
               <Table striped>
                 <Table.Thead>
                   <Table.Tr>
@@ -43,6 +43,7 @@ export default function Reviews() {
                     <Table.Th>{t('reviews.target')}</Table.Th>
                     <Table.Th>{t('reviews.rating')}</Table.Th>
                     <Table.Th>{t('reviews.comment')}</Table.Th>
+                    <Table.Th>{t('reviews.lang')}</Table.Th>
                     <Table.Th>{t('reviews.status')}</Table.Th>
                     <Table.Th />
                   </Table.Tr>
@@ -67,6 +68,11 @@ export default function Reviews() {
                           </Text>
                         </Table.Td>
                         <Table.Td maw={360}>{r.comment ?? '—'}</Table.Td>
+                        <Table.Td>
+                          <Badge variant="outline" color="gray">
+                            {r.lang === 'ne' ? 'नेपाली' : 'English'}
+                          </Badge>
+                        </Table.Td>
                         <Table.Td>
                           <Badge color={r.status === 'visible' ? 'green' : 'gray'} variant="light">
                             {t(`reviews.${r.status}`)}

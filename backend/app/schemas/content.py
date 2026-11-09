@@ -12,6 +12,13 @@ class CategoryOut(BaseModel):
     name: str
 
 
+class RatingOut(BaseModel):
+    """Bayesian average of the visible reviews (score) and how many there are (count)."""
+
+    score: float
+    count: int
+
+
 class PlaceSummary(BaseModel):
     id: uuid.UUID
     name: str
@@ -21,8 +28,9 @@ class PlaceSummary(BaseModel):
     altitude_m: int | None
     district: str | None
     province: str | None
-    entry_fee_npr: int | None
+    entry_fee_npr: int | None  # foreign rate; null = free
     thumbnail_url: str | None
+    rating: RatingOut | None = None  # V2: filled in place lists and detail
 
 
 class Page[T](BaseModel):
@@ -45,6 +53,8 @@ class NearbyPlace(BaseModel):
 
 
 class PlaceDetail(PlaceSummary):
+    entry_fee_saarc_npr: int | None
+    entry_fee_nepali_npr: int | None
     description: str | None
     how_to_reach: str | None
     photos: list[PhotoOut]
@@ -68,6 +78,7 @@ class TrekSummary(BaseModel):
     total_distance_km: float | None
     max_altitude_m: int | None
     base_difficulty: RiskLevel
+    rating: RatingOut | None = None  # V2: filled in trek lists and detail
 
 
 class PermitOut(BaseModel):

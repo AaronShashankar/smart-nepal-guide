@@ -56,7 +56,9 @@ export interface PlaceIn {
   altitude_m: number | null;
   district: string | null;
   province: string | null;
-  entry_fee_npr: number | null;
+  entry_fee_npr: number | null; // foreign rate
+  entry_fee_saarc_npr: number | null;
+  entry_fee_nepali_npr: number | null;
   is_published: boolean;
   en: PlaceText;
   ne: PlaceText;
@@ -162,6 +164,38 @@ export interface ReviewRow {
   target_name: string;
   rating: number;
   comment: string | null;
+  lang: 'en' | 'ne';
   status: ReviewStatus;
   created_at: string;
+}
+
+// ------------------------------------------------------------- V2 Phase 2
+
+export type BudgetLevel = 'low' | 'medium' | 'high';
+
+export interface BudgetRate {
+  budget_level: BudgetLevel;
+  region: string; // "city" or a trek region ("other" = fallback)
+  food_per_day_npr: number;
+  stay_per_day_npr: number;
+  transport_per_km_npr: number | null;
+  trailhead_transport_npr: number | null;
+}
+
+export interface TeahouseIn {
+  place_id: string;
+  name_en: string;
+  name_ne: string | null;
+  phone: string | null;
+  price_note_en: string | null;
+  price_note_ne: string | null;
+  has_wifi: boolean | null;
+  has_hot_shower: boolean | null;
+  source: string;
+}
+
+export interface Teahouse extends TeahouseIn {
+  id: string;
+  place_name: string;
+  updated_at: string;
 }

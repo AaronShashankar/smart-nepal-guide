@@ -8,8 +8,10 @@ import Categories from './pages/Categories';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Places from './pages/Places';
+import BudgetRates from './pages/BudgetRates';
 import Permits from './pages/Permits';
 import Reviews from './pages/Reviews';
+import Teahouses from './pages/Teahouses';
 import TrekForm from './pages/TrekForm';
 import Treks from './pages/Treks';
 import Users from './pages/Users';
@@ -65,6 +67,8 @@ export default function App() {
             <Route path="treks/:id" element={<TrekForm />} />
             <Route path="categories" element={<Categories />} />
             <Route path="permits" element={<Permits />} />
+            <Route path="teahouses" element={<Teahouses />} />
+            <Route path="budget-rates" element={<BudgetRates />} />
             <Route path="users" element={<Users />} />
             <Route path="reviews" element={<Reviews />} />
           </Route>

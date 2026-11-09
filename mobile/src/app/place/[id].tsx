@@ -8,6 +8,8 @@ import { AppText } from '@/components/AppText';
 import { CategoryIcon, InfoRow, Section } from '@/components/Cards';
 import { Chip } from '@/components/Chip';
 import { PhotoCarousel } from '@/components/PhotoCarousel';
+import { ReviewsSection } from '@/components/Reviews';
+import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
 import { formatNumber, meters, monthName, npr } from '@/lib/format';
 import { usePlace } from '@/lib/queries';
@@ -34,6 +36,7 @@ export default function PlaceDetailScreen() {
                 <View style={styles.row}>
                   <CategoryIcon category={p.category} />
                   <AppText muted>{p.category.name}</AppText>
+                  <RatingBadge rating={p.rating} />
                 </View>
               </View>
 
@@ -51,7 +54,15 @@ export default function PlaceDetailScreen() {
                 <InfoRow
                   icon="ticket-outline"
                   label={t('place.entryFee')}
-                  value={npr(p.entry_fee_npr)}
+                  value={
+                    p.entry_fee_npr == null
+                      ? npr(null)
+                      : [
+                          `${t('trek.feeForeign')} ${npr(p.entry_fee_npr)}`,
+                          `${t('trek.feeSaarc')} ${npr(p.entry_fee_saarc_npr || null)}`,
+                          `${t('trek.feeNepali')} ${npr(p.entry_fee_nepali_npr || null)}`,
+                        ].join(' · ')
+                  }
                 />
               </View>
 
@@ -78,6 +89,8 @@ export default function PlaceDetailScreen() {
                   <AppText>{p.how_to_reach}</AppText>
                 </Section>
               )}
+
+              <ReviewsSection target={{ type: 'place', id: p.id }} />
 
               {p.nearby.length > 0 && (
                 <Section title={t('place.nearby')}>

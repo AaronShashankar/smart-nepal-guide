@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="$lang">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>$title · Bato</title>
+<style>
+  :root { --crimson: #C8102E; --blue: #003893; --bg: #F7F7F5; --card: #fff; --text: #1B1B1F; --muted: #5F6368; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font-family: "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif; line-height: 1.5; }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+  .brand { color: var(--crimson); font-weight: 700; letter-spacing: .02em; }
+  h1 { margin: 4px 0 2px; font-size: 1.6rem; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .card { background: var(--card); border-radius: 14px; padding: 14px 16px; margin: 12px 0; }
+  .day h2 { margin: 0 0 6px; font-size: 1rem; color: var(--crimson); }
+  ol { margin: 0; padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  .open { display: inline-block; margin-top: 16px; padding: 12px 18px; border-radius: 12px;
+          background: var(--crimson); color: #fff; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Bato · बाटो</div>
+  <h1>$title</h1>
+  <div class="muted">$summary</div>
+  $days
+  <a class="open" href="$app_url">$open_in_app</a>
+  <p class="muted">$read_only</p>
+</main>
+</body>
+</html>

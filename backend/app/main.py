@@ -5,7 +5,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import admin, auth, lookups, me, places, risk, search, treks, trips
+from app.api import (
+    admin,
+    admin_community,
+    auth,
+    lookups,
+    me,
+    places,
+    recommendations,
+    reviews,
+    risk,
+    search,
+    shared,
+    treks,
+    trips,
+)
 from app.core.config import get_settings
 from app.core.db import SessionLocal
 from app.ml.registry import active_model
@@ -28,7 +42,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
     description=(
         "Bato (Smart Nepal Tourist & Trek Guide) API. Send `Accept-Language: en` or `ne`; "
@@ -49,7 +63,10 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-for module in (auth, me, lookups, places, treks, search, risk, trips, admin):
+for module in (
+    auth, me, lookups, places, treks, search, risk, trips, reviews, recommendations, shared, admin,
+    admin_community,
+):  # fmt: skip
     app.include_router(module.router)
 
 # Photos uploaded in the admin panel (the database stores "/uploads/places/<file>").

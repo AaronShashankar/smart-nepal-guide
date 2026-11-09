@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from alembic import command
 from app.core.db import SessionLocal, engine
 from app.models import (
+    BudgetRate,
     Category,
     CategoryTranslation,
     Interest,
@@ -34,13 +35,15 @@ from app.models import (
     PlacePhoto,
     PlaceTranslation,
     StageTranslation,
+    Teahouse,
+    TeahouseTranslation,
     TrainingSample,
     Trek,
     TrekPermit,
     TrekStage,
     TrekTranslation,
 )
-from app.models.enums import Lang, RiskLevel
+from app.models.enums import BudgetLevel, Lang, RiskLevel
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DATA_DIR = BACKEND_DIR.parent / "data"
@@ -189,6 +192,8 @@ def seed_places(db: Session, data: Path, categories: dict[str, uuid.UUID]) -> di
                 district=row["district"] or None,
                 province=row["province"] or None,
                 entry_fee_npr=opt_int(row["entry_fee_npr"]),
+                entry_fee_saarc_npr=opt_int(row.get("entry_fee_saarc_npr", "")),
+                entry_fee_nepali_npr=opt_int(row.get("entry_fee_nepali_npr", "")),
                 is_published=True,
                 deleted_at=None,
             )
@@ -292,6 +297,67 @@ def seed_treks(
     return len(seeded)
 
 
+def opt_bool(value: str) -> bool | None:
+    return {"true": True, "false": False}.get(value.lower()) if value else None
+
+
+def seed_budget_rates(db: Session, data: Path) -> int:
+    """Replace every row from budget_rates.csv (sources in data/README.md)."""
+    path = data / "budget_rates.csv"
+    if not path.exists():
+        return 0
+    db.execute(delete(BudgetRate))
+    rows = read_csv(path)
+    db.add_all(
+        BudgetRate(
+            budget_level=BudgetLevel(r["budget_level"]),
+            region=r["region"],
+            food_per_day_npr=int(r["food_per_day_npr"]),
+            stay_per_day_npr=int(r["stay_per_day_npr"]),
+            transport_per_km_npr=(
+                Decimal(r["transport_per_km_npr"]) if r["transport_per_km_npr"] else None
+            ),
+            trailhead_transport_npr=opt_int(r["trailhead_transport_npr"]),
+        )
+        for r in rows
+    )
+    return len(rows)
+
+
+def seed_teahouses(db: Session, data: Path, places: dict[str, dict]) -> int:
+    """Real lodges only, each with its source (teahouses.csv). The id comes from place + name."""
+    path = data / "teahouses.csv"
+    if not path.exists():
+        return 0
+    seeded = set()
+    for r in read_csv(path):
+        tid = sid("teahouse", f"{r['place_slug']}:{r['name_en']}")
+        db.merge(
+            Teahouse(
+                id=tid,
+                place_id=places[r["place_slug"]]["id"],
+                phone=r["phone"] or None,
+                has_wifi=opt_bool(r["has_wifi"]),
+                has_hot_shower=opt_bool(r["has_hot_shower"]),
+                source=r["source"] or None,
+                deleted_at=None,
+            )
+        )
+        db.execute(delete(TeahouseTranslation).where(TeahouseTranslation.teahouse_id == tid))
+        db.add_all(
+            translations(
+                TeahouseTranslation,
+                "teahouse_id",
+                tid,
+                {"name": r["name_en"], "price_note": r["price_note_en"] or None},
+                {"name": r["name_ne"], "price_note": r["price_note_ne"] or None},
+            )
+        )
+        seeded.add(tid)
+    _soft_delete_missing(db, Teahouse, seeded)
+    return len(seeded)
+
+
 def seed_training_samples(db: Session, data: Path) -> int:
     """Replace all rows from training_samples.csv (made by `python -m app.ml.dataset`)."""
     path = data / "training_samples.csv"
@@ -331,6 +397,8 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         places = seed_places(db, data, categories)
         treks = seed_treks(db, data, places, permits)
         samples = seed_training_samples(db, data)
+        budget_rates = seed_budget_rates(db, data)
+        teahouses = seed_teahouses(db, data, places)
         photos = db.scalar(select(PlacePhoto.id).limit(1)) is not None
     return {
         "categories": len(categories),
@@ -339,6 +407,8 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         "places": len(places),
         "treks": treks,
         "training_samples": samples,
+        "budget_rates": budget_rates,
+        "teahouses": teahouses,
         "has_photos": int(photos),
     }
 

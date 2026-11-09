@@ -13,6 +13,7 @@ from app.models.enums import (
     BudgetLevel,
     FitnessLevel,
     Lang,
+    Nationality,
     TravelStyle,
     TrekExperience,
     UserRole,
@@ -67,6 +68,13 @@ class TravellerProfile(Base):
     has_asthma: Mapped[bool | None] = mapped_column(Boolean)
     budget_level: Mapped[BudgetLevel | None] = mapped_column(pg_enum(BudgetLevel, "budget_level"))
     travel_style: Mapped[TravelStyle | None] = mapped_column(pg_enum(TravelStyle, "travel_style"))
+    # Version 2: picks the permit / entry-fee rate in the budget estimate.
+    nationality: Mapped[Nationality] = mapped_column(
+        pg_enum(Nationality, "nationality"),
+        nullable=False,
+        default=Nationality.foreign,
+        server_default=Nationality.foreign.value,
+    )
     updated_at: Mapped[datetime] = updated_at_col()
 
     user: Mapped[User] = relationship(back_populates="profile")

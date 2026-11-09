@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.models.enums import AuthProvider, ReviewStatus, RiskLevel, UserRole
+from app.models.enums import AuthProvider, BudgetLevel, Lang, ReviewStatus, RiskLevel, UserRole
 
 
 class Page[T](BaseModel):
@@ -48,7 +48,9 @@ class PlaceAdminIn(BaseModel):
     altitude_m: int | None = Field(default=None, ge=0, le=8849)
     district: str | None = None
     province: str | None = None
-    entry_fee_npr: int | None = Field(default=None, ge=0)
+    entry_fee_npr: int | None = Field(default=None, ge=0, description="foreign rate")
+    entry_fee_saarc_npr: int | None = Field(default=None, ge=0)
+    entry_fee_nepali_npr: int | None = Field(default=None, ge=0)
     is_published: bool = True
     en: PlaceText
     ne: PlaceText = Field(default_factory=PlaceText)
@@ -186,6 +188,7 @@ class ReviewAdminRow(BaseModel):
     target_name: str
     rating: int
     comment: str | None
+    lang: Lang  # the app language the review was written in
     status: ReviewStatus
     created_at: datetime
 
@@ -204,3 +207,32 @@ class StatsOut(BaseModel):
     reviews: int
     risk_predictions: int
     predictions_by_level: dict[RiskLevel, int]
+
+
+# -------------------------------------------------------------- budget rates
+class BudgetRateAdmin(BaseModel):
+    budget_level: BudgetLevel
+    region: str = Field(min_length=1, max_length=40)
+    food_per_day_npr: int = Field(ge=0)
+    stay_per_day_npr: int = Field(ge=0)
+    transport_per_km_npr: float | None = Field(default=None, ge=0)
+    trailhead_transport_npr: int | None = Field(default=None, ge=0)
+
+
+# ----------------------------------------------------------------- teahouses
+class TeahouseAdminIn(BaseModel):
+    place_id: uuid.UUID
+    name_en: str = Field(min_length=1, max_length=120)
+    name_ne: str | None = Field(default=None, max_length=120)
+    phone: str | None = Field(default=None, max_length=30)
+    price_note_en: str | None = Field(default=None, max_length=300)
+    price_note_ne: str | None = Field(default=None, max_length=300)
+    has_wifi: bool | None = None
+    has_hot_shower: bool | None = None
+    source: str = Field(min_length=3, description="where this lodge comes from (required)")
+
+
+class TeahouseAdminOut(TeahouseAdminIn):
+    id: uuid.UUID
+    place_name: str
+    updated_at: datetime

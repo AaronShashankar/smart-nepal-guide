@@ -41,7 +41,13 @@
       "expo-localization",
       "@react-native-google-signin/google-signin",
       "@maplibre/maplibre-react-native",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Bato uses your location only to list the places closest to you."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

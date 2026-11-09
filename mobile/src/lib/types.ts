@@ -6,6 +6,7 @@ export type FitnessLevel = 'low' | 'medium' | 'high';
 export type TrekExperience = 'none' | 'beginner' | 'experienced';
 export type BudgetLevel = 'low' | 'medium' | 'high';
 export type TravelStyle = 'solo' | 'family' | 'group';
+export type Nationality = 'nepali' | 'saarc' | 'foreign';
 
 export interface Tokens {
   access_token: string;
@@ -38,6 +39,7 @@ export interface Profile {
   has_asthma: boolean | null;
   budget_level: BudgetLevel | null;
   travel_style: TravelStyle | null;
+  nationality: Nationality;
   interests: Interest[];
 }
 
@@ -48,6 +50,12 @@ export interface Category {
   code: string;
   icon: string | null;
   name: string;
+}
+
+/** Bayesian average of the visible reviews (score) and how many there are (count). */
+export interface Rating {
+  score: number;
+  count: number;
 }
 
 export interface PlaceSummary {
@@ -61,6 +69,7 @@ export interface PlaceSummary {
   province: string | null;
   entry_fee_npr: number | null;
   thumbnail_url: string | null;
+  rating?: Rating | null;
 }
 
 export interface Page<T> {
@@ -71,6 +80,8 @@ export interface Page<T> {
 }
 
 export interface PlaceDetail extends PlaceSummary {
+  entry_fee_saarc_npr: number | null;
+  entry_fee_nepali_npr: number | null;
   description: string | null;
   how_to_reach: string | null;
   photos: { url: string; sort_order: number }[];
@@ -94,6 +105,7 @@ export interface TrekSummary {
   total_distance_km: number | null;
   max_altitude_m: number | null;
   base_difficulty: RiskLevel;
+  rating?: Rating | null;
 }
 
 export interface Permit {
@@ -141,6 +153,7 @@ export interface Stage {
   highest_point_m: number | null;
   is_rest_day: boolean;
   notes: string | null;
+  teahouse_count: number;
 }
 
 export interface Itinerary {
@@ -255,7 +268,94 @@ export interface TripDay {
 
 export interface TripDetail extends TripSummary {
   is_optimised: boolean;
+  estimated_budget_npr: number | null;
+  is_shared: boolean;
   stops: TripStop[];
   days: TripDay[];
   nearest_neighbour_km: number | null;
+}
+
+// ------------------------------------------------- Version 2 Phase 2: personal & community
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  lang: Lang;
+  author_name: string | null;
+  status: 'visible' | 'hidden';
+  is_mine: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewPage {
+  items: Review[];
+  total: number;
+  page: number;
+  page_size: number;
+  rating: Rating;
+  mine: Review | null;
+}
+
+export type BecauseCode =
+  | 'INTEREST_NATURE'
+  | 'INTEREST_CULTURE'
+  | 'INTEREST_ADVENTURE'
+  | 'INTEREST_RELIGIOUS'
+  | 'GOOD_SEASON'
+  | 'FITS_BUDGET'
+  | 'HIGHLY_RATED'
+  | 'OFTEN_PLANNED';
+
+export type Recommendation =
+  | { type: 'place'; item: PlaceSummary; score: number; because: BecauseCode[] }
+  | { type: 'trek'; item: TrekSummary; score: number; because: BecauseCode[] };
+
+export interface Recommendations {
+  mode: 'personal' | 'popular';
+  month: number;
+  items: Recommendation[];
+}
+
+export interface NearPlace extends PlaceSummary {
+  distance_km: number;
+}
+
+export type BudgetCode =
+  'FOOD' | 'STAY' | 'TRANSPORT' | 'ENTRY_FEE' | 'PERMIT' | 'TRAILHEAD_TRANSPORT';
+
+export interface Budget {
+  total_npr: number;
+  budget_level: BudgetLevel;
+  nationality: Nationality;
+  region: string;
+  days: number;
+  lines: { code: BudgetCode; label: string | null; qty: number; rate: number; amount: number }[];
+}
+
+export interface ShareLinks {
+  token: string;
+  url: string;
+  app_url: string;
+}
+
+export interface SharedTrip {
+  title: string;
+  start_date: string | null;
+  total_days: number | null;
+  total_km: number | null;
+  is_optimised: boolean;
+  stops: TripStop[];
+  days: TripDay[];
+}
+
+export interface Teahouse {
+  id: string;
+  name: string;
+  phone: string | null;
+  price_note: string | null;
+  has_wifi: boolean | null;
+  has_hot_shower: boolean | null;
+  updated_at: string;
 }

@@ -18,11 +18,14 @@ os.environ["UPLOADS_DIR"] = tempfile.mkdtemp(prefix="bato-test-uploads-")  # not
 
 from alembic.config import Config  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import update  # noqa: E402
 
 from alembic import command  # noqa: E402
 from app import seed  # noqa: E402
 from app.core.db import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
+from app.models import User  # noqa: E402
+from app.models.enums import UserRole  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -55,3 +58,24 @@ def user(client):
     assert r.status_code == 201, r.text
     headers = {"Authorization": f"Bearer {r.json()['access_token']}"}
     return email, password, headers
+
+
+@pytest.fixture
+def admin(client, db):
+    """Auth headers of a fresh admin account."""
+    email = f"admin-{uuid.uuid4().hex[:8]}@example.com"
+    r = client.post("/auth/register", json={"email": email, "password": "admin-pass-2026"})
+    db.execute(update(User).where(User.email == email).values(role=UserRole.admin))
+    db.commit()
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
+def register(client, name: str | None = None) -> dict:
+    """Register another user; returns auth headers."""
+    email = f"user-{uuid.uuid4().hex[:8]}@example.com"
+    body = {"email": email, "password": "trekking-2026"}
+    if name:
+        body["full_name"] = name
+    r = client.post("/auth/register", json=body)
+    assert r.status_code == 201, r.text
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}

@@ -46,6 +46,8 @@ const EMPTY: PlaceIn = {
   district: '',
   province: '',
   entry_fee_npr: null,
+  entry_fee_saarc_npr: null,
+  entry_fee_nepali_npr: null,
   is_published: true,
   en: emptyText(),
   ne: emptyText(),
@@ -376,13 +378,32 @@ function PlaceEditor({ place }: { place?: Place }) {
                     value={form.altitude_m ?? ''}
                     onChange={(v) => set({ altitude_m: numOrNull(v) })}
                   />
+                </Group>
+                <Group grow>
                   <NumberInput
                     label={t('places.entryFee')}
+                    description={t('places.feeHint')}
                     min={0}
                     allowDecimal={false}
                     thousandSeparator=","
                     value={form.entry_fee_npr ?? ''}
                     onChange={(v) => set({ entry_fee_npr: numOrNull(v) })}
+                  />
+                  <NumberInput
+                    label={t('places.entryFeeSaarc')}
+                    min={0}
+                    allowDecimal={false}
+                    thousandSeparator=","
+                    value={form.entry_fee_saarc_npr ?? ''}
+                    onChange={(v) => set({ entry_fee_saarc_npr: numOrNull(v) })}
+                  />
+                  <NumberInput
+                    label={t('places.entryFeeNepali')}
+                    min={0}
+                    allowDecimal={false}
+                    thousandSeparator=","
+                    value={form.entry_fee_nepali_npr ?? ''}
+                    onChange={(v) => set({ entry_fee_nepali_npr: numOrNull(v) })}
                   />
                 </Group>
               </Stack>

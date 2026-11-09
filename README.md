@@ -8,6 +8,9 @@ get a personal trek difficulty & risk rating with a "Why this rating?" explanati
 **Status:** Version 1 code is complete: Phase 1 (users, explore, search, map), Phase 2 (itinerary,
 acclimatisation checker, AI risk predictor) and Phase 3 (trip planner, admin panel). Still to do by
 hand: the manual test table ([docs/testing.md](docs/testing.md), run it with [docs/testing-guide.md](docs/testing-guide.md)), hosting, the APK and the demo video.
+**Version 2 Phase 2** (personalisation & community) code is done: reviews with a Bayesian rating,
+"Recommended for you" (cosine similarity), Near me, budget estimate, share a trip, teahouses
+([plan](../version2/phase2.md)). V2 Phase 1 (smart trek features) is not built yet.
 
 | Folder | What | Stack |
 |---|---|---|
@@ -49,7 +52,7 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Tests (they rebuild the `snguide_test` database from the migration and seed files on every run):
 
 ```bash
-uv run pytest            # 129 tests
+uv run pytest            # 175 tests
 uv run ruff check . && uv run ruff format --check .
 ```
 
@@ -78,7 +81,17 @@ uv run ruff check . && uv run ruff format --check .
 | POST | `/trips/{id}/stops` | **Phase 3.** Add a place (`visit_hours`, default 1.5); the same place twice → 409. Changing stops clears the plan |
 | DELETE | `/trips/{id}/stops/{stop_id}` | **Phase 3.** Remove a stop |
 | POST | `/trips/{id}/optimise` | **Phase 3.** Optional `{start_lat, start_lng}` → visiting order (nearest neighbour + 2-opt), days (greedy, 8 h/day), `total_km`, and `nearest_neighbour_km` for comparison |
-| * | `/admin/...` | **Phase 3, admins only (403 otherwise).** `stats`; CRUD for `categories`, `places` (+ `photos` upload), `permits`, `treks` (whole stage list); `users` (search, `PUT /users/{id}/block`); `reviews` (`PUT /reviews/{id}/status`). Full list in Swagger |
+| GET / POST | `/places/{id}/reviews`, `/treks/{id}/reviews` | **V2 P2.** List (visible, newest first, `page`; `mine` = your own review when logged in) / write `{rating 1–5, comment ≤ 1,000}`. Posting again **updates** your review (201 new, 200 updated); `lang` comes from `Accept-Language` |
+| DELETE | `/reviews/{id}` | **V2 P2.** Your own review only (someone else's → 404) |
+| GET | `/places`, `/treks`, details | **V2 P2.** Every item now has `rating: {score, count}` (Bayesian average, one grouped query); `sort=rating` |
+| GET | `/recommendations?limit=10` | **V2 P2, login.** `{mode: "personal" \| "popular", items[{type, item, score, because[]}]}` (cosine similarity; "Popular now" without interests) |
+| GET | `/places/near?lat=&lng=&radius_km=20&limit=20` | **V2 P2.** Bounding box → Haversine → closest first, with `distance_km` |
+| GET | `/places/{id}/teahouses` | **V2 P2.** Lodges in a village; the itinerary's stages carry `teahouse_count` |
+| GET | `/treks/{id}/budget` | **V2 P2.** Food + stay per day, permits at your nationality's rate, trailhead transport (defaults: medium, foreign) |
+| POST | `/trips/{id}/budget` | **V2 P2.** Trip estimate (needs an optimised trip, else 409 `NOT_OPTIMISED`); saves `estimated_budget_npr` |
+| POST / DELETE | `/trips/{id}/share` | **V2 P2.** Make a read-only link `{token, url, app_url}` (owner only; same link if already shared) / stop sharing |
+| GET | `/shared/trips/{token}`, `/s/{token}` | **V2 P2, no login.** Read-only trip as JSON / as a small HTML page; no user data; wrong or stopped token → 404 |
+| * | `/admin/...` | **Phase 3, admins only (403 otherwise).** `stats`; CRUD for `categories`, `places` (+ `photos` upload), `permits`, `treks` (whole stage list); `users` (search, `PUT /users/{id}/block`); `reviews` (`PUT /reviews/{id}/status`); **V2 P2:** `budget-rates` (GET, PUT), `teahouses` (CRUD). Full list in Swagger |
 
 **Localisation rule** ([app/core/i18n.py](backend/app/core/i18n.py)): read `Accept-Language` (`en`/`ne`),
 use the matching `*_translation` row, and fall back to English for a missing row *or* a missing field.
@@ -94,6 +107,10 @@ use the matching `*_translation` row, and fall back to English for a missing row
 - "Why this rating?" (decision-path tracing): [backend/app/ml/reasons.py](backend/app/ml/reasons.py)
 - Metrics, stratified split, k-fold CV (hand-written): [backend/app/ml/metrics.py](backend/app/ml/metrics.py)
 - **Trip planner (distance matrix, nearest neighbour, 2-opt, brute force, greedy day split):** [backend/app/algorithms/route.py](backend/app/algorithms/route.py); 2-opt vs exact benchmark: [route_benchmark.py](backend/app/algorithms/route_benchmark.py) → [docs/route_gap.md](docs/route_gap.md)
+- **V2 P2 · Bayesian average rating:** [backend/app/algorithms/rating.py](backend/app/algorithms/rating.py) (SQL version for `sort=rating`: [services/rating.py](backend/app/services/rating.py))
+- **V2 P2 · Cosine similarity (hand-written) + content-based recommender:** [algorithms/similarity.py](backend/app/algorithms/similarity.py), [services/recommend.py](backend/app/services/recommend.py) (the category → interest weight table is at the top)
+- **V2 P2 · Bounding box for Near me:** [algorithms/geo_box.py](backend/app/algorithms/geo_box.py), used in [api/places.py](backend/app/api/places.py)
+- **V2 P2 · Budget formula:** [services/budget.py](backend/app/services/budget.py)
 
 ### Risk model (Phase 2)
 
@@ -149,7 +166,14 @@ coloured acclimatisation badge per day and a summary box · "Check my risk" (mon
 confidence, "Why this rating?", acclimatisation warnings; asks to complete the profile first) · risk
 history (Settings → My risk checks). **Phase 3:** "Add to My Trip" on place detail (choose a trip or
 make a new one) · Trips tab · trip screen (map with numbered stops coloured by day, remove stops,
-**Optimise** → day-by-day plan and "down from X km" comparison, delete). All text is in `src/i18n/locales/en.json` / `ne.json`;
+**Optimise** → day-by-day plan and "down from X km" comparison, delete). **V2 Phase 2:** "Recommended
+for you" row on Explore (sideways, with a "Because you like…" line; "Popular now" without interests;
+pull to refresh) · **Near me** chip (asks for location with a clear message, `expo-location`) · stars
+on cards, reviews on place and trek pages ("Write a review" sheet, your review pinned first) ·
+nationality on the profile · Budget card on the trek page and **Estimate budget** on the trip ·
+**Share** (Android share sheet; `smartnepalguide://shared/{token}` opens a read-only trip) ·
+"Teahouses (n)" on itinerary days. **`expo-location` is native: rebuild the dev build once
+(`npx expo run:android`).** All text is in `src/i18n/locales/en.json` / `ne.json`;
 Noto Sans Devanagari is used everywhere.
 
 **Google sign-in setup** (only needed for that button): in Google Cloud Console create an OAuth
@@ -173,7 +197,10 @@ Only admins (see `create_admin` above) can log in. Screens (English / नेप�
 - **Categories, Permits:** table + form. A category with places, a permit used by a trek, or a place used in a
   trek stage cannot be deleted (409).
 - **Users:** search, block / unblock (a blocked user is logged out at once and cannot log in again).
-- **Reviews:** filter, hide / show. (Writing reviews in the app is Version 2.)
+- **Reviews:** filter, hide / show, and the language each review was written in. Travellers write them in the app (V2 Phase 2).
+- **Teahouses** *(V2 P2)*: table + form (village, names, phone, Wi-Fi / hot shower, price note, **source required**).
+- **Budget rates** *(V2 P2)*: edit the daily food / stay / transport rates per budget level and region; add a region.
+- **Places** now have three entry fees: foreigner, SAARC, Nepali.
 
 Notes: uploaded photos go to `backend/uploads/` (not committed) and are served at `/uploads/...`.
 Deletes are soft (`deleted_at`). **Running `app.seed` again overwrites admin edits to seeded places and
@@ -186,6 +213,20 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
 4. Search "punhill" → Poon Hill is found.
 5. Map → tap a marker → detail page.
 6. Settings → नेपाली → menus and content switch language.
+
+## Demo script (Version 2 Phase 2)
+1. Profile → interests *Culture + Religious* → Explore → **Recommended for you** starts with temples and
+   heritage sites ("Because you like religious places"). Change to *Nature + Adventure*, pull to refresh →
+   lakes, viewpoints and treks first. A new account with no interests sees **Popular now**.
+2. **Poon Hill** → **Write a review** → 4★ → it appears at once under "Your review". Admin panel →
+   Reviews → **Hide** → gone from the app. Ranking example: [algorithm.md](../smart-nepal-guide-docs/algorithm.md) (4.17 vs 4.48).
+3. Explore → **Near me** → allow location (emulator: Extended controls → Location → Thamel 27.7154, 85.3123)
+   → Kathmandu Durbar Square first, "1.3 km away".
+4. Trips → **Valley** → Optimise → **Estimate budget** → food, stay, transport, entry fees for 2 days.
+   Profile → budget *High* → estimate again → higher total. **EBC** → Budget card → permits at your
+   nationality's rate (profile → Nationality).
+5. Valley → **Share trip** → share sheet → open the link in a browser that is not logged in → read-only page.
+6. EBC → itinerary → day 4 → **Teahouses (4)** → Teahouses in Tengboche.
 
 ## Demo script (Phase 2, mid-term defense)
 1. Open **Everest Base Camp Trek** → **Day-by-day itinerary** → days 1–11 with altitude, gain, km and

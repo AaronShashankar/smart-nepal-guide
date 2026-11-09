@@ -61,12 +61,16 @@
     "treks": "Treks",
     "all": "All",
     "emptyPlaces": "No places in this category yet.",
-    "emptyTreks": "No treks yet."
+    "emptyTreks": "No treks yet.",
+    "recommended": "Recommended for you",
+    "popular": "Popular now",
+    "popularHint": "Choose your interests in the traveller profile to get personal suggestions.",
+    "trek": "Trek"
   },
   "place": {
     "about": "About",
     "bestSeason": "Best time to visit",
-    "entryFee": "Entry fee (foreigners)",
+    "entryFee": "Entry fee",
     "howToReach": "How to get there",
     "nearby": "Nearby places",
     "altitude": "Altitude",
@@ -145,7 +149,12 @@
     "budget_high": "High",
     "style_solo": "Solo",
     "style_family": "Family",
-    "style_group": "Group"
+    "style_group": "Group",
+    "nationality": "Nationality (for fees)",
+    "nationalityWhy": "Permits and entry fees have different rates for Nepali, SAARC and other foreign visitors.",
+    "nationality_nepali": "Nepali",
+    "nationality_saarc": "SAARC",
+    "nationality_foreign": "Foreign"
   },
   "settings": {
     "title": "Settings",
@@ -252,5 +261,84 @@
     "10": "Oct",
     "11": "Nov",
     "12": "Dec"
+  },
+  "near": {
+    "chip": "Near me",
+    "title": "Places near you",
+    "why": "Turn on location to see places near you. We use it only to sort places by distance; it is not saved.",
+    "allow": "Use my location",
+    "finding": "Finding your location…",
+    "denied": "Turn on location to see places near you.",
+    "error": "Could not get your location. Check that location (GPS) is switched on.",
+    "openSettings": "Open settings",
+    "empty": "No places within 20 km."
+  },
+  "reviews": {
+    "title": "Reviews",
+    "write": "Write a review",
+    "edit": "Edit your review",
+    "post": "Post review",
+    "placeholder": "What was it like? (optional)",
+    "comment": "Your review",
+    "yours": "Your review",
+    "traveller": "Traveller",
+    "delete": "Delete review",
+    "deleteTitle": "Delete your review?",
+    "none": "No reviews yet. Be the first!",
+    "count_one": "{{value}} review",
+    "count_other": "{{value}} reviews",
+    "hiddenNote": "An admin has hidden this review, so only you can see it.",
+    "bayesNote": "The score is a Bayesian average: items with only a few reviews stay close to the app's average.",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars",
+    "ratingA11y": "Rated {{score}} out of 5 from {{count}} reviews"
+  },
+  "because": {
+    "INTEREST_NATURE": "Because you like nature",
+    "INTEREST_CULTURE": "Because you like culture",
+    "INTEREST_ADVENTURE": "Because you like adventure",
+    "INTEREST_RELIGIOUS": "Because you like religious places",
+    "GOOD_SEASON": "Good time to go this month",
+    "FITS_BUDGET": "Fits your budget",
+    "HIGHLY_RATED": "Highly rated by travellers",
+    "OFTEN_PLANNED": "Often added to trips"
+  },
+  "budget": {
+    "title": "Budget estimate",
+    "estimate": "Estimate budget",
+    "again": "Estimate again",
+    "total": "Total per person",
+    "last": "Last estimate: {{total}}",
+    "perDay": "{{days}} days × {{rate}}",
+    "perKm": "{{km}} km × NPR {{rate}}/km",
+    "code_FOOD": "Food",
+    "code_STAY": "Stay",
+    "code_TRANSPORT": "Local transport",
+    "code_ENTRY_FEE": "Entry fee",
+    "code_PERMIT": "Permit",
+    "code_TRAILHEAD_TRANSPORT": "Travel to the trailhead and back",
+    "basis": "For a {{level}} budget, {{nationality}} rates. Change these in your traveller profile.",
+    "estimateOnly": "Estimate only: real prices change with season, group size and bargaining."
+  },
+  "share": {
+    "button": "Share trip",
+    "message": "My Bato trip “{{title}}”: {{url}}",
+    "failed": "Could not share the trip",
+    "isShared": "Anyone with the link can see this trip (read-only).",
+    "stop": "Stop sharing",
+    "stopTitle": "Stop sharing?",
+    "stopBody": "The old link will stop working.",
+    "sharedTitle": "Shared trip",
+    "readOnly": "A trip shared with you. You can look, but not change it.",
+    "gone": "This link does not work any more. The owner may have stopped sharing it."
+  },
+  "teahouses": {
+    "link_one": "Teahouses ({{value}})",
+    "link_other": "Teahouses ({{value}})",
+    "title": "Teahouses in {{place}}",
+    "wifi": "Wi-Fi",
+    "shower": "Hot shower",
+    "empty": "No teahouses listed here yet.",
+    "note": "Lodges taken from named sources (trekking guides, agency lists). Prices and facilities change: ask at the lodge."
   }
 }

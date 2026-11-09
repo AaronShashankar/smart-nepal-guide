@@ -1,23 +1,10 @@
 import uuid
 
-import pytest
-from sqlalchemy import update
-
 from app.models import Review, User
-from app.models.enums import UserRole
 from app.seed import sid
 
 EBC = str(sid("trek", "everest-base-camp"))
 PHOTO = b"\xff\xd8\xff\xe0" + b"0" * 200  # enough of a JPEG for the content-type check
-
-
-@pytest.fixture
-def admin(client, db):
-    email = f"admin-{uuid.uuid4().hex[:8]}@example.com"
-    r = client.post("/auth/register", json={"email": email, "password": "admin-pass-2026"})
-    db.execute(update(User).where(User.email == email).values(role=UserRole.admin))
-    db.commit()
-    return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
 def place_body(**kw):

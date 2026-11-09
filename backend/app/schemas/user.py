@@ -8,6 +8,7 @@ from app.models.enums import (
     BudgetLevel,
     FitnessLevel,
     Lang,
+    Nationality,
     TravelStyle,
     TrekExperience,
     UserRole,
@@ -41,6 +42,7 @@ class ProfileIn(BaseModel):
     has_asthma: bool | None = None
     budget_level: BudgetLevel | None = None
     travel_style: TravelStyle | None = None
+    nationality: Nationality = Nationality.foreign
     interests: list[str] = Field(default_factory=list, description="interest codes")
 
 
@@ -57,4 +59,5 @@ class ProfileOut(BaseModel):
     has_asthma: bool | None = None
     budget_level: BudgetLevel | None = None
     travel_style: TravelStyle | None = None
+    nationality: Nationality = Nationality.foreign
     interests: list[InterestOut] = Field(default_factory=list)

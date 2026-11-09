@@ -142,7 +142,9 @@ def stage_facts(trek: Trek, lang: Lang) -> list[StageFacts]:
     ]
 
 
-def itinerary_out(trek: Trek, lang: Lang) -> ItineraryOut:
+def itinerary_out(trek: Trek, lang: Lang, teahouse_counts: dict | None = None) -> ItineraryOut:
+    """`teahouse_counts`: {place_id: number of lodges} for the "Teahouses (n)" link."""
+    teahouse_counts = teahouse_counts or {}
     facts = stage_facts(trek, lang)
     summary = trek_facts(facts)
     stages = [
@@ -157,6 +159,7 @@ def itinerary_out(trek: Trek, lang: Lang) -> ItineraryOut:
             highest_point_m=s.highest_point_m,
             is_rest_day=f.is_rest_day,
             notes=pick(s.translations, lang, "notes")["notes"],
+            teahouse_count=teahouse_counts.get(s.to_place_id, 0),
         )
         for s, f in zip(trek.stages, facts, strict=True)
     ]

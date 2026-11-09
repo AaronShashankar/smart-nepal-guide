@@ -40,3 +40,16 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
     if user.role != UserRole.admin:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Admins only")
     return user
+
+
+def get_optional_user(
+    creds: HTTPAuthorizationCredentials | None = Depends(bearer),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """For public endpoints that show a little more to a logged-in user (e.g. "Your review").
+
+    No token -> None. A bad token is still a 401, so the app refreshes it like everywhere else.
+    """
+    if creds is None:
+        return None
+    return get_current_user(creds, db)

@@ -112,6 +112,8 @@ def place_out(p: Place) -> PlaceAdminOut:
         district=p.district,
         province=p.province,
         entry_fee_npr=p.entry_fee_npr,
+        entry_fee_saarc_npr=p.entry_fee_saarc_npr,
+        entry_fee_nepali_npr=p.entry_fee_nepali_npr,
         is_published=p.is_published,
         en=text(Lang.en),
         ne=text(Lang.ne),
@@ -143,6 +145,10 @@ def save_place(db: Session, p: Place, body: PlaceAdminIn, admin: User) -> None:
     p.category = category
     p.latitude, p.longitude = Decimal(str(body.latitude)), Decimal(str(body.longitude))
     p.altitude_m, p.entry_fee_npr = body.altitude_m, body.entry_fee_npr
+    p.entry_fee_saarc_npr, p.entry_fee_nepali_npr = (
+        body.entry_fee_saarc_npr,
+        body.entry_fee_nepali_npr,
+    )
     p.district, p.province = _clean(body.district), _clean(body.province)
     p.is_published = body.is_published
 

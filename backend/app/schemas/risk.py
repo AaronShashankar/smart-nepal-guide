@@ -20,6 +20,7 @@ class StageOut(BaseModel):
     highest_point_m: int | None
     is_rest_day: bool
     notes: str | None
+    teahouse_count: int = 0  # V2: lodges listed for the place where you sleep
 
 
 class ItinerarySummary(BaseModel):

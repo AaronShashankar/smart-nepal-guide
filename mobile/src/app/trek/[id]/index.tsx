@@ -4,11 +4,14 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { BudgetTable } from '@/components/BudgetTable';
 import { Button } from '@/components/Button';
 import { DifficultyBadge, Section } from '@/components/Cards';
+import { ReviewsSection } from '@/components/Reviews';
+import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
 import { days, km, meters, npr } from '@/lib/format';
-import { useTrek } from '@/lib/queries';
+import { useTrek, useTrekBudget } from '@/lib/queries';
 import type { PlaceRef } from '@/lib/types';
 import { colors, spacing } from '@/theme';
 
@@ -42,6 +45,16 @@ function PlaceStop({ label, place }: { label: string; place: PlaceRef }) {
   );
 }
 
+function TrekBudget({ id }: { id: string }) {
+  const { t } = useTranslation();
+  const budget = useTrekBudget(id);
+  return (
+    <Section title={t('budget.title')}>
+      <QueryState query={budget}>{(b) => <BudgetTable budget={b} />}</QueryState>
+    </Section>
+  );
+}
+
 export default function TrekDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -55,7 +68,10 @@ export default function TrekDetailScreen() {
           <>
             <View style={{ gap: spacing(1) }}>
               <AppText variant="title">{tr.name}</AppText>
-              <AppText muted>{tr.region}</AppText>
+              <View style={styles.inline}>
+                <AppText muted>{tr.region}</AppText>
+                <RatingBadge rating={tr.rating} />
+              </View>
             </View>
 
             <View style={styles.stats}>
@@ -125,6 +141,8 @@ export default function TrekDetailScreen() {
               </Section>
             )}
 
+            <TrekBudget id={tr.id} />
+
             <View style={styles.actions}>
               <Button
                 title={t('trek.checkRisk')}
@@ -149,6 +167,8 @@ export default function TrekDetailScreen() {
                 }
               />
             </View>
+
+            <ReviewsSection target={{ type: 'trek', id: tr.id }} />
           </>
         )}
       </QueryState>
@@ -178,4 +198,5 @@ const styles = StyleSheet.create({
   },
   fees: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing(4) },
   actions: { gap: spacing(2.5) },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
 });

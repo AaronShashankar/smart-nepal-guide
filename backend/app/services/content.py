@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, aliased
 from app.core.i18n import pick, pick_one
 from app.models import Category, Place, PlaceTranslation, Trek, TrekTranslation
 from app.models.enums import Lang
-from app.schemas.content import CategoryOut, PlaceRef, PlaceSummary, TrekSummary
+from app.schemas.content import CategoryOut, PlaceRef, PlaceSummary, RatingOut, TrekSummary
 
 NAME_COLLATION = "und-x-icu"
 
@@ -20,7 +20,9 @@ def category_out(category: Category, lang: Lang) -> CategoryOut:
     )
 
 
-def place_summary(place: Place, lang: Lang, thumbnail_url: str | None = None) -> PlaceSummary:
+def place_summary(
+    place: Place, lang: Lang, thumbnail_url: str | None = None, rating: RatingOut | None = None
+) -> PlaceSummary:
     return PlaceSummary(
         id=place.id,
         name=pick_one(place.translations, lang),
@@ -32,6 +34,7 @@ def place_summary(place: Place, lang: Lang, thumbnail_url: str | None = None) ->
         province=place.province,
         entry_fee_npr=place.entry_fee_npr,
         thumbnail_url=thumbnail_url,
+        rating=rating,
     )
 
 
@@ -45,7 +48,7 @@ def place_ref(place: Place, lang: Lang) -> PlaceRef:
     )
 
 
-def trek_summary(trek: Trek, lang: Lang) -> TrekSummary:
+def trek_summary(trek: Trek, lang: Lang, rating: RatingOut | None = None) -> TrekSummary:
     t = pick(trek.translations, lang, "name")
     return TrekSummary(
         id=trek.id,
@@ -55,6 +58,7 @@ def trek_summary(trek: Trek, lang: Lang) -> TrekSummary:
         total_distance_km=float(trek.total_distance_km) if trek.total_distance_km else None,
         max_altitude_m=trek.max_altitude_m,
         base_difficulty=trek.base_difficulty,
+        rating=rating,
     )
 
 

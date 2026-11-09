@@ -1,15 +1,18 @@
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.algorithms.best_time import MonthClimate, best_months
-from app.algorithms.haversine import nearest
+from app.algorithms.geo_box import bounding_box
+from app.algorithms.haversine import haversine_km, nearest
 from app.core.db import get_db
 from app.core.i18n import get_lang, pick, pick_one
-from app.models import Category, Place, PlaceAlias, PlaceTranslation
+from app.models import Category, Place, PlaceAlias, PlaceTranslation, Review, Teahouse
 from app.models.enums import Lang
+from app.schemas.community import NearPlaceOut, TeahouseOut
 from app.schemas.content import NearbyPlace, Page, PhotoOut, PlaceDetail, PlaceSummary
 from app.services.content import (
     category_out,
@@ -18,6 +21,7 @@ from app.services.content import (
     published_places,
     thumbnails,
 )
+from app.services.rating import rating_order, ratings
 
 router = APIRouter(prefix="/places", tags=["places"])
 
@@ -34,6 +38,7 @@ def list_places(
     min_lng: float | None = Query(None, ge=-180, le=180),
     max_lat: float | None = Query(None, ge=-90, le=90),
     max_lng: float | None = Query(None, ge=-180, le=180),
+    sort: Literal["name", "rating"] = Query("name", description="rating = Bayesian average"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -68,16 +73,85 @@ def list_places(
         )
 
     total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
-    rows = db.scalars(
-        stmt.order_by(order_by, Place.id).offset((page - 1) * page_size).limit(page_size)
-    ).all()
-    thumbs = thumbnails(db, [p.id for p in rows])
+    order = [order_by, Place.id]
+    if sort == "rating":
+        agg, score = rating_order(db, Review.place_id)
+        stmt = stmt.outerjoin(agg, agg.c.item_id == Place.id)
+        order = [score.desc(), *order]
+    rows = db.scalars(stmt.order_by(*order).offset((page - 1) * page_size).limit(page_size)).all()
+    ids = [p.id for p in rows]
+    thumbs = thumbnails(db, ids)
+    rated = ratings(db, Review.place_id, ids)
     return Page[PlaceSummary](
-        items=[place_summary(p, lang, thumbs.get(p.id)) for p in rows],
+        items=[place_summary(p, lang, thumbs.get(p.id), rated[p.id]) for p in rows],
         total=total,
         page=page,
         page_size=page_size,
     )
+
+
+MAX_NEAR_RADIUS_KM = 200
+
+
+@router.get("/near", response_model=list[NearPlaceOut])
+def near_me(
+    lat: float = Query(ge=-90, le=90),
+    lng: float = Query(ge=-180, le=180),
+    radius_km: float = Query(20, gt=0, le=MAX_NEAR_RADIUS_KM),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    lang: Lang = Depends(get_lang),
+) -> list[NearPlaceOut]:
+    """Places closest to the phone: bounding box in SQL (indexed), then exact Haversine, then
+    sort. The box is a square around the circle, so the Haversine step drops its corners."""
+    min_lat, min_lng, max_lat, max_lng = bounding_box(lat, lng, radius_km)
+    candidates = db.scalars(
+        select(Place).where(
+            published_places(),
+            Place.latitude.between(min_lat, max_lat),
+            Place.longitude.between(min_lng, max_lng),
+        )
+    ).all()
+    within = [
+        (p, d)
+        for p in candidates
+        if (d := haversine_km(lat, lng, float(p.latitude), float(p.longitude))) <= radius_km
+    ]
+    within.sort(key=lambda pair: (pair[1], str(pair[0].id)))
+    within = within[:limit]
+    ids = [p.id for p, _ in within]
+    thumbs, rated = thumbnails(db, ids), ratings(db, Review.place_id, ids)
+    return [
+        NearPlaceOut(
+            **place_summary(p, lang, thumbs.get(p.id), rated[p.id]).model_dump(),
+            distance_km=round(d, 1),
+        )
+        for p, d in within
+    ]
+
+
+@router.get("/{place_id}/teahouses", response_model=list[TeahouseOut])
+def place_teahouses(
+    place_id: uuid.UUID, db: Session = Depends(get_db), lang: Lang = Depends(get_lang)
+) -> list[TeahouseOut]:
+    """Lodges in this village (V2 Phase 2). Real entries only, see data/teahouses.csv."""
+    if db.scalar(select(Place.id).where(Place.id == place_id, published_places())) is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Place not found")
+    rows = db.scalars(
+        select(Teahouse).where(Teahouse.place_id == place_id, Teahouse.deleted_at.is_(None))
+    ).all()
+    out = [
+        TeahouseOut(
+            id=t.id,
+            phone=t.phone,
+            has_wifi=t.has_wifi,
+            has_hot_shower=t.has_hot_shower,
+            updated_at=t.updated_at,
+            **pick(t.translations, lang, "name", "price_note"),
+        )
+        for t in rows
+    ]
+    return sorted(out, key=lambda t: t.name.casefold())
 
 
 @router.get("/{place_id}", response_model=PlaceDetail)
@@ -111,9 +185,12 @@ def get_place(
         k=NEARBY_COUNT,
     )
 
-    summary = place_summary(place, lang, place.photos[0].url if place.photos else None)
+    rating = ratings(db, Review.place_id, [place.id])[place.id]
+    summary = place_summary(place, lang, place.photos[0].url if place.photos else None, rating)
     return PlaceDetail(
         **summary.model_dump(),
+        entry_fee_saarc_npr=place.entry_fee_saarc_npr,
+        entry_fee_nepali_npr=place.entry_fee_nepali_npr,
         description=text["description"],
         how_to_reach=text["how_to_reach"],
         photos=[PhotoOut(url=p.url, sort_order=p.sort_order) for p in place.photos],

@@ -6,10 +6,12 @@ import { useSettings } from '@/store/settings';
 import { api } from './api';
 import type {
   Acclimatisation,
+  Budget,
   Category,
   Interest,
   Itinerary,
   Me,
+  NearPlace,
   Page,
   PlaceDetail,
   PlaceSummary,
@@ -17,8 +19,14 @@ import type {
   Profile,
   ProfileInput,
   RiskLevel,
+  Recommendations,
+  Review,
+  ReviewPage,
   RiskResult,
   SearchResult,
+  SharedTrip,
+  ShareLinks,
+  Teahouse,
   TrekDetail,
   TrekSummary,
   TripDetail,
@@ -171,6 +179,9 @@ export function useSaveProfile() {
     onSuccess: () => {
       client.invalidateQueries({ queryKey: ['profile'] });
       client.invalidateQueries({ queryKey: ['me'] });
+      // Interests, budget level and nationality change these:
+      client.invalidateQueries({ queryKey: ['recommendations'] });
+      client.invalidateQueries({ queryKey: ['trek-budget'] });
     },
   });
 }
@@ -247,5 +258,118 @@ export function useDeleteTrip() {
   return useMutation({
     mutationFn: async (id: string) => api.delete(`/trips/${id}`),
     onSuccess: () => client.invalidateQueries({ queryKey: ['trips'] }),
+  });
+}
+
+// ------------------------------------------------- V2 Phase 2: personal & community
+
+export function useRecommendations() {
+  const lang = useLang();
+  const token = useAuth((s) => s.accessToken);
+  return useQuery({
+    queryKey: ['recommendations', lang],
+    queryFn: () => get<Recommendations>('/recommendations', { limit: 10 }),
+    enabled: !!token,
+  });
+}
+
+export function useNearPlaces(coords: { lat: number; lng: number } | null, radiusKm = 20) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['near', lang, coords, radiusKm],
+    queryFn: () => get<NearPlace[]>('/places/near', { ...coords, radius_km: radiusKm, limit: 20 }),
+    enabled: !!coords,
+  });
+}
+
+export type ReviewTarget = { type: 'place' | 'trek'; id: string };
+const reviewsUrl = (t: ReviewTarget) =>
+  `/${t.type === 'place' ? 'places' : 'treks'}/${t.id}/reviews`;
+
+export function useReviews(target: ReviewTarget) {
+  return useQuery({
+    queryKey: ['reviews', target.type, target.id],
+    queryFn: () => get<ReviewPage>(reviewsUrl(target)),
+  });
+}
+
+/** After a review changes: refresh its list, the item's rating and the recommendations. */
+function useReviewChanged(target: ReviewTarget) {
+  const client = useQueryClient();
+  return () => {
+    client.invalidateQueries({ queryKey: ['reviews', target.type, target.id] });
+    client.invalidateQueries({ queryKey: [target.type, target.id] });
+    client.invalidateQueries({ queryKey: [target.type === 'place' ? 'places' : 'treks'] });
+    client.invalidateQueries({ queryKey: ['recommendations'] });
+  };
+}
+
+export function useSaveReview(target: ReviewTarget) {
+  const changed = useReviewChanged(target);
+  return useMutation({
+    mutationFn: async (body: { rating: number; comment: string | null }) =>
+      (await api.post<Review>(reviewsUrl(target), body)).data,
+    onSuccess: changed,
+  });
+}
+
+export function useDeleteReview(target: ReviewTarget) {
+  const changed = useReviewChanged(target);
+  return useMutation({
+    mutationFn: async (id: string) => api.delete(`/reviews/${id}`),
+    onSuccess: changed,
+  });
+}
+
+export function useTrekBudget(id: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['trek-budget', id, lang],
+    queryFn: () => get<Budget>(`/treks/${id}/budget`),
+    enabled: !!id,
+  });
+}
+
+export function useTripBudget() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (tripId: string) => (await api.post<Budget>(`/trips/${tripId}/budget`)).data,
+    onSuccess: (_, tripId) => client.invalidateQueries({ queryKey: ['trip', tripId] }),
+  });
+}
+
+export function useShareTrip() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (tripId: string) =>
+      (await api.post<ShareLinks>(`/trips/${tripId}/share`)).data,
+    onSuccess: (_, tripId) => client.invalidateQueries({ queryKey: ['trip', tripId] }),
+  });
+}
+
+export function useStopSharing() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (tripId: string) => api.delete(`/trips/${tripId}/share`),
+    onSuccess: (_, tripId) => client.invalidateQueries({ queryKey: ['trip', tripId] }),
+  });
+}
+
+export function useSharedTrip(token: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['shared-trip', token, lang],
+    queryFn: () => get<SharedTrip>(`/shared/trips/${token}`),
+    enabled: !!token,
+    retry: false, // a stopped link is a 404: show it at once
+  });
+}
+
+export function useTeahouses(placeId: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['teahouses', placeId, lang],
+    queryFn: () => get<Teahouse[]>(`/places/${placeId}/teahouses`),
+    enabled: !!placeId,
   });
 }

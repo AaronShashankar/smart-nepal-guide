@@ -15,6 +15,7 @@ import { useInterests, useMe, useProfile, useSaveProfile } from '@/lib/queries';
 import type {
   BudgetLevel,
   FitnessLevel,
+  Nationality,
   Profile,
   ProfileInput,
   TravelStyle,
@@ -147,6 +148,20 @@ function ProfileForm({ initial, isNew }: { initial: ProfileInput; isNew: boolean
             options={options<BudgetLevel>('budget', ['low', 'medium', 'high'])}
             value={form.budget_level}
             onChange={(v) => set('budget_level', v)}
+          />
+        </View>
+      </Section>
+
+      <Section title={t('profile.nationality')}>
+        <AppText variant="caption" muted>
+          {t('profile.nationalityWhy')}
+        </AppText>
+        <View style={styles.wrap}>
+          <ChipGroup
+            allowClear={false}
+            options={options<Nationality>('nationality', ['nepali', 'saarc', 'foreign'])}
+            value={form.nationality}
+            onChange={(v) => v && set('nationality', v)}
           />
         </View>
       </Section>

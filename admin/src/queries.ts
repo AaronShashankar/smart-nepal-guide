@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { api } from './api';
 import type {
+  BudgetRate,
   Category,
   CategoryIn,
   Page,
@@ -14,6 +15,8 @@ import type {
   ReviewRow,
   ReviewStatus,
   Stats,
+  Teahouse,
+  TeahouseIn,
   Trek,
   TrekIn,
   TrekRow,
@@ -150,3 +153,26 @@ export const useSetReviewStatus = () =>
       api.put<ReviewRow>(`/admin/reviews/${id}/status`, { status }).then((r) => r.data),
     ['reviews'],
   );
+
+// ------------------------------------------------------------- V2 Phase 2
+
+export const useBudgetRates = () =>
+  useQuery({ queryKey: ['budget-rates'], queryFn: () => get<BudgetRate[]>('/admin/budget-rates') });
+
+export const useSaveBudgetRate = () =>
+  useAdminMutation(
+    (body: BudgetRate) => api.put<BudgetRate>('/admin/budget-rates', body).then((r) => r.data),
+    ['budget-rates'],
+  );
+
+export const useTeahouses = () =>
+  useQuery({ queryKey: ['teahouses'], queryFn: () => get<Teahouse[]>('/admin/teahouses') });
+
+export const useSaveTeahouse = () =>
+  useAdminMutation(
+    ({ id, body }: { id?: string; body: TeahouseIn }) =>
+      save<Teahouse>('/admin/teahouses', id, body),
+    ['teahouses'],
+  );
+export const useDeleteTeahouse = () =>
+  useAdminMutation((id: string) => remove(`/admin/teahouses/${id}`), ['teahouses']);

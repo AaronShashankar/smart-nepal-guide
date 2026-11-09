@@ -14,6 +14,7 @@ from sqlalchemy import (
     Numeric,
     SmallInteger,
     Text,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -79,6 +80,21 @@ class Review(Base):
         # A review is about exactly one place or one trek.
         CheckConstraint("(place_id IS NULL) <> (trek_id IS NULL)", name="one_target"),
         Index("ix_review_created", "created_at"),
+        # One review per user and item: posting again updates it (V2 Phase 2).
+        Index(
+            "uq_review_user_place",
+            "user_id",
+            "place_id",
+            unique=True,
+            postgresql_where=text("place_id IS NOT NULL"),
+        ),
+        Index(
+            "uq_review_user_trek",
+            "user_id",
+            "trek_id",
+            unique=True,
+            postgresql_where=text("trek_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -98,6 +114,7 @@ class Review(Base):
         pg_enum(ReviewStatus, "review_status"), nullable=False, default=ReviewStatus.visible
     )
     created_at: Mapped[datetime] = created_at_col()
+    updated_at: Mapped[datetime] = updated_at_col()  # V2: a second post edits the review
 
     user: Mapped[User] = relationship()
     place: Mapped[Place | None] = relationship()

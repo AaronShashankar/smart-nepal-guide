@@ -64,7 +64,10 @@ class Place(Base):
     altitude_m: Mapped[int | None] = mapped_column(Integer)
     district: Mapped[str | None] = mapped_column(Text)
     province: Mapped[str | None] = mapped_column(Text)
-    entry_fee_npr: Mapped[int | None] = mapped_column(Integer)  # null = free
+    # Entry fees like permits: foreign / SAARC / Nepali rate; null = free for that group.
+    entry_fee_npr: Mapped[int | None] = mapped_column(Integer)  # foreign rate
+    entry_fee_saarc_npr: Mapped[int | None] = mapped_column(Integer)
+    entry_fee_nepali_npr: Mapped[int | None] = mapped_column(Integer)
     is_published: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     updated_at: Mapped[datetime] = updated_at_col()
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -41,7 +41,7 @@ cp backend/.env.example backend/.env    # then put a random value in JWT_SECRET
 ```
 
 This runs:
-- **backend:** ruff lint and format check, a check that the migrations match the models, and the 129 pytest tests;
+- **backend:** ruff lint and format check, a check that the migrations match the models, and the 175 pytest tests;
 - **mobile:** the TypeScript typecheck and ESLint;
 - **admin:** the build and lint.
 
@@ -51,7 +51,9 @@ the fuzzy search cases ("punhill", "anapurna", "अन्नपूर्ण"), t
 distance from Kathmandu to Pokhara, and (Phase 2) the acclimatisation rules on the EBC itinerary,
 `gini`, the tree and forest, our accuracy against scikit-learn's, and `/predict-risk`; (Phase 3) nearest
 neighbour, 2-opt against brute force, the day split, the trips API, every admin route, photo upload,
-and blocking. The manual test cases for the report are in [docs/testing.md](docs/testing.md); the order to run them
+and blocking; (V2 Phase 2) the Bayesian average (4.17 vs 4.48), one review per user, hidden reviews,
+cosine similarity and the recommendations, Near me from Thamel, the Valley budget by hand, permits by
+nationality, share links (and that they stop working), and teahouses. The manual test cases for the report are in [docs/testing.md](docs/testing.md); the order to run them
 in and how to check each one is in [docs/testing-guide.md](docs/testing-guide.md).
 
 ---
@@ -153,6 +155,22 @@ npx expo run:android                      # builds and installs the app, then st
 
 "Continue with Google" will show *"Google sign-in is not set up in this build"* until you do
 section 6.
+
+### Check the V2 Phase 2 demo (personalisation & community)
+First time only: `expo-location` is a new native package, so rebuild the development build once
+(`cd mobile && npx expo run:android`, or a new EAS development build) and run `uv run python -m app.seed`
+(migration 0004 + budget rates + teahouses).
+- [ ] Profile → interests *Culture* + *Religious* → Explore → **Recommended for you**: temples / heritage first, each with "Because you like…"
+- [ ] Profile → *Nature* + *Adventure* → pull Explore down → lakes, viewpoints and treks first
+- [ ] New account, skip the profile → Explore shows **Popular now**
+- [ ] **Poon Hill** → **Write a review** → 4★ + text → shows at once as "Your review"; post again → it is updated, not doubled
+- [ ] Admin panel → Reviews → the review with its language → **Hide** → gone from the app's list (you still see it, marked hidden)
+- [ ] Explore → **Near me** → allow → closest first with "x km away"; deny → "Turn on location to see places near you"
+- [ ] Trips → Valley → **Optimise** → **Estimate budget** → breakdown + "Estimate only"; profile budget *High* → estimate again → total goes up
+- [ ] EBC → **Budget estimate** card → permits; profile nationality *SAARC* / *Nepali* → permits get cheaper
+- [ ] Valley → **Share trip** → share sheet → open the link in a private browser window → read-only page; **Stop sharing** → the link gives 404
+- [ ] EBC → itinerary → day 4 → **Teahouses (4)** → 4 lodges in Tengboche
+- [ ] Switch to नेपाली → the new screens are in Nepali, money as रु. with Devanagari digits
 
 ---
 

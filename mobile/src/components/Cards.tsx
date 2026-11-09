@@ -5,11 +5,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { photoUrl } from '@/lib/api';
-import { days, km, meters } from '@/lib/format';
-import type { Category, PlaceSummary, RiskLevel, TrekSummary } from '@/lib/types';
+import { days, formatNumber, km, meters } from '@/lib/format';
+import type { Category, PlaceSummary, Recommendation, RiskLevel, TrekSummary } from '@/lib/types';
 import { categoryColors, colors, difficultyColors, spacing } from '@/theme';
 
 import { AppText } from './AppText';
+import { RatingBadge } from './Stars';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -42,25 +43,30 @@ export function DifficultyBadge({ level }: { level: RiskLevel }) {
   );
 }
 
-function Thumbnail({ uri, category }: { uri: string | null; category: Category }) {
+function Thumbnail({
+  uri,
+  category,
+  wide,
+}: {
+  uri: string | null;
+  category: Category;
+  wide?: boolean;
+}) {
+  const style = wide ? styles.recImage : styles.thumb;
   if (uri) {
     return (
-      <Image
-        source={{ uri: photoUrl(uri) }}
-        style={styles.thumb}
-        contentFit="cover"
-        transition={150}
-      />
+      <Image source={{ uri: photoUrl(uri) }} style={style} contentFit="cover" transition={150} />
     );
   }
   return (
-    <View style={[styles.thumb, styles.thumbPlaceholder]}>
+    <View style={[style, styles.thumbPlaceholder]}>
       <CategoryIcon category={category} size={28} />
     </View>
   );
 }
 
-export function PlaceCard({ place }: { place: PlaceSummary }) {
+export function PlaceCard({ place, distanceKm }: { place: PlaceSummary; distanceKm?: number }) {
+  const { t } = useTranslation();
   return (
     <Link href={{ pathname: '/place/[id]', params: { id: place.id } }} asChild>
       <Pressable style={styles.card} accessibilityRole="button">
@@ -76,11 +82,19 @@ export function PlaceCard({ place }: { place: PlaceSummary }) {
               {place.district ? ` · ${place.district}` : ''}
             </AppText>
           </View>
-          {place.altitude_m != null && (
-            <AppText variant="caption" muted>
-              {meters(place.altitude_m)}
-            </AppText>
-          )}
+          <View style={styles.row}>
+            {distanceKm != null && (
+              <AppText variant="caption" style={{ color: colors.accent }}>
+                {t('units.kmAway', { value: formatNumber(distanceKm, 1) })}
+              </AppText>
+            )}
+            {distanceKm == null && place.altitude_m != null && (
+              <AppText variant="caption" muted>
+                {meters(place.altitude_m)}
+              </AppText>
+            )}
+            <RatingBadge rating={place.rating} />
+          </View>
         </View>
       </Pressable>
     </Link>
@@ -101,6 +115,7 @@ export function TrekCard({ trek }: { trek: TrekSummary }) {
           <AppText variant="caption" muted>
             {trek.region} · {days(trek.total_days)} · {km(trek.total_distance_km)}
           </AppText>
+          <RatingBadge rating={trek.rating} />
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <View style={styles.row}>
               <MaterialCommunityIcons name="image-filter-hdr" size={14} color={colors.textMuted} />
@@ -110,6 +125,47 @@ export function TrekCard({ trek }: { trek: TrekSummary }) {
             </View>
             <DifficultyBadge level={trek.base_difficulty} />
           </View>
+        </View>
+      </Pressable>
+    </Link>
+  );
+}
+
+/** Small card for the sideways "Recommended for you" row, with the reason it was picked. */
+export function RecommendationCard({ rec }: { rec: Recommendation }) {
+  const { t } = useTranslation();
+  const href =
+    rec.type === 'place'
+      ? ({ pathname: '/place/[id]', params: { id: rec.item.id } } as const)
+      : ({ pathname: '/trek/[id]', params: { id: rec.item.id } } as const);
+  const subtitle =
+    rec.type === 'place'
+      ? rec.item.category.name
+      : `${t('explore.trek')} · ${days(rec.item.total_days)}`;
+  const reason = rec.because[0];
+  return (
+    <Link href={href} asChild>
+      <Pressable style={styles.recCard} accessibilityRole="button">
+        {rec.type === 'place' ? (
+          <Thumbnail uri={rec.item.thumbnail_url} category={rec.item.category} wide />
+        ) : (
+          <View style={[styles.recImage, styles.thumbPlaceholder]}>
+            <MaterialCommunityIcons name="hiking" size={32} color={colors.accent} />
+          </View>
+        )}
+        <View style={{ padding: spacing(2.5), gap: 2 }}>
+          <AppText variant="subheading" numberOfLines={1}>
+            {rec.item.name}
+          </AppText>
+          <AppText variant="caption" muted numberOfLines={1}>
+            {subtitle}
+          </AppText>
+          <RatingBadge rating={rec.item.rating} />
+          {reason && (
+            <AppText variant="caption" numberOfLines={2} style={{ color: colors.accent }}>
+              {t(`because.${reason}`)}
+            </AppText>
+          )}
         </View>
       </Pressable>
     </Link>
@@ -171,5 +227,14 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing(1.5) },
   badge: { borderWidth: 1, borderRadius: 10, paddingHorizontal: spacing(2), paddingVertical: 1 },
   section: { gap: spacing(3) },
+  recCard: {
+    width: 200,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  recImage: { width: '100%', height: 110 },
   infoRow: { flexDirection: 'row', gap: spacing(3), alignItems: 'flex-start' },
 });

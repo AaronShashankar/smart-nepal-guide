@@ -7,7 +7,7 @@ the report). Everything runs on this laptop: PostgreSQL, the API, the admin pane
 
 | Kind | How many | How you run it | Time |
 |---|---|---|---|
-| Automated | **1 command** (129 backend tests + mobile/admin typecheck and lint) | `./scripts/verify.sh` | ~2 min |
+| Automated | **1 command** (175 backend tests + mobile/admin typecheck and lint) | `./scripts/verify.sh` | ~2 min |
 | Manual, Phone 1 | **40 cases** (TC-01 … TC-40), in 6 sessions below | by hand, phone + browser | ~2½ h |
 | Manual, Phone 2 | **8 cases** (layout check on a different screen size) | by hand | ~20 min |
 | Phone demos | 2 (mid-term demo, final demo) — **no extra work**: sessions C and D are the demos | — | — |
@@ -30,7 +30,7 @@ results into `testing.md` for the report.
 ## Before you start
 
 1. Laptop and phone on the **same Wi-Fi** (or the laptop on the phone's hotspot).
-2. Run the automated tests: `./scripts/verify.sh` → everything green. Write "129 passed" in the
+2. Run the automated tests: `./scripts/verify.sh` → everything green. Write "175 passed" in the
    tracker (task V1-P3-08 notes).
 3. Start everything: `./scripts/start-demo.sh` (add `--seed` once for fresh seed data).
 4. **Phone 1:** uninstall Bato, then install the development build again, so TC-01 sees a real

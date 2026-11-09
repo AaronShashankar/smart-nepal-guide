@@ -19,6 +19,7 @@ PROFILE_FIELDS = (
     "has_asthma",
     "budget_level",
     "travel_style",
+    "nationality",
 )
 
 

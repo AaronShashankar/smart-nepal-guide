@@ -1,17 +1,26 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, Share, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { BudgetTable } from '@/components/BudgetTable';
 import { Button } from '@/components/Button';
 import { CategoryIcon, Section } from '@/components/Cards';
 import { Screen } from '@/components/Screen';
 import { QueryState } from '@/components/StateViews';
 import { TripMap } from '@/components/TripMap';
 import { errorMessage } from '@/lib/api';
-import { formatNumber, km } from '@/lib/format';
-import { useDeleteTrip, useOptimiseTrip, useRemoveStop, useTrip } from '@/lib/queries';
+import { formatNumber, km, npr } from '@/lib/format';
+import {
+  useDeleteTrip,
+  useOptimiseTrip,
+  useRemoveStop,
+  useShareTrip,
+  useStopSharing,
+  useTrip,
+  useTripBudget,
+} from '@/lib/queries';
 import type { TripDetail, TripStop } from '@/lib/types';
 import { colors, spacing } from '@/theme';
 
@@ -92,6 +101,91 @@ function DayPlan({ trip }: { trip: TripDetail }) {
   );
 }
 
+function TripBudget({ trip }: { trip: TripDetail }) {
+  const { t } = useTranslation();
+  const budget = useTripBudget();
+  // A new estimate is only valid for the current plan: forget it when the plan changes.
+  const current = budget.data && trip.estimated_budget_npr === budget.data.total_npr;
+  return (
+    <Section title={t('budget.title')}>
+      {current ? (
+        <BudgetTable budget={budget.data!} />
+      ) : (
+        trip.estimated_budget_npr != null && (
+          <AppText muted>{t('budget.last', { total: npr(trip.estimated_budget_npr) })}</AppText>
+        )
+      )}
+      <Button
+        title={current ? t('budget.again') : t('budget.estimate')}
+        variant="secondary"
+        icon={
+          <MaterialCommunityIcons
+            name="calculator-variant-outline"
+            size={20}
+            color={colors.primary}
+          />
+        }
+        loading={budget.isPending}
+        onPress={() => budget.mutate(trip.id)}
+      />
+      {budget.isError && (
+        <AppText style={{ color: colors.danger }}>
+          {errorMessage(budget.error, t('common.error'))}
+        </AppText>
+      )}
+    </Section>
+  );
+}
+
+function ShareButtons({ trip }: { trip: TripDetail }) {
+  const { t } = useTranslation();
+  const share = useShareTrip();
+  const stop = useStopSharing();
+
+  async function onShare() {
+    try {
+      const links = await share.mutateAsync(trip.id);
+      await Share.share({ message: t('share.message', { title: trip.title, url: links.url }) });
+    } catch (e) {
+      Alert.alert(t('share.failed'), errorMessage(e, t('common.error')));
+    }
+  }
+
+  function onStop() {
+    Alert.alert(t('share.stopTitle'), t('share.stopBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('share.stop'), style: 'destructive', onPress: () => stop.mutate(trip.id) },
+    ]);
+  }
+
+  return (
+    <View style={{ gap: spacing(2) }}>
+      <Button
+        title={t('share.button')}
+        variant="secondary"
+        icon={
+          <MaterialCommunityIcons name="share-variant-outline" size={20} color={colors.primary} />
+        }
+        loading={share.isPending}
+        onPress={onShare}
+      />
+      {trip.is_shared && (
+        <>
+          <AppText variant="caption" muted>
+            {t('share.isShared')}
+          </AppText>
+          <Button
+            title={t('share.stop')}
+            variant="ghost"
+            loading={stop.isPending}
+            onPress={onStop}
+          />
+        </>
+      )}
+    </View>
+  );
+}
+
 export default function TripScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -160,6 +254,8 @@ export default function TripScreen() {
               </AppText>
             )}
             {tr.is_optimised && <DayPlan trip={tr} />}
+            {tr.is_optimised && <TripBudget trip={tr} />}
+            {tr.stops.length > 0 && <ShareButtons trip={tr} />}
 
             <Button
               title={t('trips.addPlaces')}

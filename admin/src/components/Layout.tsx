@@ -11,6 +11,8 @@ const LINKS = [
   { to: '/treks', key: 'treks' },
   { to: '/categories', key: 'categories' },
   { to: '/permits', key: 'permits' },
+  { to: '/teahouses', key: 'teahouses' },
+  { to: '/budget-rates', key: 'budgetRates' },
   { to: '/users', key: 'users' },
   { to: '/reviews', key: 'reviews' },
 ] as const;

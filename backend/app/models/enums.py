@@ -77,3 +77,11 @@ class Season(enum.StrEnum):
     autumn = "autumn"
     winter = "winter"
     any = "any"
+
+
+class Nationality(enum.StrEnum):
+    """Which fee applies: permits and entry fees have Nepali / SAARC / foreign rates."""
+
+    nepali = "nepali"
+    saarc = "saarc"
+    foreign = "foreign"

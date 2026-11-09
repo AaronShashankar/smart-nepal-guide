@@ -2,7 +2,7 @@
 
 Two kinds of testing. **Step-by-step order, test counts and how to check each case:** [testing-guide.md](testing-guide.md).
 
-1. **Automated tests**: 129 backend pytest tests (`cd backend && uv run pytest`), plus the TypeScript
+1. **Automated tests**: 175 backend pytest tests (`cd backend && uv run pytest`), plus the TypeScript
    typecheck and lint for the mobile app and the admin panel. All of them run with
    `./scripts/verify.sh`.
 2. **Manual test cases**: the table below. Run each case on a real phone (and the admin panel in a
@@ -62,6 +62,23 @@ Test data: the seed data (`uv run python -m app.seed`), an admin made with
 | TC-38 | Admin users | Users → Block the traveller | traveller account | In the app: the next request logs the traveller out; logging in again shows "This account has been blocked. Contact the Bato team." | | | `test_block_user` |
 | TC-39 | Admin users | Unblock the traveller | — | The traveller can log in again | | | `test_block_user` |
 | TC-40 | Admin language | Switch the panel to नेपाली | — | Menus, labels and buttons are in Nepali | | | |
+
+### Version 2 Phase 2 (personalisation & community)
+
+| ID | Feature | Steps | Input | Expected result | Actual result | Pass/Fail | Auto |
+|---|---|---|---|---|---|---|---|
+| TC-41 | Recommended | Profile → interests Culture + Religious → Explore | — | "Recommended for you": temples / heritage first, each card says why ("Because you like…") | | | `test_culture_user_gets_temples_before_lakes` |
+| TC-42 | Recommended | Change interests to Nature + Adventure → pull Explore down | — | Lakes, viewpoints and treks come first | | | `test_nature_user_gets_the_opposite`, `test_changing_interests_changes_the_list` |
+| TC-43 | Recommended | New account with no interests → Explore | — | "Popular now" instead | | | `test_new_user_gets_popular_now` |
+| TC-44 | Reviews | Poon Hill → Write a review → post; then post again with other stars | 4★ "Great sunrise", then 5★ | Shows at once as "Your review"; the second post updates it (still one review) | | | `test_post_review_appears_with_your_name`, `test_posting_twice_updates_instead_of_duplicating` |
+| TC-45 | Reviews | Admin panel → Reviews → Hide the review | — | Gone from the app's list and the count; the author sees it marked hidden | | | `test_hidden_review_is_not_counted_and_not_listed` |
+| TC-46 | Reviews | Delete your own review (bin icon) | — | Removed; count goes down | | | `test_you_cannot_delete_someone_elses_review` |
+| TC-47 | Near me | Explore → Near me → allow location (Thamel) | 27.7154, 85.3123 | Closest first with "x km away"; Kathmandu Durbar Square ≈ 1.3 km | | | `test_near_me_from_thamel` |
+| TC-48 | Near me | Deny the location permission | Deny | "Turn on location to see places near you" + Try again / Open settings | | | |
+| TC-49 | Budget | Valley trip → Optimise → Estimate budget; change budget level → estimate again | Medium → High | Food, stay, transport and entry-fee lines, total in NPR, "Estimate only"; the total goes up | | | `test_valley_trip_budget_by_hand`, `test_budget_level_changes_the_total` |
+| TC-50 | Budget | EBC → Budget card with nationality Foreign / SAARC / Nepali | profile nationality | Permits: foreign > SAARC > Nepali | | | `test_ebc_permits_by_nationality` |
+| TC-51 | Share | Valley → Share trip → open the link in a private browser window; then Stop sharing and reload | — | Read-only page with the stops and day plan, no name or email; after stopping → "does not work any more" (404) | | | `test_share_link_works_without_login`, `test_stop_sharing_and_bad_tokens_give_404` |
+| TC-52 | Teahouses | EBC → itinerary → day 4 → Teahouses (4) | — | 4 lodges in Tengboche; Nepali names in नेपाली | | | `test_itinerary_day_4_shows_teahouse_count`, `test_teahouses_in_tengboche` |
 
 ## Bugs found and fixed
 

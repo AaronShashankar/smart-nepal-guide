@@ -1,6 +1,7 @@
 """All ORM models; importing this package registers every table on Base.metadata."""
 
 from app.models.base import Base
+from app.models.community import BudgetRate, Teahouse, TeahouseTranslation
 from app.models.content import (
     Category,
     CategoryTranslation,
@@ -23,6 +24,7 @@ from app.models.user import Interest, InterestTranslation, TravellerProfile, Use
 
 __all__ = [
     "Base",
+    "BudgetRate",
     "Category",
     "CategoryTranslation",
     "Interest",
@@ -38,6 +40,8 @@ __all__ = [
     "Review",
     "RiskPrediction",
     "StageTranslation",
+    "Teahouse",
+    "TeahouseTranslation",
     "TrainingSample",
     "TravellerProfile",
     "Trek",
