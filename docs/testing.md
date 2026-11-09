@@ -1,6 +1,6 @@
 # Testing (for the report's testing chapter)
 
-Two kinds of testing:
+Two kinds of testing. **Step-by-step order, test counts and how to check each case:** [testing-guide.md](testing-guide.md).
 
 1. **Automated tests**: 129 backend pytest tests (`cd backend && uv run pytest`), plus the TypeScript
    typecheck and lint for the mobile app and the admin panel. All of them run with

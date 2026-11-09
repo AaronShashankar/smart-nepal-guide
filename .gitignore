@@ -21,3 +21,6 @@ dist/
 # trained models (re-create with: cd backend && uv run python -m app.ml.train)
 backend/models/
 backend/uploads/
+
+# start-demo.sh logs
+.logs/

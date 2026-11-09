@@ -7,7 +7,7 @@ get a personal trek difficulty & risk rating with a "Why this rating?" explanati
 
 **Status:** Version 1 code is complete: Phase 1 (users, explore, search, map), Phase 2 (itinerary,
 acclimatisation checker, AI risk predictor) and Phase 3 (trip planner, admin panel). Still to do by
-hand: the manual test table ([docs/testing.md](docs/testing.md)), hosting, the APK and the demo video.
+hand: the manual test table ([docs/testing.md](docs/testing.md), run it with [docs/testing-guide.md](docs/testing-guide.md)), hosting, the APK and the demo video.
 
 | Folder | What | Stack |
 |---|---|---|
@@ -24,6 +24,9 @@ hand: the manual test table ([docs/testing.md](docs/testing.md)), hosting, the A
 The phase plans are in `../version1/` ([phase1](../version1/phase1.md), [phase2](../version1/phase2.md), [phase3](../version1/phase3.md)).
 
 ---
+
+> **Quick start on this laptop (V1 is hosted here):** after the first-time setup below, `./scripts/start-demo.sh`
+> starts the database, API, admin panel and Metro in one go (see [runlocal.md](runlocal.md) → Day-to-day).
 
 ## 1. Backend
 
