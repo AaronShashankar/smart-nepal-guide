@@ -11,6 +11,8 @@ import type { Tokens } from './types';
 /**
  * Backend URL.
  * 1. EXPO_PUBLIC_API_URL in mobile/.env, if set (e.g. a deployed server).
+ *    In development a local-network IP there (192.168.x.x, 10.x.x.x, 172.16-31.x.x) is ignored:
+ *    the laptop's Wi-Fi IP changes between networks, and a stale one broke every request (BUG-05).
  * 2. In development: the same computer that serves the Metro bundle, on port 8000.
  *    The phone or emulator already reaches that host, so the API IP never goes stale.
  * 3. Fallback: 10.0.2.2, the host computer as seen from the Android emulator.
@@ -25,8 +27,22 @@ function devHostApiUrl(): string | null {
   return `http://${host}:8000`;
 }
 
-export const API_URL =
-  process.env.EXPO_PUBLIC_API_URL || (__DEV__ && devHostApiUrl()) || 'http://10.0.2.2:8000';
+const LAN_URL = /^https?:\/\/(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
+
+function resolveApiUrl(): string {
+  const fromEnv = process.env.EXPO_PUBLIC_API_URL;
+  const devHost = __DEV__ ? devHostApiUrl() : null;
+  if (fromEnv && devHost && LAN_URL.test(fromEnv) && fromEnv !== devHost) {
+    console.warn(
+      `Ignoring EXPO_PUBLIC_API_URL=${fromEnv} in development; using ${devHost}. ` +
+        'Remove it from mobile/.env (see BUG-05).',
+    );
+    return devHost;
+  }
+  return fromEnv || devHost || 'http://10.0.2.2:8000';
+}
+
+export const API_URL = resolveApiUrl();
 
 /** Photos uploaded in the admin panel are stored as "/uploads/..." on our API server. */
 export const photoUrl = (url: string) => (url.startsWith('/') ? `${API_URL}${url}` : url);

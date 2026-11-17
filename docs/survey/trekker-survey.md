@@ -4,6 +4,9 @@ Purpose: labelled examples for the Phase 2 risk model. Each answer becomes one `
 row (`source = survey`). Ask about **one completed trek** per response; people can submit again.
 Add a consent line at the top: answers are anonymous and used only for a student project.
 
+The form is built by [trekker-survey-form.gs](trekker-survey-form.gs) (Google Apps Script). Its
+answer options match what `backend/app/ml/dataset.py` expects, so don't reorder or rename them.
+
 | # | Question | Type | Maps to |
 |---|---|---|---|
 | 1 | Which trek did you do? (Poon Hill, ABC, EBC, Langtang, Mardi Himal, Annapurna Circuit, Gosaikunda, Manaslu, Other) | Multiple choice | max_altitude_m, max_daily_gain_m, distance_per_day_km (from our stage data) |

@@ -7,10 +7,10 @@ get a personal trek difficulty & risk rating with a "Why this rating?" explanati
 
 **Status:** Version 1 code is complete: Phase 1 (users, explore, search, map), Phase 2 (itinerary,
 acclimatisation checker, AI risk predictor) and Phase 3 (trip planner, admin panel). Still to do by
-hand: the manual test table ([docs/testing.md](docs/testing.md), run it with [docs/testing-guide.md](docs/testing-guide.md)), hosting, the APK and the demo video.
+hand: the manual test table ([docs/testing/testing.md](docs/testing/testing.md), run it with [docs/testing/testing-guide.md](docs/testing/testing-guide.md)), hosting, the APK and the demo video.
 **Version 2 Phase 2** (personalisation & community) code is done: reviews with a Bayesian rating,
 "Recommended for you" (cosine similarity), Near me, budget estimate, share a trip, teahouses
-([plan](../version2/phase2.md)). V2 Phase 1 (smart trek features) is not built yet.
+([plan](docs/plans/version2/phase2.md)). V2 Phase 1 (smart trek features) is not built yet.
 
 | Folder | What | Stack |
 |---|---|---|
@@ -20,11 +20,13 @@ hand: the manual test table ([docs/testing.md](docs/testing.md), run it with [do
 | [data/](data/) | Seed data (places, treks with stages, permits…) | CSV / JSON, see [data/README.md](data/README.md) |
 | [backend/app/ml/](backend/app/ml/) | Risk model: our own CART decision tree + random forest, training, evaluation | NumPy (scikit-learn only to compare) |
 | [ml/](ml/) | Evaluation notebook for the report | Jupyter |
-| [docs/](docs/) | Report material (screenshots, ML figures, route benchmark, test cases) | |
+| [docs/](docs/) | Design docs, diagrams, phase plans, testing, survey, ML results, screenshots | Markdown, see [docs/README.md](docs/README.md) |
+| [scripts/](scripts/) | `start-demo.sh` (start everything), `verify.sh` (all checks) | Bash |
 
 **To run and check everything locally, follow [runlocal.md](runlocal.md).** One command runs all automated checks: `./scripts/verify.sh`.
 
-The phase plans are in `../version1/` ([phase1](../version1/phase1.md), [phase2](../version1/phase2.md), [phase3](../version1/phase3.md)).
+The phase plans are in `docs/plans/` (Version 1: [phase1](docs/plans/version1/phase1.md), [phase2](docs/plans/version1/phase2.md), [phase3](docs/plans/version1/phase3.md); [Version 2](docs/plans/version2/README.md)).
+Every folder and important file is described in **[filestructure.md](filestructure.md)**.
 
 ---
 
@@ -219,7 +221,7 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
    heritage sites ("Because you like religious places"). Change to *Nature + Adventure*, pull to refresh →
    lakes, viewpoints and treks first. A new account with no interests sees **Popular now**.
 2. **Poon Hill** → **Write a review** → 4★ → it appears at once under "Your review". Admin panel →
-   Reviews → **Hide** → gone from the app. Ranking example: [algorithm.md](../smart-nepal-guide-docs/algorithm.md) (4.17 vs 4.48).
+   Reviews → **Hide** → gone from the app. Ranking example: [algorithm.md](docs/design/algorithm.md) (4.17 vs 4.48).
 3. Explore → **Near me** → allow location (emulator: Extended controls → Location → Thamel 27.7154, 85.3123)
    → Kathmandu Durbar Square first, "1.3 km away".
 4. Trips → **Valley** → Optimise → **Estimate budget** → food, stay, transport, entry fees for 2 days.
@@ -252,4 +254,4 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
 4. Admin → **Treks → Everest Base Camp** → remove the two rest days → save → in the app the itinerary
    has 9 days and shows **Add rest** warnings. (Put them back afterwards, or run `app.seed`.)
 5. Admin → **Users** → block the traveller → the app logs out, and logging in says the account is blocked.
-6. Show [docs/route_gap.md](docs/route_gap.md) (2-opt vs exact answer) and [docs/testing.md](docs/testing.md).
+6. Show [docs/route_gap.md](docs/route_gap.md) (2-opt vs exact answer) and [docs/testing/testing.md](docs/testing/testing.md).

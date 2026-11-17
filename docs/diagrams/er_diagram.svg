@@ -1,0 +1,335 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="840" viewBox="0 0 1350 840" font-family="Helvetica, Arial, sans-serif">
+<defs>
+<marker id="one" markerWidth="20" markerHeight="20" refX="20" refY="10" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+  <path d="M11 3 V17 M15 3 V17" stroke="#1f2933" stroke-width="1.4" fill="none"/></marker>
+<marker id="zone" markerWidth="20" markerHeight="20" refX="20" refY="10" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+  <circle cx="8" cy="10" r="3.5" fill="white" stroke="#1f2933" stroke-width="1.4"/><path d="M15 3 V17" stroke="#1f2933" stroke-width="1.4"/></marker>
+<marker id="many" markerWidth="20" markerHeight="20" refX="20" refY="10" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+  <path d="M9 10 L20 3 M9 10 L20 17 M5 3 V17" stroke="#1f2933" stroke-width="1.4" fill="none"/></marker>
+<marker id="zmany" markerWidth="20" markerHeight="20" refX="20" refY="10" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+  <circle cx="5" cy="10" r="3.5" fill="white" stroke="#1f2933" stroke-width="1.4"/><path d="M10 10 L20 3 M10 10 L20 17" stroke="#1f2933" stroke-width="1.4" fill="none"/></marker>
+</defs>
+<rect width="1350" height="840" fill="white"/>
+<text x="30" y="44" font-size="18" font-weight="bold" fill="#1f2933">ER Diagram: Bato, Smart Nepal Tourist &amp; Trek Guide (core entities)</text>
+<path d="M135 330 V258" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zone)"/>
+<text x="157" y="300" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">has</text>
+<path d="M205 330 V294 H405 V238" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="305" y="288" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">plans</text>
+<path d="M510 160 H570" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="540" y="152" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">contains</text>
+<path d="M630 238 V330" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#zmany)" marker-end="url(#one)"/>
+<text x="655" y="290" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">visits</text>
+<path d="M945 178 V300 H730 V330" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="838" y="294" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">groups</text>
+<path d="M780 410 H840" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#many)"/>
+<text x="810" y="402" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">has</text>
+<path d="M730 508 V544 H945 V580" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="838" y="538" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">from / to</text>
+<path d="M780 660 H840" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#many)"/>
+<text x="810" y="652" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">has</text>
+<path d="M675 738 V792 H1215 V658" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="945" y="786" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">requires</text>
+<path d="M1215 468 V580" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="1244" y="528" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">used in</text>
+<path d="M240 420 H300" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="270" y="412" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">writes</text>
+<path d="M570 420 H510" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#zone)" marker-end="url(#zmany)"/>
+<text x="540" y="412" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">about</text>
+<path d="M455 508 V548 H620 V580" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#zmany)" marker-end="url(#zone)"/>
+<text x="537" y="542" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">about</text>
+<path d="M205 508 V544 H360 V580" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="282" y="538" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">requests</text>
+<path d="M240 660 H300" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="270" y="652" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">used by</text>
+<path d="M570 660 H510" fill="none" stroke="#1f2933" stroke-width="1.4" marker-start="url(#one)" marker-end="url(#zmany)"/>
+<text x="540" y="652" text-anchor="middle" font-size="11" font-style="italic" fill="#52606d">for</text>
+<g>
+<rect x="30" y="80" width="210" height="178" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="30" y="80" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="135.0" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">TRAVELLER_PROFILE</text>
+<text x="37" y="125" font-size="10" font-weight="bold" fill="#1f2933">PK,FK</text>
+<text x="78" y="125" font-size="11.5" font-weight="bold" fill="#1f2933">user_id</text>
+<text x="233" y="125" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="78" y="145" font-size="11.5" fill="#1f2933">date_of_birth</text>
+<text x="233" y="145" text-anchor="end" font-size="10.5" fill="#52606d">date</text>
+<text x="78" y="165" font-size="11.5" fill="#1f2933">fitness_level</text>
+<text x="233" y="165" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="78" y="185" font-size="11.5" fill="#1f2933">trek_experience</text>
+<text x="233" y="185" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="78" y="205" font-size="11.5" fill="#1f2933">has_heart_condition</text>
+<text x="233" y="205" text-anchor="end" font-size="10.5" fill="#52606d">bool</text>
+<text x="78" y="225" font-size="11.5" fill="#1f2933">has_asthma</text>
+<text x="233" y="225" text-anchor="end" font-size="10.5" fill="#52606d">bool</text>
+<text x="78" y="245" font-size="11.5" fill="#1f2933">travel_style</text>
+<text x="233" y="245" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<line x1="72" y1="110" x2="72" y2="258" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="300" y="80" width="210" height="158" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="300" y="80" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="405.0" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">TRIP</text>
+<text x="307" y="125" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="348" y="125" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="503" y="125" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="145" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="145" font-size="11.5" fill="#1f2933">user_id</text>
+<text x="503" y="145" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="348" y="165" font-size="11.5" fill="#1f2933">title</text>
+<text x="503" y="165" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="348" y="185" font-size="11.5" fill="#1f2933">start_date</text>
+<text x="503" y="185" text-anchor="end" font-size="10.5" fill="#52606d">date</text>
+<text x="348" y="205" font-size="11.5" fill="#1f2933">total_days</text>
+<text x="503" y="205" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="348" y="225" font-size="11.5" fill="#1f2933">estimated_budget_npr</text>
+<text x="503" y="225" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<line x1="342" y1="110" x2="342" y2="238" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="570" y="80" width="210" height="158" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="570" y="80" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="675.0" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">TRIP_STOP</text>
+<text x="577" y="125" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="618" y="125" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="773" y="125" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="577" y="145" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="618" y="145" font-size="11.5" fill="#1f2933">trip_id</text>
+<text x="773" y="145" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="577" y="165" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="618" y="165" font-size="11.5" fill="#1f2933">place_id</text>
+<text x="773" y="165" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="618" y="185" font-size="11.5" fill="#1f2933">visit_order</text>
+<text x="773" y="185" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="618" y="205" font-size="11.5" fill="#1f2933">day_no</text>
+<text x="773" y="205" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="618" y="225" font-size="11.5" fill="#1f2933">visit_hours</text>
+<text x="773" y="225" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<line x1="612" y1="110" x2="612" y2="238" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="840" y="80" width="210" height="98" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="840" y="80" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="945.0" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">CATEGORY</text>
+<text x="847" y="125" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="888" y="125" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="1043" y="125" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="888" y="145" font-size="11.5" fill="#1f2933">code</text>
+<text x="1043" y="145" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="888" y="165" font-size="11.5" fill="#1f2933">icon</text>
+<text x="1043" y="165" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<line x1="882" y1="110" x2="882" y2="178" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="30" y="330" width="210" height="178" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="30" y="330" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="135.0" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">USER</text>
+<text x="37" y="375" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="78" y="375" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="233" y="375" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="78" y="395" font-size="11.5" fill="#1f2933">email</text>
+<text x="233" y="395" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="78" y="415" font-size="11.5" fill="#1f2933">password_hash</text>
+<text x="233" y="415" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="78" y="435" font-size="11.5" fill="#1f2933">full_name</text>
+<text x="233" y="435" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="78" y="455" font-size="11.5" fill="#1f2933">role</text>
+<text x="233" y="455" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="78" y="475" font-size="11.5" fill="#1f2933">auth_provider</text>
+<text x="233" y="475" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="78" y="495" font-size="11.5" fill="#1f2933">preferred_lang</text>
+<text x="233" y="495" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<line x1="72" y1="360" x2="72" y2="508" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="300" y="330" width="210" height="178" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="300" y="330" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="405.0" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">REVIEW</text>
+<text x="307" y="375" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="348" y="375" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="503" y="375" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="395" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="395" font-size="11.5" fill="#1f2933">user_id</text>
+<text x="503" y="395" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="415" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="415" font-size="11.5" fill="#1f2933">place_id (null)</text>
+<text x="503" y="415" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="435" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="435" font-size="11.5" fill="#1f2933">trek_id (null)</text>
+<text x="503" y="435" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="348" y="455" font-size="11.5" fill="#1f2933">rating</text>
+<text x="503" y="455" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="348" y="475" font-size="11.5" fill="#1f2933">comment</text>
+<text x="503" y="475" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="348" y="495" font-size="11.5" fill="#1f2933">created_at</text>
+<text x="503" y="495" text-anchor="end" font-size="10.5" fill="#52606d">time</text>
+<line x1="342" y1="360" x2="342" y2="508" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="570" y="330" width="210" height="178" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="570" y="330" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="675.0" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">PLACE</text>
+<text x="577" y="375" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="618" y="375" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="773" y="375" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="577" y="395" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="618" y="395" font-size="11.5" fill="#1f2933">category_id</text>
+<text x="773" y="395" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="618" y="415" font-size="11.5" fill="#1f2933">latitude</text>
+<text x="773" y="415" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<text x="618" y="435" font-size="11.5" fill="#1f2933">longitude</text>
+<text x="773" y="435" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<text x="618" y="455" font-size="11.5" fill="#1f2933">altitude_m</text>
+<text x="773" y="455" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="618" y="475" font-size="11.5" fill="#1f2933">district</text>
+<text x="773" y="475" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="618" y="495" font-size="11.5" fill="#1f2933">entry_fee_npr</text>
+<text x="773" y="495" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<line x1="612" y1="360" x2="612" y2="508" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="840" y="330" width="210" height="158" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="840" y="330" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="945.0" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">PLACE_TRANSLATION</text>
+<text x="847" y="375" font-size="10" font-weight="bold" fill="#1f2933">PK,FK</text>
+<text x="888" y="375" font-size="11.5" font-weight="bold" fill="#1f2933">place_id</text>
+<text x="1043" y="375" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="847" y="395" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="888" y="395" font-size="11.5" font-weight="bold" fill="#1f2933">lang</text>
+<text x="1043" y="395" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="888" y="415" font-size="11.5" fill="#1f2933">name</text>
+<text x="1043" y="415" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="888" y="435" font-size="11.5" fill="#1f2933">description</text>
+<text x="1043" y="435" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="888" y="455" font-size="11.5" fill="#1f2933">how_to_reach</text>
+<text x="1043" y="455" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="888" y="475" font-size="11.5" fill="#1f2933">is_reviewed</text>
+<text x="1043" y="475" text-anchor="end" font-size="10.5" fill="#52606d">bool</text>
+<line x1="882" y1="360" x2="882" y2="488" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="1110" y="330" width="210" height="138" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="1110" y="330" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="1215.0" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">PERMIT</text>
+<text x="1117" y="375" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="1158" y="375" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="1313" y="375" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="1158" y="395" font-size="11.5" fill="#1f2933">code</text>
+<text x="1313" y="395" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="1158" y="415" font-size="11.5" fill="#1f2933">fee_nepali_npr</text>
+<text x="1313" y="415" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="1158" y="435" font-size="11.5" fill="#1f2933">fee_saarc_npr</text>
+<text x="1313" y="435" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="1158" y="455" font-size="11.5" fill="#1f2933">fee_foreign_npr</text>
+<text x="1313" y="455" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<line x1="1152" y1="360" x2="1152" y2="468" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="30" y="580" width="210" height="158" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="30" y="580" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="135.0" y="600" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">ML_MODEL</text>
+<text x="37" y="625" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="78" y="625" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="233" y="625" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="78" y="645" font-size="11.5" fill="#1f2933">version</text>
+<text x="233" y="645" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="78" y="665" font-size="11.5" fill="#1f2933">algorithm</text>
+<text x="233" y="665" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="78" y="685" font-size="11.5" fill="#1f2933">accuracy</text>
+<text x="233" y="685" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<text x="78" y="705" font-size="11.5" fill="#1f2933">f1_score</text>
+<text x="233" y="705" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<text x="78" y="725" font-size="11.5" fill="#1f2933">is_active</text>
+<text x="233" y="725" text-anchor="end" font-size="10.5" fill="#52606d">bool</text>
+<line x1="72" y1="610" x2="72" y2="738" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="300" y="580" width="210" height="178" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="300" y="580" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="405.0" y="600" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">RISK_PREDICTION</text>
+<text x="307" y="625" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="348" y="625" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="503" y="625" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="645" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="645" font-size="11.5" fill="#1f2933">user_id</text>
+<text x="503" y="645" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="665" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="665" font-size="11.5" fill="#1f2933">trek_id</text>
+<text x="503" y="665" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="307" y="685" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="348" y="685" font-size="11.5" fill="#1f2933">model_id</text>
+<text x="503" y="685" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="348" y="705" font-size="11.5" fill="#1f2933">month</text>
+<text x="503" y="705" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="348" y="725" font-size="11.5" fill="#1f2933">predicted_level</text>
+<text x="503" y="725" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<text x="348" y="745" font-size="11.5" fill="#1f2933">reason_codes</text>
+<text x="503" y="745" text-anchor="end" font-size="10.5" fill="#52606d">jsonb</text>
+<line x1="342" y1="610" x2="342" y2="758" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="570" y="580" width="210" height="158" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="570" y="580" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="675.0" y="600" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">TREK</text>
+<text x="577" y="625" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="618" y="625" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="773" y="625" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="618" y="645" font-size="11.5" fill="#1f2933">region</text>
+<text x="773" y="645" text-anchor="end" font-size="10.5" fill="#52606d">text</text>
+<text x="618" y="665" font-size="11.5" fill="#1f2933">total_days</text>
+<text x="773" y="665" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="618" y="685" font-size="11.5" fill="#1f2933">total_distance_km</text>
+<text x="773" y="685" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<text x="618" y="705" font-size="11.5" fill="#1f2933">max_altitude_m</text>
+<text x="773" y="705" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="618" y="725" font-size="11.5" fill="#1f2933">base_difficulty</text>
+<text x="773" y="725" text-anchor="end" font-size="10.5" fill="#52606d">enum</text>
+<line x1="612" y1="610" x2="612" y2="738" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="840" y="580" width="210" height="178" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="840" y="580" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="945.0" y="600" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">TREK_STAGE</text>
+<text x="847" y="625" font-size="10" font-weight="bold" fill="#1f2933">PK</text>
+<text x="888" y="625" font-size="11.5" font-weight="bold" fill="#1f2933">id</text>
+<text x="1043" y="625" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="847" y="645" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="888" y="645" font-size="11.5" fill="#1f2933">trek_id</text>
+<text x="1043" y="645" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="847" y="665" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="888" y="665" font-size="11.5" fill="#1f2933">from_place_id</text>
+<text x="1043" y="665" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="847" y="685" font-size="10" font-weight="bold" fill="#1f2933">FK</text>
+<text x="888" y="685" font-size="11.5" fill="#1f2933">to_place_id</text>
+<text x="1043" y="685" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="888" y="705" font-size="11.5" fill="#1f2933">day_no</text>
+<text x="1043" y="705" text-anchor="end" font-size="10.5" fill="#52606d">int</text>
+<text x="888" y="725" font-size="11.5" fill="#1f2933">distance_km</text>
+<text x="1043" y="725" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<text x="888" y="745" font-size="11.5" fill="#1f2933">walk_hours</text>
+<text x="1043" y="745" text-anchor="end" font-size="10.5" fill="#52606d">numeric</text>
+<line x1="882" y1="610" x2="882" y2="758" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<g>
+<rect x="1110" y="580" width="210" height="78" rx="4" fill="white" stroke="#1f2933" stroke-width="1.4"/>
+<rect x="1110" y="580" width="210" height="30" rx="4" fill="#dde7f3" stroke="#1f2933" stroke-width="1.4"/>
+<text x="1215.0" y="600" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2933">TREK_PERMIT</text>
+<text x="1117" y="625" font-size="10" font-weight="bold" fill="#1f2933">PK,FK</text>
+<text x="1158" y="625" font-size="11.5" font-weight="bold" fill="#1f2933">trek_id</text>
+<text x="1313" y="625" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<text x="1117" y="645" font-size="10" font-weight="bold" fill="#1f2933">PK,FK</text>
+<text x="1158" y="645" font-size="11.5" font-weight="bold" fill="#1f2933">permit_id</text>
+<text x="1313" y="645" text-anchor="end" font-size="10.5" fill="#52606d">uuid</text>
+<line x1="1152" y1="610" x2="1152" y2="658" stroke="#c3ccd6" stroke-width="1"/>
+</g>
+<rect x="1110" y="80" width="210" height="168" rx="4" fill="#f7f9fb" stroke="#52606d" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="1122" y="102" font-size="12.5" font-weight="bold" fill="#1f2933">Notation (crow's foot)</text>
+<path d="M1124 126 H1174" stroke="#1f2933" stroke-width="1.4" marker-end="url(#one)"/>
+<text x="1186" y="130" font-size="11.5" fill="#1f2933">exactly one</text>
+<path d="M1124 150 H1174" stroke="#1f2933" stroke-width="1.4" marker-end="url(#zone)"/>
+<text x="1186" y="154" font-size="11.5" fill="#1f2933">zero or one</text>
+<path d="M1124 174 H1174" stroke="#1f2933" stroke-width="1.4" marker-end="url(#many)"/>
+<text x="1186" y="178" font-size="11.5" fill="#1f2933">one or more</text>
+<path d="M1124 198 H1174" stroke="#1f2933" stroke-width="1.4" marker-end="url(#zmany)"/>
+<text x="1186" y="202" font-size="11.5" fill="#1f2933">zero or more</text>
+<text x="1122" y="236" font-size="10.5" fill="#52606d">PK primary key, FK foreign key</text>
+<text x="30" y="826" font-size="11" fill="#52606d">Trek, stage, permit and category translations follow the PLACE_TRANSLATION pattern. A REVIEW is about exactly one place or one trek.</text>
+</svg>

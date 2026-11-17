@@ -181,7 +181,7 @@ def test_trip_budget_needs_an_optimised_trip(client, user):
 
 
 def test_valley_trip_budget_by_hand(client):
-    """Medium budget, foreign: 2 × (2,500 + 4,000) + km × 60 + entry fees 4,400."""
+    """Medium budget, foreign: 2 × (2,500 + 4,700) + km × 60 + entry fees 4,400."""
     headers = register(client)
     set_profile(client, headers, budget_level="medium")
     trip = new_trip(client, headers)
@@ -191,12 +191,12 @@ def test_valley_trip_budget_by_hand(client):
     b = r.json()
     lines = {line["code"]: line for line in b["lines"] if line["code"] != "ENTRY_FEE"}
     fees = [line for line in b["lines"] if line["code"] == "ENTRY_FEE"]
-    assert lines["FOOD"]["amount"] == 2 * 2500 and lines["STAY"]["amount"] == 2 * 4000
+    assert lines["FOOD"]["amount"] == 2 * 2500 and lines["STAY"]["amount"] == 2 * 4700
     assert lines["TRANSPORT"]["amount"] == round(plan["total_km"] * 60)
     # Pashupatinath 1,000 + Boudha 400 + Swayambhu 200 + Patan 1,000 + Bhaktapur 1,800;
     # Nagarkot is free
     assert sum(f["amount"] for f in fees) == 4400 and len(fees) == 5
-    assert b["total_npr"] == 13000 + round(plan["total_km"] * 60) + 4400
+    assert b["total_npr"] == 14400 + round(plan["total_km"] * 60) + 4400
     assert (b["budget_level"], b["nationality"], b["region"]) == ("medium", "foreign", "city")
     # Saved on the trip
     saved = client.get(f"/trips/{trip['id']}", headers=headers).json()

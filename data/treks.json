@@ -30,11 +30,11 @@
       {"day": 1, "from": "nayapul", "to": "ghandruk", "distance_km": 12, "walk_hours": 5.5, "notes": "Via Birethanti and Kimche, or by jeep most of the way."},
       {"day": 2, "from": "ghandruk", "to": "chhomrong", "distance_km": 9, "walk_hours": 6, "notes": "Over Komrong Danda and down to the Kimrong Khola, then up to Chhomrong."},
       {"day": 3, "from": "chhomrong", "to": "bamboo", "distance_km": 8, "walk_hours": 5, "notes": "Down the Chhomrong stairs, across the river and through Sinuwa."},
-      {"day": 4, "from": "bamboo", "to": "deurali_abc", "distance_km": 7, "walk_hours": 5, "notes": "Through Dovan and Himalaya; watch for avalanche warnings in spring."},
+      {"day": 4, "from": "bamboo", "to": "deurali_abc", "distance_km": 9, "walk_hours": 5, "notes": "Through Dovan and Himalaya; watch for avalanche warnings in spring."},
       {"day": 5, "from": "deurali_abc", "to": "annapurna_base_camp", "distance_km": 5, "walk_hours": 4.5, "notes": "Via Machhapuchhre Base Camp (3,700 m) into the Sanctuary."},
       {"day": 6, "from": "annapurna_base_camp", "to": "bamboo", "distance_km": 12, "walk_hours": 7, "notes": "Sunrise at base camp, then a long descent."},
       {"day": 7, "from": "bamboo", "to": "jhinu_danda", "distance_km": 10, "walk_hours": 6, "notes": "Back over Chhomrong to the hot springs at Jhinu."},
-      {"day": 8, "from": "jhinu_danda", "to": "nayapul", "distance_km": 12, "walk_hours": 5, "notes": "Walk out to Siwai or Nayapul and drive to Pokhara."}
+      {"day": 8, "from": "jhinu_danda", "to": "nayapul", "distance_km": 16, "walk_hours": 6, "notes": "Walk out to Siwai or Nayapul and drive to Pokhara."}
     ]
   },
   {
@@ -91,7 +91,7 @@
       "ne": "पोखरा नजिकको शान्त पदयात्रा, लालीगुराँसको वन हुँदै माछापुच्छ्रे र मर्दी हिमालको फेदसम्मको खुला डाँडामा पुगिन्छ।"
     },
     "stages": [
-      {"day": 1, "from": "kande", "to": "forest_camp", "distance_km": 10, "walk_hours": 6, "notes": "Via Australian Camp, Pothana and Deurali."},
+      {"day": 1, "from": "kande", "to": "forest_camp", "distance_km": 14, "walk_hours": 7, "notes": "Via Australian Camp, Pothana and Deurali."},
       {"day": 2, "from": "forest_camp", "to": "low_camp", "distance_km": 4, "walk_hours": 3, "notes": "Short forest climb; first close view of Machhapuchhre."},
       {"day": 3, "from": "low_camp", "to": "high_camp_mardi", "distance_km": 4, "walk_hours": 3, "notes": "Above the tree line via Badal Danda."},
       {"day": 4, "from": "high_camp_mardi", "to": "low_camp", "distance_km": 11, "walk_hours": 7, "highest_point_m": 4200, "notes": "Early climb to the upper viewpoint, then back down to Low Camp."},
