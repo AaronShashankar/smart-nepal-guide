@@ -58,18 +58,14 @@ if [[ -z "$IP" ]]; then
 fi
 API="http://$IP:8000"
 echo "API for the phone: $API"
+# The app finds the API by itself: it uses the computer that serves Metro, on port 8000
+# (mobile/src/lib/api.ts). So nothing is written to mobile/.env any more.
 ENV_FILE="$ROOT/mobile/.env"
-[[ -f "$ENV_FILE" ]] || cp "$ROOT/mobile/.env.example" "$ENV_FILE"
-OLD="$(grep -E '^EXPO_PUBLIC_API_URL=' "$ENV_FILE" | cut -d= -f2- || true)"
 CLEAR=""
-if [[ "$OLD" != "$API" ]]; then
-  if grep -qE '^EXPO_PUBLIC_API_URL=' "$ENV_FILE"; then
-    sed -i '' "s|^EXPO_PUBLIC_API_URL=.*|EXPO_PUBLIC_API_URL=$API|" "$ENV_FILE"
-  else
-    echo "EXPO_PUBLIC_API_URL=$API" >>"$ENV_FILE"
-  fi
-  echo "Updated mobile/.env (was: ${OLD:-not set})"
-  CLEAR="-c"   # Metro must clear its cache to pick up the new address
+OVERRIDE="$(grep -E '^EXPO_PUBLIC_API_URL=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- || true)"
+if [[ -n "$OVERRIDE" ]]; then
+  warn "mobile/.env sets EXPO_PUBLIC_API_URL=$OVERRIDE, so the app will use that instead."
+  warn "Comment that line out to let the app find this laptop automatically."
 fi
 
 PIDS=()
@@ -118,4 +114,4 @@ step "5. Mobile app (Metro)"
 echo "Open the Bato app (the development build) on the phone. The phone must be on the same network."
 echo "Press Ctrl+C to stop everything."
 cd "$ROOT/mobile"
-npx expo start $CLEAR
+npx expo start -c   # -c: always rebuild with the current .env

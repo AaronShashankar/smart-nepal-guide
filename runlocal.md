@@ -60,6 +60,11 @@ in and how to check each one is in [docs/testing-guide.md](docs/testing-guide.md
 
 ## 2. Backend — Terminal 1
 
+**Shortcut:** from the repository root, `make dev` does all of the steps below and runs the API
+(it also starts PostgreSQL and Redis if they are stopped). Run `make` to see the other commands:
+`make seed`, `make train`, `make test`, `make lint`, `make status`, `make stop`.
+
+The same steps by hand:
 ```bash
 cd backend
 uv sync                                   # install Python packages (first time / after changes)
@@ -109,12 +114,10 @@ npx expo run:android                      # builds and installs the app, then st
    **Developer options** and turn on **USB debugging**.
 2. Connect the phone by USB. Run `adb devices`; the phone should be listed as `device`. Accept the
    prompt on the phone if one appears.
-3. Make sure the phone is on the **same Wi-Fi** as the Mac. Then tell the app where the API is
-   (this Mac's IP is currently `192.168.1.66`; check it with `ipconfig getifaddr en0`):
+3. Make sure the phone is on the **same Wi-Fi** as the Mac. You don't need to set an IP: the app
+   talks to the API on the same computer it loads Metro from, on port 8000 (`mobile/src/lib/api.ts`).
    ```bash
    cd mobile
-   cp .env.example .env
-   # edit .env:  EXPO_PUBLIC_API_URL=http://192.168.1.66:8000
    npx expo run:android --device          # pick your phone from the list
    ```
 4. Next time you only need `npx expo start`, then open the **Bato** app on the phone.
@@ -201,7 +204,7 @@ and treks to the files in `data/` (admin edits to them are lost; places the admi
 
 | Task | Command |
 |---|---|
-| Start everything | `./scripts/start-demo.sh` (PostgreSQL, Redis, API, admin panel, Metro; writes this laptop's Wi-Fi IP into `mobile/.env`). `--seed` reloads data/ first; `--no-metro` starts only the servers. Running servers are reused. Ctrl+C stops what it started |
+| Start everything | `./scripts/start-demo.sh` (PostgreSQL, Redis, API, admin panel, Metro, always with a fresh cache). `--seed` reloads data/ first; `--no-metro` starts only the servers. Running servers are reused. Ctrl+C stops what it started |
 | Changed `data/*.csv` or `treks.json` | `cd backend && uv run python -m app.seed` (overwrites admin edits to seeded content) |
 | Changed treks or survey data → retrain | `uv run python -m app.ml.dataset [--survey form.csv]`, `uv run python -m app.seed`, `uv run python -m app.ml.train`, `uv run python -m app.ml.evaluate` |
 | "No trained model yet" (503) in the app | `cd backend && uv run python -m app.ml.train` (no restart needed) |
@@ -248,7 +251,7 @@ and treks to the files in `data/` (admin edits to them are lost; places the admi
 
 | Problem | Fix |
 |---|---|
-| App says "Cannot reach the server (http://…)" | Is the backend running with `--host 0.0.0.0`? On a phone: same Wi-Fi, the correct IP in `mobile/.env`, then `npx expo start -c`. If the macOS firewall asks about Python, allow incoming connections. Test from the phone's browser: `http://192.168.1.66:8000/health` |
+| App says "Cannot reach the server (http://…)" | Is the backend running with `--host 0.0.0.0`? On a phone: same Wi-Fi as the Mac. `mobile/.env` should *not* set `EXPO_PUBLIC_API_URL` (check **Settings → API server** in the app), then `npx expo start -c`. If the macOS firewall asks about Python, allow incoming connections. Test from the phone's browser: `http://<ipconfig getifaddr en0>:8000/health` |
 | Map is blank (no streets) | The phone needs internet access for the OpenStreetMap tiles. The markers come from your API. |
 | "Expo Go" opens / the map crashes | Open the **Bato** app (the dev build), not Expo Go. |
 | `expo run:android` fails with an SDK/Java error | Open Android Studio once and install the SDK it suggests. Check that `java -version` shows 17 and that `ANDROID_HOME` is set. |

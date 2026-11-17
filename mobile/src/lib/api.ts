@@ -1,4 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 import i18n from '@/i18n';
 import { useAuth } from '@/store/auth';
@@ -7,10 +9,24 @@ import { currentLang } from '@/store/settings';
 import type { Tokens } from './types';
 
 /**
- * Backend URL. On a real phone use your computer's LAN IP, e.g. http://192.168.1.10:8000
- * (set EXPO_PUBLIC_API_URL in mobile/.env).
+ * Backend URL.
+ * 1. EXPO_PUBLIC_API_URL in mobile/.env, if set (e.g. a deployed server).
+ * 2. In development: the same computer that serves the Metro bundle, on port 8000.
+ *    The phone or emulator already reaches that host, so the API IP never goes stale.
+ * 3. Fallback: 10.0.2.2, the host computer as seen from the Android emulator.
  */
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8000';
+function devHostApiUrl(): string | null {
+  const host = Constants.expoConfig?.hostUri?.split(':')[0];
+  if (!host) return null;
+  // "localhost" inside the Android emulator is the emulator itself.
+  if (Platform.OS === 'android' && (host === 'localhost' || host === '127.0.0.1')) {
+    return 'http://10.0.2.2:8000';
+  }
+  return `http://${host}:8000`;
+}
+
+export const API_URL =
+  process.env.EXPO_PUBLIC_API_URL || (__DEV__ && devHostApiUrl()) || 'http://10.0.2.2:8000';
 
 /** Photos uploaded in the admin panel are stored as "/uploads/..." on our API server. */
 export const photoUrl = (url: string) => (url.startsWith('/') ? `${API_URL}${url}` : url);
