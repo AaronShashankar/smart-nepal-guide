@@ -1,3 +1,5 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 

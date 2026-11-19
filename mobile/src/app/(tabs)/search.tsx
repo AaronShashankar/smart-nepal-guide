@@ -1,3 +1,5 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -9,6 +11,7 @@ import { Section, TrekCard } from '@/components/Cards';
 import { ChipGroup } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { Empty, ErrorState, Loading } from '@/components/StateViews';
+import { regionName } from '@/lib/format';
 import { useSearch, useTrekRegions, useTreks, type TrekFilters } from '@/lib/queries';
 import type { RiskLevel, SearchHit } from '@/lib/types';
 import { useDebounced } from '@/lib/useDebounced';
@@ -126,7 +129,7 @@ export default function SearchScreen() {
           contentContainerStyle={styles.chips}
         >
           <ChipGroup
-            options={(regions.data ?? []).map((r) => ({ value: r, label: r }))}
+            options={(regions.data ?? []).map((r) => ({ value: r, label: regionName(r) }))}
             value={region}
             onChange={setRegion}
           />

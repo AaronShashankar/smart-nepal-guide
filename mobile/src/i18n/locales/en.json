@@ -13,7 +13,8 @@
     "any": "Any",
     "seeAll": "See all",
     "cancel": "Cancel",
-    "offline": "No internet connection. Check Wi-Fi or mobile data and try again."
+    "offline": "No internet connection. Check Wi-Fi or mobile data and try again.",
+    "invalidInput": "Please check what you entered and try again."
   },
   "units": {
     "m": "{{value}} m",
@@ -46,7 +47,8 @@
     "registerFailed": "Could not create the account.",
     "googleFailed": "Google sign-in failed.",
     "googleNotConfigured": "Google sign-in is not set up in this build.",
-    "fillAll": "Please enter your email and password."
+    "fillAll": "Please enter your email and password.",
+    "passwordTooShort": "Password must be at least 8 characters."
   },
   "tabs": {
     "explore": "Explore",
@@ -340,5 +342,12 @@
     "shower": "Hot shower",
     "empty": "No teahouses listed here yet.",
     "note": "Lodges taken from named sources (trekking guides, agency lists). Prices and facilities change: ask at the lodge."
+  },
+  "errors": {
+    "emailTaken": "Email is already registered",
+    "wrongLogin": "Incorrect email or password",
+    "blocked": "This account has been blocked. Contact the Bato team.",
+    "alreadyInTrip": "This place is already in the trip",
+    "notFound": "This item could not be found. It may have been removed."
   }
 }

@@ -1,6 +1,8 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -10,8 +12,8 @@ import { DifficultyBadge, Section } from '@/components/Cards';
 import { ReviewsSection } from '@/components/Reviews';
 import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
-import { days, km, meters, npr } from '@/lib/format';
-import { useTrek, useTrekBudget } from '@/lib/queries';
+import { days, km, meters, npr, regionName } from '@/lib/format';
+import { useRefreshDetail, useTrek, useTrekBudget } from '@/lib/queries';
 import type { PlaceRef } from '@/lib/types';
 import { colors, spacing } from '@/theme';
 
@@ -59,9 +61,15 @@ export default function TrekDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const trek = useTrek(id);
+  const refresh = useRefreshDetail('trek', id);
 
   return (
-    <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.body}>
+    <ScrollView
+      style={{ backgroundColor: colors.background }}
+      contentContainerStyle={styles.body}
+      keyboardShouldPersistTaps="handled" // the review sheet is a Modal inside (BUG-11)
+      refreshControl={<RefreshControl {...refresh} />}
+    >
       <Stack.Screen options={{ title: trek.data?.name ?? '' }} />
       <QueryState query={trek}>
         {(tr) => (
@@ -69,7 +77,7 @@ export default function TrekDetailScreen() {
             <View style={{ gap: spacing(1) }}>
               <AppText variant="title">{tr.name}</AppText>
               <View style={styles.inline}>
-                <AppText muted>{tr.region}</AppText>
+                <AppText muted>{regionName(tr.region)}</AppText>
                 <RatingBadge rating={tr.rating} />
               </View>
             </View>

@@ -1,6 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +11,7 @@ import { Chip, ChipGroup } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { QueryState } from '@/components/StateViews';
 import { errorMessage } from '@/lib/api';
+import { markProfilePromptShown } from '@/lib/profilePrompt';
 import { useInterests, useMe, useProfile, useSaveProfile } from '@/lib/queries';
 import type {
   BudgetLevel,
@@ -211,6 +212,11 @@ function ProfileForm({ initial, isNew }: { initial: ProfileInput; isNew: boolean
 export default function ProfileScreen() {
   const profile = useProfile();
   const me = useMe();
+  const userId = me.data?.id;
+  // Opened for a new user (from register or the tabs layout): don't open it a second time.
+  useEffect(() => {
+    if (userId) markProfilePromptShown(userId);
+  }, [userId]);
   return (
     <Screen edges={[]}>
       <QueryState query={profile}>

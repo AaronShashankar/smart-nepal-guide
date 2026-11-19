@@ -1,3 +1,5 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';

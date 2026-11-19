@@ -62,9 +62,13 @@ export default function Users() {
                       <Table.Td>{u.email}</Table.Td>
                       <Table.Td>{u.full_name ?? '—'}</Table.Td>
                       <Table.Td>
-                        {u.role === 'admin' ? <Badge variant="light">admin</Badge> : u.role}
+                        {u.role === 'admin' ? (
+                          <Badge variant="light">{t('users.roles.admin')}</Badge>
+                        ) : (
+                          t(`users.roles.${u.role}`)
+                        )}
                       </Table.Td>
-                      <Table.Td>{u.auth_provider}</Table.Td>
+                      <Table.Td>{t(`users.providers.${u.auth_provider}`)}</Table.Td>
                       <Table.Td>{formatDate(u.created_at)}</Table.Td>
                       <Table.Td>{u.prediction_count}</Table.Td>
                       <Table.Td>{u.trip_count}</Table.Td>

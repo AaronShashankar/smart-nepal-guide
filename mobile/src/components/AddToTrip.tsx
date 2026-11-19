@@ -1,3 +1,5 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';

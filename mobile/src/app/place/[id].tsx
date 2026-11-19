@@ -1,6 +1,8 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AddToTrip } from '@/components/AddToTrip';
@@ -11,19 +13,24 @@ import { PhotoCarousel } from '@/components/PhotoCarousel';
 import { ReviewsSection } from '@/components/Reviews';
 import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
-import { formatNumber, meters, monthName, npr } from '@/lib/format';
-import { usePlace } from '@/lib/queries';
+import { districtName, formatNumber, meters, monthName, npr, provinceName } from '@/lib/format';
+import { usePlace, useRefreshDetail } from '@/lib/queries';
 import { colors, spacing } from '@/theme';
 
 export default function PlaceDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const place = usePlace(id);
+  const refresh = useRefreshDetail('place', id);
 
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: spacing(10) }}
+      // The trip and review sheets are Modals inside this ScrollView: without "handled" the first
+      // tap on their buttons only closes the keyboard (BUG-11).
+      keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl {...refresh} />}
     >
       <Stack.Screen options={{ title: place.data?.name ?? '' }} />
       <QueryState query={place}>
@@ -49,7 +56,11 @@ export default function PlaceDetailScreen() {
                 <InfoRow
                   icon="map-marker-outline"
                   label={t('place.location')}
-                  value={[p.district, p.province].filter(Boolean).join(', ') || '—'}
+                  value={
+                    [p.district && districtName(p.district), p.province && provinceName(p.province)]
+                      .filter(Boolean)
+                      .join(', ') || '—'
+                  }
                 />
                 <InfoRow
                   icon="ticket-outline"

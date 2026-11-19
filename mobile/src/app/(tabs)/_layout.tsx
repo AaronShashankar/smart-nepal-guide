@@ -1,9 +1,10 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, Tabs } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { markProfilePromptShown, profilePromptShown } from '@/lib/profilePrompt';
 import { useMe } from '@/lib/queries';
 import { colors, fonts } from '@/theme';
 
@@ -21,12 +22,11 @@ const icon = (name: IconName) =>
 export default function TabsLayout() {
   const { t } = useTranslation();
   const me = useMe();
-  const prompted = useRef(false);
 
   // New users (e.g. first Google sign-in) are asked to fill in their profile once.
   useEffect(() => {
-    if (me.data && !me.data.has_profile && !prompted.current) {
-      prompted.current = true;
+    if (me.data && !me.data.has_profile && !profilePromptShown(me.data.id)) {
+      markProfilePromptShown(me.data.id);
       router.push('/profile');
     }
   }, [me.data]);

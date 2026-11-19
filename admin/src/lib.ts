@@ -33,9 +33,21 @@ export const orNull = (s: string | null | undefined) => (s && s.trim() ? s.trim(
 export const numOrNull = (v: string | number | null | undefined) =>
   v === '' || v == null || Number.isNaN(Number(v)) ? null : Number(v);
 
-export const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(i18n.language === 'ne' ? 'ne-NP' : 'en-GB', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+const NE_MONTHS = [
+  'जनवरी', 'फेब्रुअरी', 'मार्च', 'अप्रिल', 'मे', 'जुन',
+  'जुलाई', 'अगस्ट', 'सेप्टेम्बर', 'अक्टोबर', 'नोभेम्बर', 'डिसेम्बर',
+];
+const toNepaliDigits = (text: string) =>
+  text.replace(/[0-9]/g, (d) => '०१२३४५६७८९'[Number(d)]);
+
+/**
+ * "19 Nov 2026", or "१९ नोभेम्बर २०२६" in Nepali. Built by hand because many browsers have no
+ * Nepali date data and quietly fall back to English (BUG-09).
+ */
+export const formatDate = (iso: string) => {
+  const date = new Date(iso);
+  if (i18n.language !== 'ne')
+    return date.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+  const day = toNepaliDigits(String(date.getDate()));
+  return `${day} ${NE_MONTHS[date.getMonth()]} ${toNepaliDigits(String(date.getFullYear()))}`;
+};

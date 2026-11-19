@@ -39,10 +39,15 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
   );
 }
 
-/** Renders loading / error states for a query, or the children when data is ready. */
+/**
+ * Renders loading / error states for a query, or the children when data is ready.
+ * If a refresh fails but older data is loaded (e.g. offline), the data stays with a short note
+ * above it (BUG-13). `onRetry` replaces the default "refetch this query" for Try again.
+ */
 export function QueryState<T>({
   query,
   children,
+  onRetry,
 }: {
   query: {
     isPending: boolean;
@@ -52,11 +57,22 @@ export function QueryState<T>({
     refetch: () => unknown;
   };
   children: (data: T) => React.ReactNode;
+  onRetry?: () => unknown;
 }) {
+  const { t } = useTranslation();
   if (query.isPending) return <Loading />;
-  if (query.isError || query.data === undefined)
-    return <ErrorState error={query.error} onRetry={() => query.refetch()} />;
-  return <>{children(query.data)}</>;
+  if (query.data === undefined)
+    return <ErrorState error={query.error} onRetry={onRetry ?? (() => query.refetch())} />;
+  return (
+    <>
+      {query.isError && (
+        <AppText variant="caption" muted style={styles.center} accessibilityLiveRegion="polite">
+          {errorMessage(query.error, t('common.error'))}
+        </AppText>
+      )}
+      {children(query.data)}
+    </>
+  );
 }
 
 const styles = StyleSheet.create({

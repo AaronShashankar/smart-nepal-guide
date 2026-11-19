@@ -1,5 +1,11 @@
 import i18n from '@/i18n';
 
+/*
+ * These helpers read the current language from i18n, which the React Compiler cannot see: it would
+ * keep "8 days" after switching to नेपाली because `days(8)` looks unchanged (BUG-14). Every file that
+ * imports from here starts with 'use no memo' so its components are re-rendered normally.
+ */
+
 const NEPALI_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
 
 /** 1234 -> "1,234" in English, "१,२३४" in Nepali. */
@@ -23,3 +29,13 @@ export const days = (count: number) =>
     .t('units.days', { count, value: formatNumber(count) })
     .replace(String(count), formatNumber(count));
 export const monthName = (month: number) => i18n.t(`months.${month}`);
+
+/**
+ * Region, district and province are plain text in the database (English). Known names have a
+ * Nepali form in ne.json; anything new from the admin panel is shown as it is (BUG-09).
+ */
+const placeName = (kind: 'region' | 'district' | 'province', value: string) =>
+  i18n.t(`names.${kind}.${value}`, { defaultValue: value });
+export const regionName = (value: string) => placeName('region', value);
+export const districtName = (value: string) => placeName('district', value);
+export const provinceName = (value: string) => placeName('province', value);

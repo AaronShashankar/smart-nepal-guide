@@ -23,6 +23,7 @@ export default function RegisterScreen() {
 
   async function register() {
     if (!email || !password) return setError(t('auth.fillAll'));
+    if (password.length < 8) return setError(t('auth.passwordTooShort')); // same rule as the API
     setBusy(true);
     setError(null);
     try {

@@ -302,7 +302,11 @@ def test_stop_sharing_and_bad_tokens_give_404(client, user):
     assert client.get(f"/trips/{trip['id']}", headers=headers).json()["is_shared"] is True
     assert client.delete(f"/trips/{trip['id']}/share", headers=headers).status_code == 204
     assert client.get(f"/shared/trips/{token}").status_code == 404
-    assert client.get(f"/s/{token}").status_code == 404
+    page = client.get(f"/s/{token}")
+    assert page.status_code == 404 and "text/html" in page.headers["content-type"]
+    assert "This link does not work any more" in page.text and '"detail"' not in page.text
+    nepali = client.get(f"/s/{token}", headers={"Accept-Language": "ne"})
+    assert nepali.status_code == 404 and "यो लिङ्क अब चल्दैन" in nepali.text
     # A new share makes a new token; deleting the trip kills it too
     token2 = client.post(f"/trips/{trip['id']}/share", headers=headers).json()["token"]
     assert token2 != token

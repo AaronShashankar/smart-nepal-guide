@@ -1,3 +1,5 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
@@ -5,7 +7,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { photoUrl } from '@/lib/api';
-import { days, formatNumber, km, meters } from '@/lib/format';
+import { days, districtName, formatNumber, km, meters, regionName } from '@/lib/format';
 import type { Category, PlaceSummary, Recommendation, RiskLevel, TrekSummary } from '@/lib/types';
 import { categoryColors, colors, difficultyColors, spacing } from '@/theme';
 
@@ -79,7 +81,7 @@ export function PlaceCard({ place, distanceKm }: { place: PlaceSummary; distance
             <CategoryIcon category={place.category} size={14} />
             <AppText variant="caption" muted numberOfLines={1}>
               {place.category.name}
-              {place.district ? ` · ${place.district}` : ''}
+              {place.district ? ` · ${districtName(place.district)}` : ''}
             </AppText>
           </View>
           <View style={styles.row}>
@@ -113,7 +115,7 @@ export function TrekCard({ trek }: { trek: TrekSummary }) {
             {trek.name}
           </AppText>
           <AppText variant="caption" muted>
-            {trek.region} · {days(trek.total_days)} · {km(trek.total_distance_km)}
+            {regionName(trek.region)} · {days(trek.total_days)} · {km(trek.total_distance_km)}
           </AppText>
           <RatingBadge rating={trek.rating} />
           <View style={[styles.row, { justifyContent: 'space-between' }]}>

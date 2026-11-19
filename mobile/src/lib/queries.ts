@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
 
 import { useAuth } from '@/store/auth';
 import { useSettings } from '@/store/settings';
@@ -372,4 +373,25 @@ export function useTeahouses(placeId: string | undefined) {
     queryFn: () => get<Teahouse[]>(`/places/${placeId}/teahouses`),
     enabled: !!placeId,
   });
+}
+
+/**
+ * Pull-to-refresh for a place or trek page: reloads the item, its reviews and (for a trek) the
+ * budget, so changes made in the admin panel show without restarting the app (BUG-12).
+ */
+export function useRefreshDetail(type: ReviewTarget['type'], id: string | undefined) {
+  const client = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    if (!id) return;
+    setRefreshing(true);
+    const keys = [
+      [type, id],
+      ['reviews', type, id],
+      ...(type === 'trek' ? [['trek-budget', id]] : []),
+    ];
+    await Promise.allSettled(keys.map((queryKey) => client.refetchQueries({ queryKey })));
+    setRefreshing(false);
+  }, [client, type, id]);
+  return { refreshing, onRefresh };
 }

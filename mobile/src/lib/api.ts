@@ -98,13 +98,33 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   return api(original);
 });
 
+/** Server messages a traveller can see, so they are shown in the app's language (BUG-07). */
+const SERVER_MESSAGES: Record<string, string> = {
+  'Email is already registered': 'errors.emailTaken',
+  'Incorrect email or password': 'errors.wrongLogin',
+  'This account has been blocked. Contact the Bato team.': 'errors.blocked',
+  'This place is already in the trip': 'errors.alreadyInTrip',
+  'Place not found': 'errors.notFound',
+  'Trek not found': 'errors.notFound',
+  'Trip not found': 'errors.notFound',
+  'Review not found': 'errors.notFound',
+};
+
 /** A readable message from an API error (FastAPI puts it in `detail`). */
 export function errorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const detail = (error.response?.data as { detail?: unknown } | undefined)?.detail;
-    if (typeof detail === 'string') return detail;
-    if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg);
-    if (!error.response) return `${i18n.t('common.offline')} (${API_URL})`;
+    if (typeof detail === 'string') {
+      const key = SERVER_MESSAGES[detail];
+      return key ? i18n.t(key) : detail;
+    }
+    // A 422 list from FastAPI holds raw English validation text; show our own words (BUG-07).
+    if (Array.isArray(detail)) return i18n.t('common.invalidInput');
+    if (!error.response) {
+      const offline = i18n.t('common.offline');
+      // The server address helps when setting up a phone, but users don't need it (BUG-13).
+      return __DEV__ ? `${offline} (${API_URL})` : offline;
+    }
   }
   return fallback;
 }

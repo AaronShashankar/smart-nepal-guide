@@ -1,3 +1,5 @@
+'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
+
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import { Linking, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
@@ -25,7 +27,8 @@ const NEAR = '__near__';
 function Recommended() {
   const { t } = useTranslation();
   const recs = useRecommendations();
-  if (recs.isPending || recs.isError || !recs.data?.items.length) return null;
+  // Keep showing loaded suggestions when a refresh fails (offline); hide only when there are none.
+  if (!recs.data?.items.length) return null;
   return (
     <Section
       title={recs.data.mode === 'personal' ? t('explore.recommended') : t('explore.popular')}
@@ -151,7 +154,7 @@ export default function ExploreScreen() {
           {/* Treks are shown first when no category filter is active */}
           {!category && (
             <Section title={t('explore.treks')}>
-              <QueryState query={treks}>
+              <QueryState query={treks} onRetry={refresh}>
                 {(data) =>
                   data.items.length === 0 ? (
                     <Empty message={t('explore.emptyTreks')} />
@@ -177,7 +180,7 @@ export default function ExploreScreen() {
               ) : null
             }
           >
-            <QueryState query={places}>
+            <QueryState query={places} onRetry={refresh}>
               {(data) =>
                 data.items.length === 0 ? (
                   <Empty message={t('explore.emptyPlaces')} />

@@ -154,6 +154,8 @@ const en = {
     block: 'Block',
     unblock: 'Unblock',
     confirmBlock: 'Block {{email}}? They are logged out and cannot sign in until unblocked.',
+    roles: { traveller: 'traveller', admin: 'admin' },
+    providers: { email: 'email', google: 'Google' },
   },
   reviews: {
     user: 'User',
@@ -353,6 +355,8 @@ const ne: typeof en = {
     block: 'रोक्नुहोस्',
     unblock: 'खोल्नुहोस्',
     confirmBlock: '{{email}} लाई रोक्ने? खोल्दासम्म उहाँ साइन इन गर्न सक्नुहुन्न।',
+    roles: { traveller: 'यात्री', admin: 'एडमिन' },
+    providers: { email: 'इमेल', google: 'Google' },
   },
   reviews: {
     user: 'प्रयोगकर्ता',

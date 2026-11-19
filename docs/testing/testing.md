@@ -9,8 +9,14 @@ Two kinds of testing. **Step-by-step order, test counts and how to check each ca
    browser), then fill in **Actual result** and **Pass/Fail**. Test on at least two Android phones
    with different screen sizes, and write the phone models here:
 
-   - Phone 1: ______________________ (screen size ____)
-   - Phone 2: ______________________ (screen size ____)
+   - Phone 1: Android emulator "Medium Phone", Android 17 (screen size 1080 × 2400, 420 dpi). First full run on
+     2026-11-19, driven with mobile-mcp; the admin panel with Playwright (Chromium). Screenshots in
+     `docs/screenshots/TC-*.png`.
+   - Phone 2: ______________________ (screen size ____), still to do on a real phone (layout check, GPS for TC-47)
+
+   Result of the first run (52 cases): 50 Pass, 1 Fail (TC-01, Nepali labels cut off), 1 Blocked (TC-47,
+   emulator GPS; the API gives the right answer). After fixing BUG-06 to BUG-14, TC-01 was run again and
+   passed: **51 Pass, 1 Blocked**.
 
 The **Auto** column names the pytest test that checks the same behaviour through the API, where
 there is one. The manual case still checks the screen.
@@ -22,63 +28,63 @@ Test data: the seed data (`uv run python -m app.seed`), an admin made with
 
 | ID | Feature | Steps | Input | Expected result | Actual result | Pass/Fail | Auto |
 |---|---|---|---|---|---|---|---|
-| TC-01 | Language | First launch → choose a language | नेपाली | Every screen is in Nepali, with numbers in Devanagari digits | | | |
-| TC-02 | Register | Register with email | new email, 8+ char password | Account created; the profile form opens | | | `test_register_login_me` |
-| TC-03 | Register | Register with a short password | `abc` | Error message; no account created | | | `test_short_password_rejected` |
-| TC-04 | Register | Register an email that is already used | existing email | "Email is already registered" message | | | `test_duplicate_email_rejected` |
-| TC-05 | Login | Log out, then log in | correct email + password | Explore tab opens | | | `test_register_login_me` |
-| TC-06 | Login | Log in with a wrong password | wrong password | "Incorrect email or password" message | | | `test_wrong_password_fails` |
-| TC-07 | Login | Leave the app open > 30 min, then use it | — | Still logged in (token refreshed silently) | | | `test_refresh_token_flow` |
-| TC-08 | Profile | Fill in and save the profile, reopen it | DOB, fitness *Medium*, experience *None* | Saved values are shown again | | | `test_profile_save_and_load` |
-| TC-09 | Explore | Explore → a category chip | *Temples & Stupas* | Only temples and stupas are listed | | | `test_list_places_by_category_paginated` |
-| TC-10 | Place detail | Open a place | Pashupatinath | Photos, best months, entry fee, how to reach, 5 nearby places | | | `test_place_detail` |
-| TC-11 | Language fallback | Switch to Nepali → open a place with no Nepali description | Ghorepani | Nepali name, English description | | | `test_partial_nepali_row_falls_back_per_field` |
-| TC-12 | Search | Search with a spelling mistake | `punhill` | Poon Hill is found | | | `test_search_fuzzy` |
-| TC-13 | Search | Search in Devanagari | `अन्नपूर्ण` | Annapurna treks / places are found | | | `test_search_fuzzy` |
-| TC-14 | Search | Search for nonsense | `xqzv` | "No results" message, no crash | | | `test_search_nonsense_returns_nothing` |
-| TC-15 | Trek filters | Search → trek filters | Region *Annapurna*, difficulty *Moderate* | ABC and Mardi Himal | | | `test_list_treks_filters` |
-| TC-16 | Map | Map tab → tap a marker | any marker | Its detail page opens | | | `test_list_places_bbox_for_map` |
-| TC-17 | Map | Map tab → category chip | *Viewpoints* | Only viewpoint markers stay | | | |
-| TC-18 | Itinerary | EBC → Day-by-day itinerary | — | 11 day cards; days 3 and 6 are rest days | | | `test_stages_and_summary` |
-| TC-19 | Acclimatisation | EBC itinerary | — | Days 2, 5, 7 show **Caution**; summary says it passes | | | `test_standard_ebc_passes_with_cautions` |
-| TC-20 | Acclimatisation | ABC itinerary | — | Day 5 shows **Add rest**; suggests a rest day at Deurali | | | `test_acclimatisation_endpoint` |
-| TC-21 | Risk | EBC → Check my risk | January; fitness *Medium*, experience *None* | **Risky**, confidence, up to 3 reasons | | | `test_beginner_ebc_january_riskier_than_expert_poon_hill_october` |
-| TC-22 | Risk | Change profile → EBC → Check my risk | October; fitness *High*, *Experienced* | **Hard**, with different reasons | | | same as above |
-| TC-23 | Risk | New account, skip the profile → Check my risk | — | Asked to complete the profile first | | | `test_predict_needs_complete_profile` |
-| TC-24 | Risk history | Settings → My risk checks | — | Both checks, newest first | | | |
-| TC-25 | Trip planner | Place detail → Add to My Trip → new trip | Pashupatinath Temple, title "Valley" | "Pashupatinath Temple added to “Valley”."; trip appears in Trips tab | | | `test_create_list_and_get` |
-| TC-26 | Trip planner | Add 5 more places to the same trip | Boudhanath, Swayambhunath, Patan Durbar Sq., Bhaktapur, Nagarkot | Trip shows 6 stops and numbered markers on the map | | | |
-| TC-27 | Trip planner | Add the same place twice | Pashupatinath again | "This place is already in the trip" | | | `test_create_list_and_get` |
-| TC-28 | Route optimisation | Tap **Optimise** | the 6 valley places | 2 days, 31.3 km in total; "Nearest neighbour gave 38.8 km; 2-opt shortened it to 31.3 km."; markers renumbered, line in visiting order | | | `test_demo_trip_two_days` |
-| TC-29 | Trip planner | Remove a stop after optimising | — | Plan disappears; "Optimise" button shown again | | | `test_adding_or_removing_a_stop_clears_the_plan` |
-| TC-30 | Trip planner | Delete the trip | — | Confirmation, then the trip is gone from the list | | | `test_rename_and_delete` |
-| TC-31 | Offline | Turn off Wi-Fi/data, pull to refresh | — | Friendly "no internet" message with **Try again** | | | |
-| TC-32 | Admin login | Admin panel → log in with a traveller account | traveller email | "This account is not an admin" | | | `test_admin_routes_need_admin` |
-| TC-33 | Admin dashboard | Log in as admin | — | Counts + bar chart of predictions per level (matches TC-21/22) | | | `test_stats` |
-| TC-34 | Admin places | Places → New place, fill English + नेपाली, click the map, save, upload a photo | "Test Viewpoint", JPEG < 5 MB | Saved; photo shows; the place appears in the app (pull to refresh) and in search | | | `test_place_crud_appears_in_app_and_search`, `test_photo_upload_and_delete` |
-| TC-35 | Admin places | Upload a wrong file type | a PDF | "Upload a JPEG, PNG or WebP image" | | | `test_photo_upload_and_delete` |
-| TC-36 | Admin places | Delete a place that a trek uses | Namche Bazaar | Refused with a message; nothing deleted | | | `test_place_used_by_a_trek_cannot_be_deleted` |
-| TC-37 | Admin treks | EBC → remove the two rest days → save | — | Days = 9; in the app the itinerary now shows **Add rest** warnings | | | `test_edit_trek_stages_updates_itinerary_and_acclimatisation` |
-| TC-38 | Admin users | Users → Block the traveller | traveller account | In the app: the next request logs the traveller out; logging in again shows "This account has been blocked. Contact the Bato team." | | | `test_block_user` |
-| TC-39 | Admin users | Unblock the traveller | — | The traveller can log in again | | | `test_block_user` |
-| TC-40 | Admin language | Switch the panel to नेपाली | — | Menus, labels and buttons are in Nepali | | | |
+| TC-01 | Language | First launch → choose a language | नेपाली | Every screen is in Nepali, with numbers in Devanagari digits | First run: many Nepali labels lost their last word and regions stayed English (BUG-06, BUG-09). Re-test after the fixes: login, register, profile, Explore, place, trek and itinerary screens complete in Nepali ("Google बाट अगाडि बढ्नुहोस्", "अन्नपूर्ण · ८ दिन · ८१ कि.मि.", "म्याग्दी, गण्डकी"); text with no Nepali version in the data falls back to English as in TC-11 | Pass (re-test) | |
+| TC-02 | Register | Register with email | new email, 8+ char password | Account created; the profile form opens | Account created; profile form opened. "Skip for now" then shows the form a second time (BUG-08) | Pass | `test_register_login_me` |
+| TC-03 | Register | Register with a short password | `abc` | Error message; no account created | Error shown, no account in the database; but the text is the server's raw English "String should have at least 8 characters", also in Nepali (BUG-07) | Pass | `test_short_password_rejected` |
+| TC-04 | Register | Register an email that is already used | existing email | "Email is already registered" message | "Email is already registered" | Pass | `test_duplicate_email_rejected` |
+| TC-05 | Login | Log out, then log in | correct email + password | Explore tab opens | Explore tab opened | Pass | `test_register_login_me` |
+| TC-06 | Login | Log in with a wrong password | wrong password | "Incorrect email or password" message | "Incorrect email or password" | Pass | `test_wrong_password_fails` |
+| TC-07 | Login | Leave the app open > 30 min, then use it | — | Still logged in (token refreshed silently) | 32 min after login: still logged in; the profile loaded fresh data from the server | Pass | `test_refresh_token_flow` |
+| TC-08 | Profile | Fill in and save the profile, reopen it | DOB, fitness *Medium*, experience *None* | Saved values are shown again | DOB 1995-01-15, fitness Medium, experience None, budget Medium shown again | Pass | `test_profile_save_and_load` |
+| TC-09 | Explore | Explore → a category chip | *Temples & Stupas* | Only temples and stupas are listed | 9 places, all temples and stupas | Pass | `test_list_places_by_category_paginated` |
+| TC-10 | Place detail | Open a place | Pashupatinath | Photos, best months, entry fee, how to reach, 5 nearby places | Photo, altitude, entry fee (Foreign NPR 1,000 · SAARC/Nepali free), best months, how to get there, 5 nearby places (Boudhanath 1.8 km … Changu Narayan 7.8 km) | Pass | `test_place_detail` |
+| TC-11 | Language fallback | Switch to Nepali → open a place with no Nepali description | Ghorepani | Nepali name, English description | घोरेपानी: Nepali name and labels, English description, no blank text (district stays English, BUG-09) | Pass | `test_partial_nepali_row_falls_back_per_field` |
+| TC-12 | Search | Search with a spelling mistake | `punhill` | Poon Hill is found | Poon Hill and Ghorepani Poon Hill Trek found | Pass | `test_search_fuzzy` |
+| TC-13 | Search | Search in Devanagari | `अन्नपूर्ण` | Annapurna treks / places are found | Annapurna Base Camp, ABC Trek and Annapurna Circuit Trek found | Pass | `test_search_fuzzy` |
+| TC-14 | Search | Search for nonsense | `xqzv` | "No results" message, no crash | "Nothing found for “xqzv”.", no crash | Pass | `test_search_nonsense_returns_nothing` |
+| TC-15 | Trek filters | Search → trek filters | Region *Annapurna*, difficulty *Moderate* | ABC and Mardi Himal | Exactly ABC Trek and Mardi Himal Trek | Pass | `test_list_treks_filters` |
+| TC-16 | Map | Map tab → tap a marker | any marker | Its detail page opens | Tapped the Lumbini marker → Lumbini detail opened | Pass | `test_list_places_bbox_for_map` |
+| TC-17 | Map | Map tab → category chip | *Viewpoints* | Only viewpoint markers stay | Only the 5 viewpoint markers remain | Pass | |
+| TC-18 | Itinerary | EBC → Day-by-day itinerary | — | 11 day cards; days 3 and 6 are rest days | 11 day cards; day 3 Namche and day 6 Dingboche are rest days; summary +830 m (day 2), highest night 5,164 m, 2 rest days | Pass | `test_stages_and_summary` |
+| TC-19 | Acclimatisation | EBC itinerary | — | Days 2, 5, 7 show **Caution**; summary says it passes | Days 2, 5, 7 Caution; orange summary "Some days climb more than 500 m" (passes) | Pass | `test_standard_ebc_passes_with_cautions` |
+| TC-20 | Acclimatisation | ABC itinerary | — | Day 5 shows **Add rest**; suggests a rest day at Deurali | "This itinerary climbs too fast. Add rest days: Rest at Deurali (3,200 m) before day 5"; day 5 Add rest | Pass | `test_acclimatisation_endpoint` |
+| TC-21 | Risk | EBC → Check my risk | January; fitness *Medium*, experience *None* | **Risky**, confidence, up to 3 reasons | Risky, 98%, 3 reasons (no multi-day experience; up to 5,644 m; +830 m on day 2) | Pass | `test_beginner_ebc_january_riskier_than_expert_poon_hill_october` |
+| TC-22 | Risk | Change profile → EBC → Check my risk | October; fitness *High*, *Experienced* | **Hard**, with different reasons | Hard, 82%, 2 reasons (above 5,000 m; +830 m on day 2) | Pass | same as above |
+| TC-23 | Risk | New account, skip the profile → Check my risk | — | Asked to complete the profile first | "Complete your traveller profile first" with a button to the profile | Pass | `test_predict_needs_complete_profile` |
+| TC-24 | Risk history | Settings → My risk checks | — | Both checks, newest first | EBC · Oct Hard 82% first, then EBC · Jan Risky 98% | Pass | |
+| TC-25 | Trip planner | Place detail → Add to My Trip → new trip | Pashupatinath Temple, title "Valley" | "Pashupatinath Temple added to “Valley”."; trip appears in Trips tab | "Pashupatinath Temple added to “Valley”."; trip in the Trips tab. First tap on the sheet button only closes the keyboard (BUG-11) | Pass | `test_create_list_and_get` |
+| TC-26 | Trip planner | Add 5 more places to the same trip | Boudhanath, Swayambhunath, Patan Durbar Sq., Bhaktapur, Nagarkot | Trip shows 6 stops and numbered markers on the map | 6 places, numbered markers 1–6 with a dashed line | Pass | |
+| TC-27 | Trip planner | Add the same place twice | Pashupatinath again | "This place is already in the trip" | "This place is already in the trip" | Pass | `test_create_list_and_get` |
+| TC-28 | Route optimisation | Tap **Optimise** | the 6 valley places | 2 days, 31.3 km in total; "Nearest neighbour gave 38.8 km; 2-opt shortened it to 31.3 km."; markers renumbered, line in visiting order | 2 days, 31.3 km; "Nearest neighbour gave 38.8 km; 2-opt shortened it to 31.3 km."; markers renumbered per day | Pass | `test_demo_trip_two_days` |
+| TC-29 | Trip planner | Remove a stop after optimising | — | Plan disappears; "Optimise" button shown again | Day plan gone, Optimise shown again | Pass | `test_adding_or_removing_a_stop_clears_the_plan` |
+| TC-30 | Trip planner | Delete the trip | — | Confirmation, then the trip is gone from the list | "Delete this trip?", then "No trips yet" | Pass | `test_rename_and_delete` |
+| TC-31 | Offline | Turn off Wi-Fi/data, pull to refresh | — | Friendly "no internet" message with **Try again** | "No internet connection. Check Wi-Fi or mobile data and try again." + Try again; recovers when the network is back. Also shows the server address and hides already-loaded lists (BUG-13) | Pass | |
+| TC-32 | Admin login | Admin panel → log in with a traveller account | traveller email | "This account is not an admin" | "This account is not an admin." | Pass | `test_admin_routes_need_admin` |
+| TC-33 | Admin dashboard | Log in as admin | — | Counts + bar chart of predictions per level (matches TC-21/22) | Counts (Users 6, Places 69, Treks 8, Trips 4, Reviews 1, Predictions 11); bars Easy 2 / Moderate 2 / Hard 6 / Risky 1 | Pass | `test_stats` |
+| TC-34 | Admin places | Places → New place, fill English + नेपाली, click the map, save, upload a photo | "Test Viewpoint", JPEG < 5 MB | Saved; photo shows; the place appears in the app (pull to refresh) and in search | Saved in English and Nepali, map click set the position, photo uploaded; the app shows the place with its photo and search finds it | Pass | `test_place_crud_appears_in_app_and_search`, `test_photo_upload_and_delete` |
+| TC-35 | Admin places | Upload a wrong file type | a PDF | "Upload a JPEG, PNG or WebP image" | "Upload a JPEG, PNG or WebP image" | Pass | `test_photo_upload_and_delete` |
+| TC-36 | Admin places | Delete a place that a trek uses | Namche Bazaar | Refused with a message; nothing deleted | "This place is used in a trek itinerary: edit the trek first"; nothing deleted | Pass | `test_place_used_by_a_trek_cannot_be_deleted` |
+| TC-37 | Admin treks | EBC → remove the two rest days → save | — | Days = 9; in the app the itinerary now shows **Add rest** warnings | "Days: 9 · 114 km"; app: Rest days 0 and "Add rest days: Tengboche before day 4, Dingboche before day 5". EBC restored afterwards | Pass | `test_edit_trek_stages_updates_itinerary_and_acclimatisation` |
+| TC-38 | Admin users | Users → Block the traveller | traveller account | In the app: the next request logs the traveller out; logging in again shows "This account has been blocked. Contact the Bato team." | App logged out on the next request; login shows "This account has been blocked. Contact the Bato team." | Pass | `test_block_user` |
+| TC-39 | Admin users | Unblock the traveller | — | The traveller can log in again | Logged in again | Pass | `test_block_user` |
+| TC-40 | Admin language | Switch the panel to नेपाली | — | Menus, labels and buttons are in Nepali | Menus, headings and buttons in Nepali; role, sign-in type and dates from the database stay English (BUG-09) | Pass | |
 
 ### Version 2 Phase 2 (personalisation & community)
 
 | ID | Feature | Steps | Input | Expected result | Actual result | Pass/Fail | Auto |
 |---|---|---|---|---|---|---|---|
-| TC-41 | Recommended | Profile → interests Culture + Religious → Explore | — | "Recommended for you": temples / heritage first, each card says why ("Because you like…") | | | `test_culture_user_gets_temples_before_lakes` |
-| TC-42 | Recommended | Change interests to Nature + Adventure → pull Explore down | — | Lakes, viewpoints and treks come first | | | `test_nature_user_gets_the_opposite`, `test_changing_interests_changes_the_list` |
-| TC-43 | Recommended | New account with no interests → Explore | — | "Popular now" instead | | | `test_new_user_gets_popular_now` |
-| TC-44 | Reviews | Poon Hill → Write a review → post; then post again with other stars | 4★ "Great sunrise", then 5★ | Shows at once as "Your review"; the second post updates it (still one review) | | | `test_post_review_appears_with_your_name`, `test_posting_twice_updates_instead_of_duplicating` |
-| TC-45 | Reviews | Admin panel → Reviews → Hide the review | — | Gone from the app's list and the count; the author sees it marked hidden | | | `test_hidden_review_is_not_counted_and_not_listed` |
-| TC-46 | Reviews | Delete your own review (bin icon) | — | Removed; count goes down | | | `test_you_cannot_delete_someone_elses_review` |
-| TC-47 | Near me | Explore → Near me → allow location (Thamel) | 27.7154, 85.3123 | Closest first with "x km away"; Kathmandu Durbar Square ≈ 1.3 km | | | `test_near_me_from_thamel` |
-| TC-48 | Near me | Deny the location permission | Deny | "Turn on location to see places near you" + Try again / Open settings | | | |
-| TC-49 | Budget | Valley trip → Optimise → Estimate budget; change budget level → estimate again | Medium → High | Food, stay, transport and entry-fee lines, total in NPR, "Estimate only"; the total goes up | | | `test_valley_trip_budget_by_hand`, `test_budget_level_changes_the_total` |
-| TC-50 | Budget | EBC → Budget card with nationality Foreign / SAARC / Nepali | profile nationality | Permits: foreign > SAARC > Nepali | | | `test_ebc_permits_by_nationality` |
-| TC-51 | Share | Valley → Share trip → open the link in a private browser window; then Stop sharing and reload | — | Read-only page with the stops and day plan, no name or email; after stopping → "does not work any more" (404) | | | `test_share_link_works_without_login`, `test_stop_sharing_and_bad_tokens_give_404` |
-| TC-52 | Teahouses | EBC → itinerary → day 4 → Teahouses (4) | — | 4 lodges in Tengboche; Nepali names in नेपाली | | | `test_itinerary_day_4_shows_teahouse_count`, `test_teahouses_in_tengboche` |
+| TC-41 | Recommended | Profile → interests Culture + Religious → Explore | — | "Recommended for you": temples / heritage first, each card says why ("Because you like…") | Lumbini, Janaki Temple, World Peace Pagoda, Manakamana, Boudhanath … "Because you like religious places" | Pass | `test_culture_user_gets_temples_before_lakes` |
+| TC-42 | Recommended | Change interests to Nature + Adventure → pull Explore down | — | Lakes, viewpoints and treks come first | Treks first (ABC, Annapurna Circuit, Gosaikunda …) "Because you like adventure" | Pass | `test_nature_user_gets_the_opposite`, `test_changing_interests_changes_the_list` |
+| TC-43 | Recommended | New account with no interests → Explore | — | "Popular now" instead | "Popular now" with "Often added to trips" | Pass | `test_new_user_gets_popular_now` |
+| TC-44 | Reviews | Poon Hill → Write a review → post; then post again with other stars | 4★ "Great sunrise", then 5★ | Shows at once as "Your review"; the second post updates it (still one review) | 4★ shown at once as "Your review"; 5★ updated it, still one review (text "Lovely sunset view": typing r twice reloads a dev build) | Pass | `test_post_review_appears_with_your_name`, `test_posting_twice_updates_instead_of_duplicating` |
+| TC-45 | Reviews | Admin panel → Reviews → Hide the review | — | Gone from the app's list and the count; the author sees it marked hidden | Hidden at once in the API; the app showed the old count until restarted (BUG-12); the author sees "An admin has hidden this review" | Pass | `test_hidden_review_is_not_counted_and_not_listed` |
+| TC-46 | Reviews | Delete your own review (bin icon) | — | Removed; count goes down | "Delete your review?" → removed, count 1 → "No reviews yet" | Pass | `test_you_cannot_delete_someone_elses_review` |
+| TC-47 | Near me | Explore → Near me → allow location (Thamel) | 27.7154, 85.3123 | Closest first with "x km away"; Kathmandu Durbar Square ≈ 1.3 km | Emulator GPS mock never reached the app ("Could not get your location" + Try again). Same API request from Thamel: Kathmandu Durbar Square 1.3 km first. Re-test on a phone | **Blocked** | `test_near_me_from_thamel` |
+| TC-48 | Near me | Deny the location permission | Deny | "Turn on location to see places near you" + Try again / Open settings | "Turn on location to see places near you." + Try again; after "don't ask again" + Open settings | Pass | |
+| TC-49 | Budget | Valley trip → Optimise → Estimate budget; change budget level → estimate again | Medium → High | Food, stay, transport and entry-fee lines, total in NPR, "Estimate only"; the total goes up | Medium: food, stay, transport, 5 entry fees, total NPR 20,678, "Estimate only"; High: NPR 41,530 | Pass | `test_valley_trip_budget_by_hand`, `test_budget_level_changes_the_total` |
+| TC-50 | Budget | EBC → Budget card with nationality Foreign / SAARC / Nepali | profile nationality | Permits: foreign > SAARC > Nepali | Permits Foreign 6,000 (KPLRM + SNP), SAARC 1,500, Nepali 100; totals 190,000 / 185,500 / 184,100 | Pass | `test_ebc_permits_by_nationality` |
+| TC-51 | Share | Valley → Share trip → open the link in a private browser window; then Stop sharing and reload | — | Read-only page with the stops and day plan, no name or email; after stopping → "does not work any more" (404) | Read-only page (6 places · 2 days · 31.3 km), no name or email; after stopping: 404 "This link does not work any more" as raw JSON (BUG-10) | Pass | `test_share_link_works_without_login`, `test_stop_sharing_and_bad_tokens_give_404` |
+| TC-52 | Teahouses | EBC → itinerary → day 4 → Teahouses (4) | — | 4 lodges in Tengboche; Nepali names in नेपाली | 4 lodges (Tashi Delek Lodge, Tengboche Guest House, The Happy House, Trekkers Lodge); Nepali names in नेपाली | Pass | `test_itinerary_day_4_shows_teahouse_count`, `test_teahouses_in_tengboche` |
 
 ## Bugs found and fixed
 
@@ -91,3 +97,19 @@ development:
 | Same training data gave a different model each run | Rows were read in random-UUID order | Stable row ids in the seed |
 | Creating a trek from the admin panel failed (NOT NULL) | The trek was saved before its totals were worked out | Compute totals from the stages first, then save |
 | 2-opt sometimes more than 15% worse than the exact answer | 2-opt is a heuristic: it finds a local, not global, best | Test the *average* gap instead (see `route_gap.md`) |
+
+### Found in the manual test run (2026-11-19)
+
+The same bugs are in the tracker's **Bugs** tab, with severity and status.
+
+| Bug | Case | What happened | Cause | Severity / status |
+|---|---|---|---|---|
+| BUG-06 | TC-01 | In नेपाली many labels lose their last word (buttons, chips, headings) | The text box is a fraction of a pixel narrower than the shaped Devanagari text, and Android's line breaker moves the last word to a hidden second line (Latin text is never broken this way). **Fix:** `AppText` adds a tiny no-break space (U+202F) after Devanagari text on Android | High / fixed, to check on a real phone |
+| BUG-07 | TC-03 | Short password shows the server's raw English 422 text, also in Nepali | No length check in the app; `errorMessage()` shows FastAPI's message as it is. **Fix:** the register screen checks 8+ characters first; `errorMessage()` turns 422 lists into "invalid input" and maps known server messages to EN/NE text | Low / fixed |
+| BUG-08 | TC-02 | After registering, "Skip for now" opens the profile form again | The tabs layout mounts fresh and pushes `/profile` again while `has_profile` is false. **Fix:** the "asked once" flag lives in `lib/profilePrompt.ts` per user for the app session | Medium / fixed |
+| BUG-09 | TC-01, 11, 40, 52 | Region, district, stage notes and admin user values stay English in Nepali | Plain text columns with no Nepali translation; no Nepali stage notes in the data. **Fix:** Nepali names for regions, provinces and districts in `ne.json`; admin translates role and sign-in type and writes Nepali dates. Stage notes stay English until Nepali notes are added to the seed data (per-field fallback) | Low / fixed (stage notes: content task) |
+| BUG-10 | TC-51 | Stopped share link shows raw JSON instead of a page | The HTML route raises the same JSON 404 as the API. **Fix:** `/s/<token>` returns a "This link does not work any more" page (EN/NE), still status 404 | Low / fixed |
+| BUG-11 | TC-25 | First tap on a bottom-sheet button only closes the keyboard | The sheets are Modals inside the place / trek screen's `ScrollView`, which had the default `keyboardShouldPersistTaps`. **Fix:** `"handled"` on both screens | Low / fixed |
+| BUG-12 | TC-45 | A hidden review still counts in the app until restart | 5-minute query cache and no pull-to-refresh on the place screen. **Fix:** pull-to-refresh on place and trek screens reloads the item, its reviews and the trek budget | Low / fixed |
+| BUG-13 | TC-31 | Offline message shows the server address; loaded lists are hidden; Try again misses Recommended | Error text appends the API URL; error state replaces cached data. **Fix:** address shown only in development builds; loaded data stays with a short note above it; Try again refreshes all of Explore | Low / fixed |
+| BUG-14 | TC-01 (found while fixing BUG-06) | After switching language in Settings, trek cards keep "8 days" / "4,130 m" in the old language until restart | The React Compiler caches `days()`, `km()` etc. by their arguments; `lib/format` reads the language from i18n, which the compiler cannot see. **Fix:** files that import `lib/format` opt out with `'use no memo'` | Medium / fixed |
