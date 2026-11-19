@@ -117,7 +117,7 @@ restores seeded treks and keeps "Test Viewpoint"). Re-run TC-18 to confirm 11 da
 
 | Order | TC | Do | Check |
 |---|---|---|---|
-| 1 | TC-31 | Turn off Wi-Fi and mobile data → pull to refresh on Explore | Friendly "no internet" message with **Try again**; turn Wi-Fi on → Try again works. 📸 offline |
+| 1 | TC-31 | Turn off Wi-Fi and mobile data → pull to refresh on Explore | Lists already loaded stay, with a "no internet" note above them. Then tap a category not opened yet → message with **Try again**; turn Wi-Fi on → Try again loads it. 📸 offline |
 | 2 | TC-07 | Leave the app open (logged in) for more than 30 minutes, then open a place | Still logged in, no error (the token was refreshed silently). Do this while you write up results |
 
 ---

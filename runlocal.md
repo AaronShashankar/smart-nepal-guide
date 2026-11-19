@@ -135,7 +135,8 @@ npx expo run:android                      # builds and installs the app, then st
 - [ ] Settings → **नेपाली** → tab names, buttons **and** place/trek names switch to Nepali
 - [ ] Open **Ghorepani** in Nepali → the name is Nepali, the description is English (the fallback)
 - [ ] Log out → log in again with a **wrong password** → you see an error message
-- [ ] Stop the backend (Ctrl+C) and pull to refresh a list → you see an error with a **Try again** button
+- [ ] Stop the backend (Ctrl+C) and pull to refresh Explore → the lists already loaded stay, with an error note above
+  them; tap a category you have not opened yet → an error with a **Try again** button
 
 ### Check the Phase 2 demo (mid-term)
 - [ ] Explore → **Everest Base Camp Trek** → **Day-by-day itinerary** → 11 day cards; days 3 and 6 are rest days
@@ -251,7 +252,7 @@ and treks to the files in `data/` (admin edits to them are lost; places the admi
 
 | Problem | Fix |
 |---|---|
-| App says "Cannot reach the server (http://…)" | Is the backend running with `--host 0.0.0.0`? On a phone: same Wi-Fi as the Mac. `mobile/.env` should *not* set `EXPO_PUBLIC_API_URL` (check **Settings → API server** in the app), then `npx expo start -c`. If the macOS firewall asks about Python, allow incoming connections. Test from the phone's browser: `http://<ipconfig getifaddr en0>:8000/health` |
+| App says "No internet connection…" though the backend runs (a development build adds the address it tried, e.g. `(http://10.0.2.2:8000)`; a release build does not) | Is the backend running with `--host 0.0.0.0`? On a phone: same Wi-Fi as the Mac. `mobile/.env` should *not* set `EXPO_PUBLIC_API_URL` (check **Settings → API server** in the app), then `npx expo start -c`. If the macOS firewall asks about Python, allow incoming connections. Test from the phone's browser: `http://<ipconfig getifaddr en0>:8000/health` |
 | Map is blank (no streets) | The phone needs internet access for the OpenStreetMap tiles. The markers come from your API. |
 | "Expo Go" opens / the map crashes | Open the **Bato** app (the dev build), not Expo Go. |
 | `expo run:android` fails with an SDK/Java error | Open Android Studio once and install the SDK it suggests. Check that `java -version` shows 17 and that `ANDROID_HOME` is set. |

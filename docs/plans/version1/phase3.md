@@ -8,6 +8,11 @@ Previous: [phase2.md](phase2.md) · Algorithms: [algorithm.md](../../design/algo
 **Status (2026-11-06): code done.** Trip planner (backend + mobile), admin API and admin panel are
 built; 129 backend tests pass, and the mobile and admin typecheck, lint and build are clean. Still open (yours): app icon,
 running the manual test table on two phones, hosting, the APK, the demo video and the `v1.0` tag.
+
+**Status (2026-11-19):** all 52 manual test cases run on Phone 1 (Android emulator): 51 Pass, 1 Blocked
+(TC-47 Near me, emulator GPS). The 9 bugs found (BUG-06 to BUG-14 in
+[testing.md](../../testing/testing.md)) are fixed and their cases re-run; 175 backend tests pass. Left:
+Phone 2 (a real phone: layout checks, TC-47, BUG-06), commit, and Nepali stage notes (V1-P3-19).
 Changes from the plan below are marked *Note*.
 
 ---
@@ -73,8 +78,8 @@ Changes from the plan below are marked *Note*.
 
 - [x] Backend: pytest for all algorithms and the main API routes (129 tests)
 - [x] **Manual test cases table:** ID, feature, steps, input, expected result, actual result, pass/fail (about 30–40 cases covering login, profile, search, map, itinerary, acclimatisation, risk, trip planner, admin): 40 cases in `smart-nepal-guide/docs/testing/testing.md`; *Actual result* and *Pass/Fail* are filled in when you run them
-- [ ] Test on at least two Android phones (different screen sizes). *Note:* order, counts and checks in `smart-nepal-guide/docs/testing/testing-guide.md` (1 command + 40 cases on Phone 1 + 8 layout cases on Phone 2)
-- [ ] Fix all bugs found before moving on
+- [ ] Test on at least two Android phones (different screen sizes). *Note:* order, counts and checks in `smart-nepal-guide/docs/testing/testing-guide.md` (1 command + 40 cases on Phone 1 + 8 layout cases on Phone 2). *Note (2026-11-19):* Phone 1 done on the emulator, all 52 cases (40 + 12 from V2 Phase 2); Phone 2 still to do
+- [ ] Fix all bugs found before moving on. *Note (2026-11-19):* BUG-05 to BUG-14 fixed and re-tested on the emulator; BUG-06 (High, Nepali labels cut off) still needs a check on a real phone
 
 ## 6. Version 1 release
 

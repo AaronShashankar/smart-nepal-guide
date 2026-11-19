@@ -29,6 +29,21 @@ Run lint and typecheck before declaring any task done.
 - Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
 - Docs: https://docs.expo.dev/router/introduction.md
 
+## Project rules (Bato)
+
+- **Text:** use `AppText` (`src/components/AppText.tsx`), not `Text`, for anything that can show Nepali. On
+  Android it adds a tiny no-break space after Devanagari text; without it the last word of a label can
+  disappear (BUG-06 in `docs/testing/testing.md`).
+- **Formatting numbers, days, units, region and district names:** use `src/lib/format.ts`. It reads the
+  current language from i18n, which the React Compiler cannot see, so **every file that imports
+  `@/lib/format` must start with `'use no memo';`**. Without it, values stay in the old language after the
+  user switches language in Settings (BUG-14).
+- **Error text:** show `errorMessage(error, fallback)` from `src/lib/api.ts`; add new server messages to its
+  `SERVER_MESSAGES` map with an `errors.*` key in both `en.json` and `ne.json`.
+- **Lists from the API:** wrap them in `QueryState` (`src/components/StateViews.tsx`); it keeps already loaded
+  data when a refresh fails.
+- **Screens with a Modal sheet inside a `ScrollView`:** set `keyboardShouldPersistTaps="handled"` (BUG-11).
+
 ## Building with EAS
 
 Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.

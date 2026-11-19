@@ -73,6 +73,8 @@ laptop's real address.
 
 **Record:** in the Bugs tab, BUG-05 → Status **Fixed**, with the commit hash once committed.
 
+*Status 2026-11-19:* confirmed by TC-02 on the emulator; BUG-05 is **Fixed** in the tracker. Fill in the commit hash after committing.
+
 ---
 
 ## 2. Launch the trekker survey
@@ -277,6 +279,9 @@ Use a phone with a **different screen size** (small or older) as Phone 2.
 - At the end, copy the results into `docs/testing/testing.md` for the report.
 - V1-P3-08 → **Done** when every row has a result.
 
+*Status 2026-11-19:* Phone 1 done on the Android emulator (all 52 cases: 51 Pass, 1 Blocked, TC-47 needs real
+GPS). Still to do: **Phone 2** (a real phone): the 8 layout cases, TC-47 Near me, and BUG-06 (Nepali labels).
+
 ---
 
 ## 11. Log and retest bugs
@@ -289,6 +294,10 @@ Use a phone with a **different screen size** (small or older) as Phone 2.
 **Check:** after a fix, run the **same test case** again. Pass → set the bug to **Fixed** and the case to **Pass**.
 
 **Record:** V1-P3-09 → **Done** when no bug of severity High is left open.
+
+*Status 2026-11-19:* BUG-06 to BUG-14 fixed by Claude and re-tested on the emulator (13 bugs Fixed in the
+tracker). Left: check BUG-06 on Phone 2 (it depends on how the phone draws Nepali text), then commit and
+fill in the commit hashes.
 
 ---
 
