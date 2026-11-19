@@ -27,6 +27,8 @@ from app.models import (
     CategoryTranslation,
     Interest,
     InterestTranslation,
+    PackingItem,
+    PackingItemTranslation,
     Permit,
     PermitTranslation,
     Place,
@@ -43,7 +45,7 @@ from app.models import (
     TrekStage,
     TrekTranslation,
 )
-from app.models.enums import BudgetLevel, Lang, RiskLevel
+from app.models.enums import BudgetLevel, Lang, PackingGroup, RiskLevel
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DATA_DIR = BACKEND_DIR.parent / "data"
@@ -358,6 +360,46 @@ def seed_teahouses(db: Session, data: Path, places: dict[str, dict]) -> int:
     return len(seeded)
 
 
+def seed_packing_items(db: Session, data: Path) -> int:
+    """Packing checklist rules (packing_items.csv). `months` is a ;-separated list, e.g. 12;1;2.
+
+    Seeded rows that disappeared from the file are deleted (nothing else points to them).
+    """
+    path = data / "packing_items.csv"
+    if not path.exists():
+        return 0
+    seeded = set()
+    for r in read_csv(path):
+        iid = sid("packing", r["code"])
+        db.merge(
+            PackingItem(
+                id=iid,
+                code=r["code"],
+                group=PackingGroup(r["group"]),
+                sort_order=int(r["sort_order"]),
+                always=r["always"] == "true",
+                min_altitude_m=opt_int(r["min_altitude_m"]),
+                months=[int(m) for m in r["months"].split(";") if m],
+                min_days=opt_int(r["min_days"]),
+            )
+        )
+        db.execute(delete(PackingItemTranslation).where(PackingItemTranslation.item_id == iid))
+        db.add_all(
+            translations(
+                PackingItemTranslation,
+                "item_id",
+                iid,
+                {"name": r["name_en"], "note": r["note_en"] or None},
+                {"name": r["name_ne"], "note": r["note_ne"] or None},
+            )
+        )
+        seeded.add(iid)
+    gone = [i for i in db.scalars(select(PackingItem.id)) if i.version == 5 and i not in seeded]
+    if gone:
+        db.execute(delete(PackingItem).where(PackingItem.id.in_(gone)))
+    return len(seeded)
+
+
 def seed_training_samples(db: Session, data: Path) -> int:
     """Replace all rows from training_samples.csv (made by `python -m app.ml.dataset`)."""
     path = data / "training_samples.csv"
@@ -399,6 +441,7 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         samples = seed_training_samples(db, data)
         budget_rates = seed_budget_rates(db, data)
         teahouses = seed_teahouses(db, data, places)
+        packing_items = seed_packing_items(db, data)
         photos = db.scalar(select(PlacePhoto.id).limit(1)) is not None
     return {
         "categories": len(categories),
@@ -409,6 +452,7 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         "training_samples": samples,
         "budget_rates": budget_rates,
         "teahouses": teahouses,
+        "packing_items": packing_items,
         "has_photos": int(photos),
     }
 

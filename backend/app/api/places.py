@@ -1,7 +1,7 @@
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -14,14 +14,17 @@ from app.models import Category, Place, PlaceAlias, PlaceTranslation, Review, Te
 from app.models.enums import Lang
 from app.schemas.community import NearPlaceOut, TeahouseOut
 from app.schemas.content import NearbyPlace, Page, PhotoOut, PlaceDetail, PlaceSummary
+from app.schemas.smart import WeatherOut
 from app.services.content import (
     category_out,
     localised_name_order,
+    place_ref,
     place_summary,
     published_places,
     thumbnails,
 )
 from app.services.rating import rating_order, ratings
+from app.services.weather import forecast
 
 router = APIRouter(prefix="/places", tags=["places"])
 
@@ -152,6 +155,23 @@ def place_teahouses(
         for t in rows
     ]
     return sorted(out, key=lambda t: t.name.casefold())
+
+
+@router.get("/{place_id}/weather", response_model=WeatherOut)
+def place_weather(
+    place_id: uuid.UUID,
+    response: Response,
+    db: Session = Depends(get_db),
+    lang: Lang = Depends(get_lang),
+) -> WeatherOut:
+    """7-day forecast from Open-Meteo, cached in Redis for an hour
+    (header X-Cache: HIT/MISS/STALE)."""
+    place = db.scalar(select(Place).where(Place.id == place_id, published_places()))
+    if place is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Place not found")
+    data, cache = forecast(float(place.latitude), float(place.longitude))
+    response.headers["X-Cache"] = cache
+    return WeatherOut(place=place_ref(place, lang), **data)
 
 
 @router.get("/{place_id}", response_model=PlaceDetail)

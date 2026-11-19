@@ -174,6 +174,24 @@ export interface Itinerary {
 export type AcclimatisationStatus = 'ok' | 'caution' | 'danger';
 export type AcclimatisationCode = 'GAIN_OVER_500' | 'NEEDS_REST' | 'REST_DAY';
 
+// ------------------------------------------------------------ V2 Phase 1: smart trek features
+
+export interface AltitudePoint {
+  km: number;
+  altitude_m: number;
+  day: number; // 0 = start point
+  place: string; // '' for a high point between two places
+  kind: 'start' | 'high' | 'sleep';
+  status: AcclimatisationStatus;
+}
+
+export interface AltitudeProfile {
+  points: AltitudePoint[];
+  max_altitude_m: number;
+  total_km: number;
+  total_days: number;
+}
+
 export interface Acclimatisation {
   status: AcclimatisationStatus;
   passes: boolean;
@@ -358,4 +376,56 @@ export interface Teahouse {
   has_wifi: boolean | null;
   has_hot_shower: boolean | null;
   updated_at: string;
+}
+
+export type AlternativeReason =
+  'LOWER_ALTITUDE' | 'SMALLER_GAIN' | 'FEWER_DAYS' | 'SHORTER_DAYS' | 'LOWER_RISK';
+
+export interface SaferAlternatives {
+  trek_id: string;
+  month: number;
+  level: RiskLevel;
+  k: number;
+  items: {
+    trek: TrekSummary;
+    level: RiskLevel;
+    distance: number;
+    why: AlternativeReason;
+    why_from: number | null;
+    why_to: number | null;
+  }[];
+}
+
+export interface Weather {
+  place: PlaceRef; // for a trek: its highest sleeping place
+  fetched_at: string;
+  stale: boolean;
+  days: {
+    date: string; // YYYY-MM-DD
+    code: number; // WMO weather code
+    max_c: number | null;
+    min_c: number | null;
+    rain_mm: number | null;
+  }[];
+}
+
+export type PackingReason = 'ALWAYS' | 'ALTITUDE' | 'WINTER' | 'MONSOON' | 'LONG_TREK' | 'PERMIT';
+export type PackingGroup = 'clothing' | 'gear' | 'health' | 'documents';
+
+export interface PackingList {
+  trek_id: string;
+  month: number;
+  max_altitude_m: number;
+  total_days: number;
+  total_items: number;
+  groups: {
+    group: PackingGroup;
+    items: {
+      code: string; // rule code, or "permit:<CODE>"
+      name: string;
+      note: string | null;
+      reason: PackingReason;
+      value: number | null; // metres (ALTITUDE, WINTER) or days (LONG_TREK)
+    }[];
+  }[];
 }

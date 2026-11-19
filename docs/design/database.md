@@ -40,6 +40,7 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 | `review_status` | visible, hidden |
 | `season` | spring, summer, autumn, winter, any |
 | `nationality` | nepali, saarc, foreign *(V2 Phase 2: picks the permit / entry-fee rate)* |
+| `packing_group` | clothing, gear, health, documents *(V2 Phase 1: sections of the packing checklist)* |
 
 ---
 
@@ -142,7 +143,7 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 
 **teahouse** *(V2 Phase 2)* — id (PK), place_id (FK → the village, index), phone, has_wifi, has_hot_shower (null = not known), source (where the lodge comes from; required in the admin form), updated_at, deleted_at (soft delete) + **teahouse_translation** — PK (teahouse_id, lang); name, price_note. Seeded from `data/teahouses.csv` with real lodges only (no invented names or phone numbers)
 
-**packing_item** — id (PK), min_altitude_m, season, category + **packing_item_translation** (packing_item_id, lang, name)
+**packing_item** *(V2 Phase 1, migration 0005)* — id (PK), code (unique), group (`packing_group`), sort_order, and the rule columns: always (bool), min_altitude_m (null = not used), months (`smallint[]`, empty = any month), min_days (null = not used), updated_at. `CHECK has_rule`: an item that is not `always` needs at least one condition; `CHECK months <@ {1..12}`. Seeded from `data/packing_items.csv` (34 rules) + **packing_item_translation** — PK (item_id, lang); name, note (short tip, e.g. "Ask a doctor before the trek"). Permits are not rows here: the packing list adds the trek's own `trek_permit` rows as documents
 
 ### C. Trip Planner
 

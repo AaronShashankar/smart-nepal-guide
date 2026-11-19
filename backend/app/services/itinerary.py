@@ -5,7 +5,7 @@ stage's `from` place. A rest day is a stage whose `from` and `to` are the same p
 """
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -15,8 +15,10 @@ from app.algorithms.acclimatisation import (
     ACCLIMATISATION_START_M,
     AcclimatisationReport,
     StageAltitude,
+    Status,
     check_acclimatisation,
 )
+from app.algorithms.altitude_profile import profile_points
 from app.core.i18n import pick, pick_one
 from app.models import Trek, TrekStage
 from app.models.enums import Lang
@@ -28,6 +30,7 @@ from app.schemas.risk import (
     RestSuggestionOut,
     StageOut,
 )
+from app.schemas.smart import AltitudePointOut, AltitudeProfileOut
 from app.services.content import place_ref, published_treks
 
 
@@ -176,6 +179,20 @@ def itinerary_out(trek: Trek, lang: Lang, teahouse_counts: dict | None = None) -
             rest_days=summary.rest_days,
         ),
         stages=stages,
+    )
+
+
+def altitude_profile_out(trek: Trek, lang: Lang) -> AltitudeProfileOut:
+    facts = stage_facts(trek, lang)
+    points = profile_points(facts)
+    status_of = {d.day: d.status for d in acclimatisation(facts).days}
+    return AltitudeProfileOut(
+        points=[
+            AltitudePointOut(**asdict(p), status=status_of.get(p.day, Status.ok)) for p in points
+        ],
+        max_altitude_m=max((p.altitude_m for p in points), default=0),
+        total_km=points[-1].km if points else 0.0,
+        total_days=len(facts),
     )
 
 

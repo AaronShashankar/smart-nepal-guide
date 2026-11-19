@@ -7,12 +7,14 @@ import { useSettings } from '@/store/settings';
 import { api } from './api';
 import type {
   Acclimatisation,
+  AltitudeProfile,
   Budget,
   Category,
   Interest,
   Itinerary,
   Me,
   NearPlace,
+  PackingList,
   Page,
   PlaceDetail,
   PlaceSummary,
@@ -24,6 +26,7 @@ import type {
   Review,
   ReviewPage,
   RiskResult,
+  SaferAlternatives,
   SearchResult,
   SharedTrip,
   ShareLinks,
@@ -32,6 +35,7 @@ import type {
   TrekSummary,
   TripDetail,
   TripSummary,
+  Weather,
 } from './types';
 
 // The language is part of every content query key, so switching language refetches.
@@ -121,6 +125,47 @@ export function useItinerary(id: string | undefined) {
     queryKey: ['itinerary', id, lang],
     queryFn: () => get<Itinerary>(`/treks/${id}/stages`),
     enabled: !!id,
+  });
+}
+
+export function useAltitudeProfile(id: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['altitude-profile', id, lang],
+    queryFn: () => get<AltitudeProfile>(`/treks/${id}/altitude-profile`),
+    enabled: !!id,
+  });
+}
+
+/** Asked again for every new risk check (`predictionId`), so a changed profile is used. */
+export function useSaferAlternatives(id: string, month: number, predictionId: string) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['safer-alternatives', id, month, predictionId, lang],
+    queryFn: () => get<SaferAlternatives>(`/treks/${id}/safer-alternatives?month=${month}`),
+  });
+}
+
+/** 7-day forecast; the server caches it for an hour, so the app keeps it for 30 minutes. */
+export function useWeather(type: 'place' | 'trek', id: string | undefined) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['weather', type, id, lang],
+    queryFn: () => get<Weather>(`/${type}s/${id}/weather`),
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000,
+    retry: false,
+  });
+}
+
+/** Packing checklist for a trek and month (rule-based on the server). */
+export function usePacking(id: string | undefined, month: number) {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['packing', id, month, lang],
+    queryFn: () => get<PackingList>(`/treks/${id}/packing`, { month }),
+    enabled: !!id,
+    placeholderData: keepPreviousData, // keep the old list on screen while the month changes
   });
 }
 
@@ -388,6 +433,7 @@ export function useRefreshDetail(type: ReviewTarget['type'], id: string | undefi
     const keys = [
       [type, id],
       ['reviews', type, id],
+      ['weather', type, id],
       ...(type === 'trek' ? [['trek-budget', id]] : []),
     ];
     await Promise.allSettled(keys.map((queryKey) => client.refetchQueries({ queryKey })));

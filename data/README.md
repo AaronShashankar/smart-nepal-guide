@@ -13,6 +13,7 @@ derived from the slugs/codes, so updates happen in place).
 | `permits.csv` | 7 | TIMS, ACAP, SNP, KPLRM, LNP, MCAP, MRAP with Nepali/SAARC/foreign fees |
 | `budget_rates.csv` | 18 | **V2 Phase 2.** Per-person daily food and stay cost per budget level (low/medium/high) for `city` trips and each trek region (+ `other`), city transport per km, and the Kathmandu ↔ trailhead return trip for treks. See "Budget rates" below |
 | `teahouses.csv` | 4 | **V2 Phase 2.** Real lodges in Tengboche, each with its **source**. No phone numbers (none found in a source we can name) |
+| `packing_items.csv` | 34 | **V2 Phase 1.** Packing checklist rules: code, group (clothing / gear / health / documents), sort order, and the conditions `always`, `min_altitude_m`, `months` (`;`-separated, e.g. `12;1;2`; only winter or monsoon months) and `min_days`, with English + Nepali name and tip. Nepali text is an AI draft to review. Permits are not listed here: they come from each trek's permits |
 | `photos.csv` | 36 | Wikimedia Commons photos with **author, licence and source page** (for the report) |
 | `climate_baseline.csv`, `climate_regions.csv` | | inputs to the approximate climate model below |
 | `training_samples.csv` | 592 | risk-model training rows (Phase 2): 32 `agency` + 560 `rule` (+ `survey` rows when added). **Generated** by `cd backend && uv run python -m app.ml.dataset [--survey form.csv]`, don't edit by hand; the labelling rules are in `backend/app/ml/dataset.py` |

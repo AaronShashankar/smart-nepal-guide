@@ -1,15 +1,24 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { formatNumber, km, meters } from '@/lib/format';
-import type { Acclimatisation, AcclimatisationStatus, Reason } from '@/lib/types';
+import { days, formatNumber, km, meters, monthName } from '@/lib/format';
+import { useSaferAlternatives } from '@/lib/queries';
+import type {
+  Acclimatisation,
+  AcclimatisationStatus,
+  AlternativeReason,
+  Reason,
+  RiskResult,
+} from '@/lib/types';
 import { colors, spacing, statusColors } from '@/theme';
 
 import { AppText } from './AppText';
+import { DifficultyBadge, Section } from './Cards';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -91,7 +100,64 @@ export function ReasonList({ reasons }: { reasons: Reason[] }) {
   );
 }
 
+function alternativeReason(
+  t: TFunction,
+  why: AlternativeReason,
+  from: number | null,
+  to: number | null,
+): string {
+  if (why === 'LOWER_RISK' || from == null || to == null) return t('alternatives.why_LOWER_RISK');
+  const unit = { LOWER_ALTITUDE: meters, SMALLER_GAIN: meters, FEWER_DAYS: days, SHORTER_DAYS: km }[
+    why
+  ];
+  return t(`alternatives.why_${why}`, { from: unit(from), to: unit(to) });
+}
+
+/**
+ * V2 Phase 1: similar treks (KNN) that the risk model rates lower for this traveller and month.
+ * Shown only for a hard or risky result, and only when there is at least one; never a trek that
+ * is just as risky. While loading or on an error nothing is shown.
+ */
+export function SaferAlternatives({ result }: { result: RiskResult }) {
+  const { t } = useTranslation();
+  const query = useSaferAlternatives(result.trek_id, result.month, result.id);
+  const items = query.data?.items ?? [];
+  if (items.length === 0) return null;
+  return (
+    <Section title={t('alternatives.title')}>
+      <AppText variant="caption" muted>
+        {t('alternatives.hint', { month: monthName(result.month) })}
+      </AppText>
+      {items.map((alt) => (
+        <Pressable
+          key={alt.trek.id}
+          style={styles.alternative}
+          accessibilityRole="button"
+          onPress={() => router.push({ pathname: '/trek/[id]', params: { id: alt.trek.id } })}
+        >
+          <View style={{ flex: 1, gap: 2 }}>
+            <AppText variant="subheading">{alt.trek.name}</AppText>
+            <AppText variant="caption" muted>
+              {alternativeReason(t, alt.why, alt.why_from, alt.why_to)}
+            </AppText>
+          </View>
+          <DifficultyBadge level={alt.level} />
+          <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+        </Pressable>
+      ))}
+    </Section>
+  );
+}
+
 const styles = StyleSheet.create({
+  alternative: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(2),
+    padding: spacing(3.5),
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+  },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',

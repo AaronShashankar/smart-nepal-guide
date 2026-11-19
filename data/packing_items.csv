@@ -1,0 +1,35 @@
+code,group,sort_order,always,min_altitude_m,months,min_days,name_en,name_ne,note_en,note_ne
+trekking_boots,clothing,10,true,,,,Broken-in trekking boots,पहिले नै लगाएर बानी परेका पदयात्रा जुत्ता,New boots cause blisters: walk in them for a few weeks first.,नयाँ जुत्ताले फोका बनाउँछ: केही हप्ता पहिलेदेखि लगाएर हिँड्नुहोस्।
+trekking_socks,clothing,20,true,,,,Wool trekking socks (3 pairs),ऊनी पदयात्रा मोजा (३ जोर),,
+base_layers,clothing,30,true,,,,Quick-dry base layers,छिटो सुक्ने भित्री लुगा,Avoid cotton: it stays wet and cold.,सुती कपडा नलगाउनुहोस्: भिजेपछि चिसो र ओसिलो रहन्छ।
+fleece,clothing,40,true,,,,Fleece or warm mid layer,फ्लिस वा न्यानो बीचको तह,,
+rain_jacket,clothing,50,true,,,,Waterproof jacket,पानी नछिर्ने ज्याकेट,,
+sun_hat,clothing,60,true,,,,Sun hat,घामबाट जोगाउने टोपी,,
+warm_hat_gloves,clothing,70,false,3000,,,Warm hat and light gloves,न्यानो टोपी र पातलो पन्जा,"Mornings and evenings are cold above 3,000 m.","३,००० मि. माथि बिहान र साँझ चिसो हुन्छ।"
+neck_gaiter,clothing,80,false,3500,,,Neck gaiter (buff),घाँटी छोप्ने कपडा (बफ),Keeps dust and cold air out on high trails.,उच्च बाटोमा धुलो र चिसो हावाबाट जोगाउँछ।
+down_jacket,clothing,90,false,4000,,,Down jacket,डाउन ज्याकेट,"Nights fall well below freezing above 4,000 m.","४,००० मि. माथि रातमा तापक्रम शून्यभन्दा धेरै तल झर्छ।"
+thermal_underwear,clothing,100,false,4000,,,Thermal underwear for sleeping,सुत्दा लगाउने थर्मल लुगा,,
+insulated_gloves,clothing,110,false,3500,12;1;2,,Insulated winter gloves,जाडोका लागि मोटो न्यानो पन्जा,,
+gaiters,clothing,120,false,3500,12;1;2,,Gaiters,गेटर्स (खुट्टा छोप्ने),Keep snow out of your boots.,जुत्ताभित्र हिउँ पस्न दिँदैन।
+leech_socks,clothing,130,false,,6;7;8;9,,Leech socks,जुका रोक्ने मोजा,Leeches are common on wet forest trails in the monsoon.,वर्षायाममा ओसिलो जङ्गलको बाटोमा जुका धेरै हुन्छन्।
+headlamp,gear,10,true,,,,Headlamp and spare batteries,हेडल्याम्प र थप ब्याट्री,,
+water_bottles,gear,20,true,,,,Two 1-litre water bottles,१ लिटरका दुई पानीका बोतल,,
+daypack,gear,30,true,,,,Daypack (25–35 litres),सानो झोला (२५–३५ लिटर),,
+trekking_poles,gear,40,false,3000,,,Trekking poles,पदयात्रा लौरो,They save your knees on long descents.,लामो ओरालोमा घुँडा जोगाउँछ।
+sunglasses,gear,50,false,3500,,,Category 3–4 sunglasses,क्याटेगोरी ३–४ को कालो चस्मा,Snow glare can burn your eyes.,हिउँको टल्काइले आँखा पोल्न सक्छ।
+sleeping_bag,gear,60,false,4000,,,−10 °C sleeping bag,−१० °C को स्लिपिङ ब्याग,Teahouse blankets are not enough this high.,यति उचाइमा टिहाउसको कम्बलले पुग्दैन।
+microspikes,gear,70,false,3500,12;1;2,,Microspikes,माइक्रोस्पाइक (जुत्तामा लगाउने काँटा),Trails can be icy in winter.,जाडोमा बाटो बरफले चिप्लो हुन सक्छ।
+pack_rain_cover,gear,80,false,,6;7;8;9,,Rain cover for the backpack,झोलाको पानी छेक्ने खोल,,
+dry_bags,gear,90,false,,6;7;8;9,,Dry bags for clothes and electronics,लुगा र इलेक्ट्रोनिक सामानका लागि पानी नछिर्ने झोला,,
+power_bank,gear,100,false,,,10,"Power bank (10,000 mAh or more)","पावर बैंक (१०,००० mAh वा बढी)",Charging costs money in teahouses and is not always possible.,टिहाउसमा चार्ज गर्न पैसा लाग्छ र सधैँ सम्भव हुँदैन।
+water_purification,health,10,true,,,,Water purification tablets or filter,पानी शुद्ध गर्ने चक्की वा फिल्टर,Saves buying plastic bottles on the trail.,बाटोमा प्लास्टिकका बोतल किन्नु पर्दैन।
+first_aid,health,20,true,,,,First-aid kit,प्राथमिक उपचार सामग्री,,
+sunscreen,health,30,true,,,,SPF 50 sunscreen and lip balm,SPF ५० सनस्क्रिन र ओठमा लगाउने बाम,,
+hand_sanitiser,health,40,true,,,,Hand sanitiser,ह्यान्ड स्यानिटाइजर,,
+blister_kit,health,50,false,,,5,Blister plasters,फोकामा टाँस्ने प्लास्टर,,
+diamox,health,60,false,4000,,,Diamox (acetazolamide),डायमक्स (एसिटाजोलामाइड),Ask a doctor before the trek. It does not replace going slowly.,पदयात्राअघि चिकित्सकसँग सोध्नुहोस्। यसले बिस्तारै चढ्नुको सट्टा काम गर्दैन।
+insect_repellent,health,70,false,,6;7;8;9,,Insect repellent,कीरा भगाउने औषधि,,
+passport_copy,documents,10,true,,,,Passport and photocopies,राहदानी र यसका फोटोकपी,Checkpoints ask to see them.,चेकपोस्टमा देखाउनुपर्छ।
+passport_photos,documents,20,true,,,,Passport-size photos (4),पासपोर्ट साइजका फोटो (४ वटा),Needed for permits.,अनुमति पत्रका लागि चाहिन्छ।
+cash,documents,30,true,,,,Nepali cash,नेपाली नगद,There are few or no ATMs on most trails.,धेरैजसो बाटोमा एटीएम छैन वा कम छ।
+rescue_insurance,documents,40,false,4000,,,Travel insurance that covers helicopter rescue,हेलिकप्टर उद्धार समेट्ने यात्रा बीमा,,

@@ -10,7 +10,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Section } from '@/components/Cards';
 import { Chip } from '@/components/Chip';
-import { AcclimatisationBox, ReasonList } from '@/components/Risk';
+import { AcclimatisationBox, ReasonList, SaferAlternatives } from '@/components/Risk';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/StateViews';
 import { errorMessage } from '@/lib/api';
@@ -50,6 +50,10 @@ function Result({ result }: { result: RiskResult }) {
           </AppText>
         )}
       </Section>
+
+      {(result.level === 'hard' || result.level === 'risky') && (
+        <SaferAlternatives result={result} />
+      )}
 
       <Section title={t('risk.warnings')}>
         {result.acclimatisation.status === 'ok' ? (

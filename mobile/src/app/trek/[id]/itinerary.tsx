@@ -5,11 +5,12 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { AltitudeChart } from '@/components/AltitudeChart';
 import { AppText } from '@/components/AppText';
 import { AcclimatisationBox, signedMeters, StatusBadge } from '@/components/Risk';
 import { QueryState } from '@/components/StateViews';
 import { formatNumber, km, meters } from '@/lib/format';
-import { useAcclimatisation, useItinerary } from '@/lib/queries';
+import { useAcclimatisation, useAltitudeProfile, useItinerary } from '@/lib/queries';
 import type { Acclimatisation, Itinerary, Stage } from '@/lib/types';
 import { colors, spacing, statusColors } from '@/theme';
 
@@ -145,6 +146,7 @@ export default function ItineraryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const itinerary = useItinerary(id);
   const report = useAcclimatisation(id);
+  const profile = useAltitudeProfile(id);
 
   return (
     <>
@@ -160,6 +162,7 @@ export default function ItineraryScreen() {
               keyExtractor={(s) => String(s.day)}
               ListHeaderComponent={
                 <View style={{ gap: spacing(3) }}>
+                  {profile.data && <AltitudeChart profile={profile.data} />}
                   <Summary itinerary={it} />
                   {report.data && <AcclimatisationBox report={report.data} />}
                 </View>

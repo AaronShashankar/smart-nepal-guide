@@ -54,7 +54,7 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Tests (they rebuild the `snguide_test` database from the migration and seed files on every run):
 
 ```bash
-uv run pytest            # 175 tests
+uv run pytest            # 209 tests
 uv run ruff check . && uv run ruff format --check .
 ```
 

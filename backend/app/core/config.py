@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://snguide:snguide@localhost:5432/snguide"
     redis_url: str = "redis://localhost:6379/0"
+    # How long a weather forecast stays in Redis before Open-Meteo is asked again
+    weather_cache_seconds: int = 3600
 
     jwt_secret: str = "change-me-in-.env"
     jwt_algorithm: str = "HS256"

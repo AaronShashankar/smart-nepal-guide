@@ -1,6 +1,9 @@
 # BCA 6th Semester – Project II (CAPJ356) Notes
 
-## Preferred idea
+## Final choice
+**Bato (बाटो): Smart Nepal Tourist & Trek Guide** (see the ⭐ section below). The ideas below were the earlier shortlist.
+
+## First preferred idea (replaced by Bato)
 **Nepali News Classifier / Fake News Detector** (noted 2026-11-05)
 
 - Classify Nepali news articles by category (politics, sports, business, etc.) and/or flag likely fake news
@@ -30,6 +33,7 @@ One app for travelling in Nepal: discover places, plan trips, and check how hard
 👉 Architecture diagram image for Figure 1: [docs/diagrams/architecture.png](../diagrams/architecture.png)
 👉 Database design (full schema): [database.md](database.md) · ER diagram image: [docs/diagrams/er_diagram.png](../diagrams/er_diagram.png)
 👉 Use case diagram: [docs/diagrams/use_case_diagram.png](../diagrams/use_case_diagram.png) (source: docs/diagrams/make_use_case_diagram.py)
+👉 **UI redesign (design canvas: 8 screens + style sheet, private until shared from its Share menu):** https://claude.ai/artifact/XyZ7XFUVMygZw38axdfPK2
 👉 **Project tracker (Google Sheet, source of truth for every task, bug, test case and decision):** https://docs.google.com/spreadsheets/d/1LWie4PGyiRj2xzo-zmTeK6Zd2-Rd_LAcVR2xOdkE33I/edit
 👉 **Version 1 implementation plan:** [Phase 1 — setup, users, explore](../plans/version1/phase1.md) · [Phase 2 — itinerary & AI risk predictor](../plans/version1/phase2.md) · [Phase 3 — trip planner, admin, release](../plans/version1/phase3.md)
 👉 **Version 2 implementation plan:** [Overview](../plans/version2/README.md) · [Phase 1 — smart trek features](../plans/version2/phase1.md) · [Phase 2 — personalisation & community](../plans/version2/phase2.md) · [Phase 3 — safety & offline](../plans/version2/phase3.md)
@@ -63,6 +67,9 @@ One app for travelling in Nepal: discover places, plan trips, and check how hard
 - **TSP nearest-neighbour heuristic + Haversine distance**: orders the places in a trip plan
 - **Rule-based altitude check**: daily gain above ~300–500 m once over 3,000 m → warning
 - **Content-based filtering**: recommends treks or places
+- **Linear interpolation** (V2): altitude at any point between two stages for the altitude profile chart
+- **K-nearest neighbours** (V2): finds similar treks (min-max normalised, Euclidean distance, K=4) and keeps the ones the risk model rates lower for this user ("safer alternatives")
+- **Cache-aside with a time-to-live** (V2): weather forecasts from Open-Meteo kept in Redis for 1 hour, with a 24-hour stale copy if the API is down
 
 **Data collection**
 - Trek routes: daily stages, altitude, distance (Annapurna Circuit, ABC, EBC, Langtang, Mardi Himal, Poon Hill, etc.)
@@ -70,7 +77,7 @@ One app for travelling in Nepal: discover places, plan trips, and check how hard
 - Labelled difficulty data: from trekking agency ratings, plus a survey of trekkers
 
 **Possible stack**
-- **Decided (2026-11-05), see [techstack.md](techstack.md):** React Native + Expo (mobile), React (admin), Python FastAPI (backend + ML), PostgreSQL, MapLibre + OpenStreetMap
+- **Decided (2026-11-05), see [techstack.md](techstack.md):** React Native + Expo (mobile), React (admin), Python FastAPI (backend + ML), PostgreSQL, Redis (weather cache, added in V2), MapLibre + OpenStreetMap
 - Bilingual: English (primary) + Nepali (secondary), with AI-assisted translation and human review
 
 **Team split (if 3 members)**

@@ -9,6 +9,7 @@ import { AppText } from '@/components/AppText';
 import { BudgetTable } from '@/components/BudgetTable';
 import { Button } from '@/components/Button';
 import { DifficultyBadge, Section } from '@/components/Cards';
+import { ForecastStrip } from '@/components/ForecastStrip';
 import { ReviewsSection } from '@/components/Reviews';
 import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
@@ -101,6 +102,8 @@ export default function TrekDetailScreen() {
               />
             </View>
 
+            <ForecastStrip type="trek" id={tr.id} />
+
             {tr.overview && (
               <Section title={t('trek.overview')}>
                 <AppText>{tr.overview}</AppText>
@@ -172,6 +175,20 @@ export default function TrekDetailScreen() {
                 }
                 onPress={() =>
                   router.push({ pathname: '/trek/[id]/itinerary', params: { id: tr.id } })
+                }
+              />
+              <Button
+                title={t('trek.packingList')}
+                variant="secondary"
+                icon={
+                  <MaterialCommunityIcons
+                    name="bag-personal-outline"
+                    size={20}
+                    color={colors.primary}
+                  />
+                }
+                onPress={() =>
+                  router.push({ pathname: '/trek/[id]/packing', params: { id: tr.id } })
                 }
               />
             </View>

@@ -116,6 +116,80 @@ Worked example (the "Valley" trip, medium budget, foreign, 2 days, *K* km after 
 **5. Share a trip: random tokens.** `secrets.token_urlsafe(16)` (128 random bits, impossible to guess);
 the token is the only key; a wrong token, a stopped share and a deleted trip all give the same 404.
 
+### Version 2 Phase 1: how they were built (with worked examples for the report)
+
+**1. Altitude graph: linear interpolation**
+([altitude_profile.py](../../backend/app/algorithms/altitude_profile.py)).
+Each day gives up to three known points: where it starts, the day's highest point (only when it is
+higher than both ends, placed in the middle of the day) and where you sleep. Between two known points
+the altitude is assumed to change in a straight line:
+`alt(x) = a₁ + (a₂ − a₁) · (x − x₁) / (x₂ − x₁)`.
+Worked example: between (0 km, 2,000 m) and (10 km, 3,000 m), at 5 km → 2,000 + 1,000 · 5/10 = **2,500 m**.
+A rest day adds a point with no extra km. For EBC the highest point is Kala Patthar, 5,644 m on day 9.
+The chart in the app puts **days** on the x-axis (not km): day *d*'s high point at *d* − 0.5 and its
+sleeping place at *d*, so rest days stay visible as flat steps. Each segment takes the colour of that
+day's acclimatisation status, so the chart and the day badges always agree.
+
+**2. Safer alternatives: K-nearest neighbours + the risk model**
+([knn.py](../../backend/app/algorithms/knn.py),
+[alternatives.py](../../backend/app/services/alternatives.py)).
+1. Every published trek becomes a vector `[max sleeping altitude, max daily gain, total days, km per day]`.
+2. **Min-max normalisation** per column, `x' = (x − min) / (max − min)`, so metres don't outweigh days
+   (a column where every trek is equal becomes 0).
+3. **Euclidean distance** `d(a, b) = √Σ(aᵢ − bᵢ)²` from the chosen trek to every other trek; keep the
+   **K = 4** nearest.
+4. Ask the same risk model about each neighbour for **this** traveller and month; keep only the ones
+   rated lower than the chosen trek (never suggest one that is just as risky), and show at most 3.
+5. "Why": the feature where the alternative improves most on the chosen trek (lower altitude, smaller
+   gain, fewer days, shorter days), with both values.
+
+Real result (demo profile: medium fitness, no multi-day experience, EBC in January → **Risky**):
+Annapurna Base Camp (Hard, *lower altitude* 5,644 → 4,130 m) and Annapurna Circuit (Hard, *fewer days*
+11 → 8). An expert on Poon Hill in October gets none, because Poon Hill is already the lowest rating.
+Nothing is saved to the risk history.
+
+**3. Weather forecast: cache-aside with a time-to-live (Redis)**
+([cache.py](../../backend/app/core/cache.py), [weather.py](../../backend/app/services/weather.py)).
+1. Look in Redis under `weather:{lat:.2f}:{lng:.2f}`. Rounding to 2 decimals (about 1 km) lets nearby
+   places share one entry. Found → **HIT**.
+2. Not found → call Open-Meteo (free, no key, 5 s timeout), save the answer for **3,600 s** → **MISS**.
+   A second copy, `weather:stale:…`, is kept for 24 h.
+3. Open-Meteo fails → return the 24-hour copy marked `stale` → **STALE**; no copy → 503.
+4. Redis down → every request is a MISS, but the forecast still works.
+
+The response header `X-Cache` says which case happened. A trek's forecast is for its **highest
+sleeping place** (the coldest night), e.g. Gorak Shep (5,164 m) for EBC. Checked live on 2026-11-19:
+MISS, then HIT; TTL 3,600 s and 86,400 s.
+
+**4. Packing checklist: rule-based expert system**
+([packing.py](../../backend/app/algorithms/packing.py),
+[services/packing.py](../../backend/app/services/packing.py)).
+- **Knowledge base:** one rule per item in `packing_item` (34 rules, `data/packing_items.csv`). A rule
+  is either `always`, or has up to three conditions: `min_altitude_m` (the trek's highest point is at
+  least this), `months` (the chosen month is one of these) and `min_days`.
+- **Facts:** the trek's highest point and number of days (computed from the stages) and the month.
+- **Inference (forward chaining over a flat rule table):** an item is on the list when it is `always`,
+  or when **all** of its set conditions are true. A rule with no condition never fires (a database
+  `CHECK` stops such rows).
+- **Explanation:** each item says which rule fired: `ALWAYS`, `ALTITUDE` (4,000 m), `WINTER`
+  (Dec–Feb, above 3,500 m), `MONSOON` (Jun–Sep), `LONG_TREK` (10+ days) or `PERMIT`.
+- **Permits:** the trek's own permits are added as documents, so the list and the permit section match.
+
+| Rule (from the table) | EBC, January (5,644 m, 11 days) | Poon Hill, October (3,210 m, 4 days) |
+|---|---|---|
+| Down jacket: altitude ≥ 4,000 m | 5,644 ≥ 4,000 → **yes** | 3,210 < 4,000 → no |
+| Microspikes: altitude ≥ 3,500 m **and** month ∈ {12, 1, 2} | yes and yes → **yes** | no and no → no |
+| Trekking poles: altitude ≥ 3,000 m | **yes** | 3,210 ≥ 3,000 → **yes** |
+| Power bank: days ≥ 10 | 11 ≥ 10 → **yes** | 4 < 10 → no |
+| Leech socks: month ∈ {6, 7, 8, 9} | no | no (yes in July) |
+| Permits | KPLRM, SNP | ACAP, TIMS |
+| **Items on the list** | **32** | **20** |
+
+(`test_ebc_in_january_has_cold_weather_gear`, `test_poon_hill_in_october_is_a_much_shorter_list`.)
+In the app the ticks are kept on the phone (AsyncStorage key `packing:{trekId}:{month}`), so a list
+works without an account. The advice is general: the screen says to check with an agency, and Diamox
+says "ask a doctor".
+
 ## Supporting algorithms
 
 | Feature | Algorithm |

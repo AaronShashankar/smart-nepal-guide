@@ -97,7 +97,8 @@
     "notFound": "Trek not found.",
     "viewItinerary": "Day-by-day itinerary",
     "checkRisk": "Check my risk",
-    "checkRiskHint": "A personal difficulty and risk rating, from your profile and the month you go."
+    "checkRiskHint": "A personal difficulty and risk rating, from your profile and the month you go.",
+    "packingList": "Packing list"
   },
   "difficulty": {
     "easy": "Easy",
@@ -189,6 +190,65 @@
     "code_REST_DAY": "Rest day",
     "rules": "Rule: above 3,000 m, sleep at most 500 m higher each day, and rest for every 1,000 m gained."
   },
+  "altitude": {
+    "title": "Altitude profile",
+    "start": "Start",
+    "highPoint": "Highest point of the day",
+    "tapHint": "Tap the chart to see each day.",
+    "a11y": "Altitude chart from {{from}} to a highest point of {{max}} over {{days}}"
+  },
+  "weather": {
+    "title": "Weather at {{place}}",
+    "today": "Today",
+    "updatedNow": "Updated just now",
+    "updatedMinutes": "Updated {{value}} min ago",
+    "updatedHours": "Updated {{value}} h ago",
+    "stale": "No connection to the forecast service: this forecast is {{value}} h old.",
+    "rain": "{{value}} mm",
+    "day": "{{day}}: {{sky}}, high {{max}}, low {{min}}",
+    "dayRain": "{{day}}: {{sky}}, high {{max}}, low {{min}}, {{rain}} rain",
+    "source": "Forecast: Open-Meteo",
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "code": {
+      "0": "Clear sky",
+      "1": "Mainly clear",
+      "2": "Partly cloudy",
+      "3": "Overcast",
+      "45": "Fog",
+      "48": "Freezing fog",
+      "51": "Light drizzle",
+      "53": "Drizzle",
+      "55": "Heavy drizzle",
+      "56": "Freezing drizzle",
+      "57": "Heavy freezing drizzle",
+      "61": "Light rain",
+      "63": "Rain",
+      "65": "Heavy rain",
+      "66": "Freezing rain",
+      "67": "Heavy freezing rain",
+      "71": "Light snow",
+      "73": "Snow",
+      "75": "Heavy snow",
+      "77": "Snow grains",
+      "80": "Light showers",
+      "81": "Showers",
+      "82": "Heavy showers",
+      "85": "Snow showers",
+      "86": "Heavy snow showers",
+      "95": "Thunderstorm",
+      "96": "Thunderstorm with hail",
+      "99": "Thunderstorm with heavy hail"
+    },
+    "unknown": "Weather"
+  },
   "risk": {
     "title": "Check my risk",
     "intro": "Choose the month you plan to start. We rate how hard {{trek}} would be for you.",
@@ -208,6 +268,15 @@
     "history": "My risk checks",
     "historyEmpty": "No risk checks yet. Open a trek and tap “Check my risk”.",
     "inMonth": "{{trek}} · {{month}}"
+  },
+  "alternatives": {
+    "title": "Safer alternatives for you",
+    "hint": "Similar treks that our model rates lower for you in {{month}}.",
+    "why_LOWER_ALTITUDE": "Highest point {{to}} instead of {{from}}",
+    "why_SMALLER_GAIN": "Biggest daily climb {{to}} instead of {{from}}",
+    "why_FEWER_DAYS": "{{to}} instead of {{from}}",
+    "why_SHORTER_DAYS": "{{to}} a day instead of {{from}}",
+    "why_LOWER_RISK": "Rated lower for you by the model"
   },
   "reasons": {
     "HIGH_ALTITUDE": "Goes up to {{altitude}}, above 5,000 m",
@@ -349,5 +418,31 @@
     "blocked": "This account has been blocked. Contact the Bato team.",
     "alreadyInTrip": "This place is already in the trip",
     "notFound": "This item could not be found. It may have been removed."
+  },
+  "packing": {
+    "title": "Packing list",
+    "month": "When do you go?",
+    "intro": "What to take on {{trek}} in {{month}}: highest point {{altitude}}, {{days}}.",
+    "progress": "{{done}} of {{total}} packed",
+    "reset": "Clear ticks",
+    "resetDone": "Ticks cleared",
+    "saved": "Ticks are saved on this phone.",
+    "disclaimer": "General guidance only. Check with your trekking agency, and ask a doctor about medicines.",
+    "group": {
+      "clothing": "Clothing",
+      "gear": "Gear",
+      "health": "Health",
+      "documents": "Documents and money"
+    },
+    "reason": {
+      "ALWAYS": "Every trek",
+      "ALTITUDE": "You go above {{value}}",
+      "WINTER": "Winter month",
+      "WINTER_HIGH": "Winter, above {{value}}",
+      "MONSOON": "Monsoon month",
+      "LONG_TREK": "Trek of {{value}} or more",
+      "PERMIT": "Required for this trek"
+    },
+    "failed": "Could not load the packing list."
   }
 }

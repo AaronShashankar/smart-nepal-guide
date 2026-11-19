@@ -85,3 +85,12 @@ class Nationality(enum.StrEnum):
     nepali = "nepali"
     saarc = "saarc"
     foreign = "foreign"
+
+
+class PackingGroup(enum.StrEnum):
+    """Sections of the packing checklist (V2 Phase 1), in the order the app shows them."""
+
+    clothing = "clothing"
+    gear = "gear"
+    health = "health"
+    documents = "documents"

@@ -19,6 +19,7 @@ from app.models.content import (
     TrekTranslation,
 )
 from app.models.ml import MlModel, RiskPrediction, TrainingSample
+from app.models.packing import PackingItem, PackingItemTranslation
 from app.models.trip import Review, Trip, TripStop
 from app.models.user import Interest, InterestTranslation, TravellerProfile, User, UserInterest
 
@@ -30,6 +31,8 @@ __all__ = [
     "Interest",
     "InterestTranslation",
     "MlModel",
+    "PackingItem",
+    "PackingItemTranslation",
     "Permit",
     "PermitTranslation",
     "Place",

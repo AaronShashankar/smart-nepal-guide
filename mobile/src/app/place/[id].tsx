@@ -9,6 +9,7 @@ import { AddToTrip } from '@/components/AddToTrip';
 import { AppText } from '@/components/AppText';
 import { CategoryIcon, InfoRow, Section } from '@/components/Cards';
 import { Chip } from '@/components/Chip';
+import { ForecastStrip } from '@/components/ForecastStrip';
 import { PhotoCarousel } from '@/components/PhotoCarousel';
 import { ReviewsSection } from '@/components/Reviews';
 import { RatingBadge } from '@/components/Stars';
@@ -78,6 +79,8 @@ export default function PlaceDetailScreen() {
               </View>
 
               <AddToTrip placeId={p.id} placeName={p.name} />
+
+              <ForecastStrip type="place" id={p.id} />
 
               {p.description && (
                 <Section title={t('place.about')}>

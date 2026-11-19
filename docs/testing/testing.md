@@ -2,7 +2,7 @@
 
 Two kinds of testing. **Step-by-step order, test counts and how to check each case:** [testing-guide.md](testing-guide.md).
 
-1. **Automated tests**: 175 backend pytest tests (`cd backend && uv run pytest`), plus the TypeScript
+1. **Automated tests**: 209 backend pytest tests (`cd backend && uv run pytest`), plus the TypeScript
    typecheck and lint for the mobile app and the admin panel. All of them run with
    `./scripts/verify.sh`.
 2. **Manual test cases**: the table below. Run each case on a real phone (and the admin panel in a
@@ -86,6 +86,19 @@ Test data: the seed data (`uv run python -m app.seed`), an admin made with
 | TC-51 | Share | Valley → Share trip → open the link in a private browser window; then Stop sharing and reload | — | Read-only page with the stops and day plan, no name or email; after stopping → "does not work any more" (404) | Read-only page (6 places · 2 days · 31.3 km), no name or email; after stopping: 404. First run: the 404 was raw JSON (BUG-10); re-test: a page "This link does not work any more" / "यो लिङ्क अब चल्दैन", still 404 | Pass | `test_share_link_works_without_login`, `test_stop_sharing_and_bad_tokens_give_404` |
 | TC-52 | Teahouses | EBC → itinerary → day 4 → Teahouses (4) | — | 4 lodges in Tengboche; Nepali names in नेपाली | 4 lodges (Tashi Delek Lodge, Tengboche Guest House, The Happy House, Trekkers Lodge); Nepali names in नेपाली. Stage notes stay English: no Nepali notes in the data yet (task V1-P3-19) | Pass | `test_itinerary_day_4_shows_teahouse_count`, `test_teahouses_in_tengboche` |
 
+### Version 2 Phase 1 (smart trek features)
+
+Run on 2026-11-19 on the same emulator (Phone 1), mostly in नेपाली. Screenshots `docs/screenshots/V2P1-*.png`.
+
+| TC | Feature | Steps | Test data | Expected result | Actual result | Pass/Fail | Automated test |
+|---|---|---|---|---|---|---|---|
+| TC-53 | Altitude chart | EBC → Day-by-day itinerary → chart above the days; tap day 4 | — | Line from Lukla (2,860 m) up to Kala Patthar (5,644 m); rest days flat; big-climb days orange; tap shows the day, place and altitude | Highest point 5,644 m on day 9 (selected by default); days 3 and 6 flat; days 2, 5 and 7 orange; tap day 4 → "दिन ४ · तेङबोचे · ३,८६० मि. · २८ कि.मि." | Pass | `test_ebc_profile_tops_out_at_kala_patthar`, `test_rest_day_adds_no_km_and_stays_flat`, `test_profile_colours_match_the_acclimatisation_check` |
+| TC-54 | Safer alternatives | Profile medium fitness, no multi-day experience → EBC → Check my risk → January | January | Risky; below the reasons, 1–3 similar treks the model rates lower, each with why; tap one opens it | Risky. Annapurna Circuit (Hard, fewer days 11 → 8) and Annapurna Base Camp (Hard, lower altitude 5,644 → 4,130 m); tap opens the trek | Pass | `test_beginner_ebc_january_gets_only_lower_rated_treks` |
+| TC-55 | Safer alternatives | Expert profile → Poon Hill → Check my risk → October | October | No "Safer alternatives" box (nothing is rated lower) | Easy, no box | Pass | `test_expert_poon_hill_october_gets_nothing` |
+| TC-56 | Weather | EBC page and Boudhanath page → 7-day forecast; tap a day; open again within the hour | — | 7 days with icon, max/min °C; EBC uses its highest sleeping place; tapping a day reads it in words; second request `X-Cache: HIT` | EBC: "Weather at Gorak Shep", 7 days (−4°/−17° today); Sun → "Sun: Fog, high -5°, low -19°"; Boudhanath: Kathmandu 22°/10°. Live API: MISS then HIT, TTL 3,600 s, stale copy 86,400 s. Nepali weekdays and digits OK | Pass | `test_second_call_within_the_ttl_is_a_cache_hit`, `test_stale_copy_when_open_meteo_fails`, `test_weather_still_works_when_redis_is_down` |
+| TC-57 | Packing list | EBC → Packing list → January; then Poon Hill → October | January / October | EBC: down jacket, microspikes, −10 °C sleeping bag, each with why; permits KPLRM + SNP. Poon Hill: a much shorter list without them | EBC January: 32 items in 4 groups ("४,००० मि. भन्दा माथि जाने भएकाले" next to the down jacket; KPLRM and SNP under documents). Poon Hill October: 20 items, no down jacket or microspikes (checked through the API). Same screen in English also checked: reasons "You go above 4,000 m", "Winter, above 3,500 m", "Trek of 5 days or more", "Required for this trek" (`V2P1-packing-ebc-en.png`) | Pass | `test_ebc_in_january_has_cold_weather_gear`, `test_poon_hill_in_october_is_a_much_shorter_list`, `test_permit_items_match_the_trek_permits` |
+| TC-58 | Packing list | Tick items → close the app fully → reopen the same trek and month; tap Clear ticks | — | Ticks are still there (saved on the phone, per trek and month); Clear ticks empties them | After a force-stop: January still "३२ मध्ये ४ तयार", November kept its own tick; Clear ticks → 0. First run: the Clear ticks label showed only "चिनो" (BUG-15); re-test: full label | Pass | (phone only: AsyncStorage) |
+
 ## Bugs found and fixed
 
 Write the bugs you find while running the table here (ID, what happened, fix). Examples from
@@ -114,3 +127,4 @@ The same bugs are in the tracker's **Bugs** tab, with severity, status and the f
 | BUG-12 | TC-45 | A hidden review still counts in the app until restart | 5-minute query cache and no pull-to-refresh on the place screen. **Fix:** pull-to-refresh on place and trek screens reloads the item, its reviews and the trek budget | Low / fixed |
 | BUG-13 | TC-31 | Offline message shows the server address; loaded lists are hidden; Try again misses Recommended | Error text appends the API URL; error state replaces cached data. **Fix:** address shown only in development builds; loaded data stays with a short note above it; Try again refreshes all of Explore | Low / fixed |
 | BUG-14 | TC-01 (found while fixing BUG-06) | After switching language in Settings, trek cards keep "8 days" / "4,130 m" in the old language until restart | The React Compiler caches `days()`, `km()` etc. by their arguments; `lib/format` reads the language from i18n, which the compiler cannot see. **Fix:** files that import `lib/format` opt out with `'use no memo'` | Medium / fixed |
+| BUG-15 | TC-58 | The Packing list's "चिनो हटाउनुहोस्" (Clear ticks) button showed only "चिनो" | The button appeared only after the first tick. On Android a Nepali button label that mounts after the screen has loaded loses its last word (the BUG-06 line-break issue), even at full width. **Fix:** the button is always there and only disabled while nothing is ticked | Low / fixed |

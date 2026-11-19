@@ -41,7 +41,7 @@ cp backend/.env.example backend/.env    # then put a random value in JWT_SECRET
 ```
 
 This runs:
-- **backend:** ruff lint and format check, a check that the migrations match the models, and the 175 pytest tests;
+- **backend:** ruff lint and format check, a check that the migrations match the models, and the 209 pytest tests;
 - **mobile:** the TypeScript typecheck and ESLint;
 - **admin:** the build and lint.
 
@@ -175,6 +175,18 @@ First time only: `expo-location` is a new native package, so rebuild the develop
 - [ ] Valley → **Share trip** → share sheet → open the link in a private browser window → read-only page; **Stop sharing** → the link gives 404
 - [ ] EBC → itinerary → day 4 → **Teahouses (4)** → 4 lodges in Tengboche
 - [ ] Switch to नेपाली → the new screens are in Nepali, money as रु. with Devanagari digits
+
+### Check the V2 Phase 1 demo (smart trek features)
+First time only: `react-native-svg` and `@react-native-async-storage/async-storage` are native packages, so
+rebuild the development build once (`cd mobile && npx expo run:android`), run `uv run python -m app.seed`
+(migration 0005 + 34 packing items) and make sure Redis is running (`redis-cli ping` → PONG).
+- [ ] EBC → **Day-by-day itinerary** → altitude chart: up to Kala Patthar 5,644 m on day 9, rest days flat, big-climb days orange; tap a day → "Day 4 · Tengboche · 3,860 m"
+- [ ] Profile medium fitness, no experience → EBC → **Check my risk** → January → Risky → **Safer alternatives**: Annapurna Circuit (fewer days) and ABC (lower altitude); tap one opens it
+- [ ] EBC page → **Weather at Gorak Shep** (7 days); a place page (Boudhanath) → its own forecast; tap a day to read it in words
+- [ ] Cache: `curl -sI http://localhost:8000/treks/<EBC id>/weather | grep -i x-cache` twice → `MISS`, then `HIT` (after `redis-cli flushdb` it is a MISS again)
+- [ ] EBC → **Packing list** → January → down jacket, microspikes, −10 °C sleeping bag, each with its reason; KPLRM + SNP under documents. Poon Hill → October → a much shorter list
+- [ ] Tick a few items → close the app fully → reopen → ticks still there; **Clear ticks** empties them
+- [ ] Switch to नेपाली → chart labels, forecast, reasons and the packing list in Nepali with Devanagari digits
 
 ---
 
