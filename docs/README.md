@@ -9,6 +9,8 @@ For the whole repository layout see [../filestructure.md](../filestructure.md).
 | [diagrams/](diagrams/) | Architecture, ER, use case, DFD (level 0 and 1) and class diagrams as `.png` + `.svg`, and the `make_*.py` scripts that draw them | Report figures. Redraw with `python3 docs/diagrams/make_er_diagram.py` (writes the `.svg` next to the script) |
 | [plans/version1/](plans/version1/) | Phase 1–3 plans with checkboxes and *Note:* lines for changes | Done: what was built and why |
 | [plans/version2/](plans/version2/) | [README.md](plans/version2/README.md) (overview, gate, open decisions) + phase 1–3 plans | Next work |
+| [plans/version3/](plans/version3/) | [README.md](plans/version3/README.md) + phase 1–3: Bato as a product after the defense (validate, launch, agency pilot) | After the defense |
+| [product/](product/) | [beyond-college.md](product/beyond-college.md): market, gaps, business models, risks; later interviews, competitors, pilot notes | After the defense |
 | [testing/](testing/) | [testing.md](testing/testing.md) (the 40 + 12 manual test cases and bugs), [testing-guide.md](testing/testing-guide.md) (order, sessions, how to check each) | Testing chapter |
 | [survey/](survey/) | [trekker-survey.md](survey/trekker-survey.md) (questions and labelling rule), [trekker-survey-form.gs](survey/trekker-survey-form.gs) (Apps Script that builds the Google Form) | Real training data for the risk model |
 | [ml/](ml/) | `comparison.md`, confusion matrices, feature importance, CV depth, data sources, `metrics.json` | ML chapter. **Generated**: `cd backend && uv run python -m app.ml.evaluate` (do not edit by hand) |
