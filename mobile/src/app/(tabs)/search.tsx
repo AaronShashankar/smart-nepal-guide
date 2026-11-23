@@ -1,7 +1,6 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,7 @@ import { useSearch, useTrekRegions, useTreks, type TrekFilters } from '@/lib/que
 import type { RiskLevel, SearchHit } from '@/lib/types';
 import { useDebounced } from '@/lib/useDebounced';
 import { colors, difficultyTints, radii, shadows, spacing } from '@/theme';
+import { PressableLink } from '@/components/PressableLink';
 
 type Duration = 'short' | 'medium' | 'long';
 type Tab = 'places' | 'treks';
@@ -32,29 +32,28 @@ function HitRow({ hit }: { hit: SearchHit }) {
       ? ({ pathname: '/place/[id]', params: { id: hit.id } } as const)
       : ({ pathname: '/trek/[id]', params: { id: hit.id } } as const);
   return (
-    <Link href={href} asChild>
-      <Pressable
-        style={({ pressed }) => [styles.hit, pressed && { opacity: 0.85 }]}
-        accessibilityRole="button"
-      >
-        <View style={styles.hitIcon}>
-          <MaterialCommunityIcons
-            name={hit.type === 'place' ? 'map-marker-outline' : 'hiking'}
-            size={20}
-            color={colors.primary}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <AppText variant="subheading">{hit.name}</AppText>
-          {hit.subtitle && (
-            <AppText variant="caption" muted>
-              {hit.subtitle}
-            </AppText>
-          )}
-        </View>
-        <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
-      </Pressable>
-    </Link>
+    <PressableLink
+      href={href}
+      style={({ pressed }) => [styles.hit, pressed && { opacity: 0.85 }]}
+      accessibilityRole="button"
+    >
+      <View style={styles.hitIcon}>
+        <MaterialCommunityIcons
+          name={hit.type === 'place' ? 'map-marker-outline' : 'hiking'}
+          size={20}
+          color={colors.primary}
+        />
+      </View>
+      <View style={{ flex: 1 }}>
+        <AppText variant="subheading">{hit.name}</AppText>
+        {hit.subtitle && (
+          <AppText variant="caption" muted>
+            {hit.subtitle}
+          </AppText>
+        )}
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+    </PressableLink>
   );
 }
 

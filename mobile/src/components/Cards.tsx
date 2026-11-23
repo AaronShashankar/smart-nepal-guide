@@ -2,8 +2,7 @@
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { photoUrl } from '@/lib/api';
@@ -15,6 +14,7 @@ import { AppText } from './AppText';
 import { Pill } from './Chip';
 import { MountainArt, Scrim } from './Layout';
 import { RatingBadge } from './Stars';
+import { PressableLink } from './PressableLink';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -76,94 +76,91 @@ function Meta({ icon, text }: { icon: IconName; text: string }) {
 export function PlaceCard({ place, distanceKm }: { place: PlaceSummary; distanceKm?: number }) {
   const { t } = useTranslation();
   return (
-    <Link href={{ pathname: '/place/[id]', params: { id: place.id } }} asChild>
-      <Pressable
-        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        accessibilityRole="button"
-      >
-        <Thumbnail uri={place.thumbnail_url} category={place.category} />
-        <View style={styles.body}>
-          <AppText variant="subheading" numberOfLines={1}>
-            {place.name}
-          </AppText>
-          <AppText variant="caption" muted numberOfLines={1}>
-            {place.category.name}
-            {place.district ? ` · ${districtName(place.district)}` : ''}
-          </AppText>
-          <View style={[styles.row, styles.between]}>
-            {distanceKm != null ? (
-              <Meta
-                icon="map-marker-outline"
-                text={t('units.kmAway', { value: formatNumber(distanceKm, 1) })}
-              />
-            ) : place.altitude_m != null ? (
-              <Meta icon="image-filter-hdr" text={meters(place.altitude_m)} />
-            ) : (
-              <View />
-            )}
-            <RatingBadge rating={place.rating} />
-          </View>
+    <PressableLink
+      href={{ pathname: '/place/[id]', params: { id: place.id } }}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      accessibilityRole="button"
+    >
+      <Thumbnail uri={place.thumbnail_url} category={place.category} />
+      <View style={styles.body}>
+        <AppText variant="subheading" numberOfLines={1}>
+          {place.name}
+        </AppText>
+        <AppText variant="caption" muted numberOfLines={1}>
+          {place.category.name}
+          {place.district ? ` · ${districtName(place.district)}` : ''}
+        </AppText>
+        <View style={[styles.row, styles.between]}>
+          {distanceKm != null ? (
+            <Meta
+              icon="map-marker-outline"
+              text={t('units.kmAway', { value: formatNumber(distanceKm, 1) })}
+            />
+          ) : place.altitude_m != null ? (
+            <Meta icon="image-filter-hdr" text={meters(place.altitude_m)} />
+          ) : (
+            <View />
+          )}
+          <RatingBadge rating={place.rating} />
         </View>
-      </Pressable>
-    </Link>
+      </View>
+    </PressableLink>
   );
 }
 
 export function TrekCard({ trek }: { trek: TrekSummary }) {
   return (
-    <Link href={{ pathname: '/trek/[id]', params: { id: trek.id } }} asChild>
-      <Pressable
-        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        accessibilityRole="button"
-      >
-        <MountainArt style={styles.thumb} />
-        <View style={styles.body}>
-          <AppText variant="subheading" numberOfLines={2}>
-            {trek.name}
-          </AppText>
-          <AppText variant="caption" muted numberOfLines={1}>
-            {regionName(trek.region)} · {days(trek.total_days)} · {km(trek.total_distance_km)}
-          </AppText>
-          <View style={[styles.row, styles.between]}>
-            <View style={styles.row}>
-              <Meta icon="image-filter-hdr" text={meters(trek.max_altitude_m)} />
-              <RatingBadge rating={trek.rating} />
-            </View>
-            <DifficultyBadge level={trek.base_difficulty} />
+    <PressableLink
+      href={{ pathname: '/trek/[id]', params: { id: trek.id } }}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      accessibilityRole="button"
+    >
+      <MountainArt style={styles.thumb} />
+      <View style={styles.body}>
+        <AppText variant="subheading" numberOfLines={2}>
+          {trek.name}
+        </AppText>
+        <AppText variant="caption" muted numberOfLines={1}>
+          {regionName(trek.region)} · {days(trek.total_days)} · {km(trek.total_distance_km)}
+        </AppText>
+        <View style={[styles.row, styles.between]}>
+          <View style={styles.row}>
+            <Meta icon="image-filter-hdr" text={meters(trek.max_altitude_m)} />
+            <RatingBadge rating={trek.rating} />
           </View>
+          <DifficultyBadge level={trek.base_difficulty} />
         </View>
-      </Pressable>
-    </Link>
+      </View>
+    </PressableLink>
   );
 }
 
 /** Search result: picture on top with the difficulty pill, then name and days · km · altitude. */
 export function TrekResultCard({ trek }: { trek: TrekSummary }) {
   return (
-    <Link href={{ pathname: '/trek/[id]', params: { id: trek.id } }} asChild>
-      <Pressable
-        style={({ pressed }) => [styles.resultCard, pressed && styles.pressed]}
-        accessibilityRole="button"
-      >
-        <View style={{ height: 150 }}>
-          <MountainArt style={StyleSheet.absoluteFill} />
-          <View style={{ position: 'absolute', top: 12, left: 12 }}>
-            <DifficultyBadge level={trek.base_difficulty} />
-          </View>
+    <PressableLink
+      href={{ pathname: '/trek/[id]', params: { id: trek.id } }}
+      style={({ pressed }) => [styles.resultCard, pressed && styles.pressed]}
+      accessibilityRole="button"
+    >
+      <View style={{ height: 150 }}>
+        <MountainArt style={StyleSheet.absoluteFill} />
+        <View style={{ position: 'absolute', top: 12, left: 12 }}>
+          <DifficultyBadge level={trek.base_difficulty} />
         </View>
-        <View style={{ padding: spacing(4), paddingTop: 14, gap: 10 }}>
-          <AppText variant="subheading" style={{ fontSize: 17 }}>
-            {trek.name}
-          </AppText>
-          <View style={[styles.row, { gap: spacing(4), flexWrap: 'wrap' }]}>
-            <Meta icon="calendar-blank-outline" text={days(trek.total_days)} />
-            <Meta icon="map-marker-distance" text={km(trek.total_distance_km)} />
-            <Meta icon="image-filter-hdr" text={meters(trek.max_altitude_m)} />
-            <RatingBadge rating={trek.rating} />
-          </View>
+      </View>
+      <View style={{ padding: spacing(4), paddingTop: 14, gap: 10 }}>
+        <AppText variant="subheading" style={{ fontSize: 17 }}>
+          {trek.name}
+        </AppText>
+        <View style={[styles.row, { gap: spacing(4), flexWrap: 'wrap' }]}>
+          <Meta icon="calendar-blank-outline" text={days(trek.total_days)} />
+          <Meta icon="map-marker-distance" text={km(trek.total_distance_km)} />
+          <Meta icon="image-filter-hdr" text={meters(trek.max_altitude_m)} />
+          <RatingBadge rating={trek.rating} />
         </View>
-      </Pressable>
-    </Link>
+      </View>
+    </PressableLink>
   );
 }
 
@@ -186,41 +183,40 @@ export function RecommendationCard({ rec }: { rec: Recommendation }) {
   const photo =
     rec.type === 'place' && rec.item.thumbnail_url ? photoUrl(rec.item.thumbnail_url) : null;
   return (
-    <Link href={href} asChild>
-      <Pressable
-        style={({ pressed }) => [styles.recCard, pressed && styles.pressed]}
-        accessibilityRole="button"
-      >
-        {photo ? (
-          <Image
-            source={{ uri: photo }}
-            style={StyleSheet.absoluteFill}
-            contentFit="cover"
-            transition={150}
-          />
-        ) : (
-          <MountainArt style={StyleSheet.absoluteFill} />
-        )}
-        <Scrim
-          id={`rec-${rec.item.id}`}
-          stops={[
-            [0.3, 0],
-            [0.55, 0.35],
-            [1, 0.88],
-          ]}
+    <PressableLink
+      href={href}
+      style={({ pressed }) => [styles.recCard, pressed && styles.pressed]}
+      accessibilityRole="button"
+    >
+      {photo ? (
+        <Image
+          source={{ uri: photo }}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          transition={150}
         />
-        <View style={styles.recText}>
-          {reason && <Pill label={t(`because.${reason}`)} onPhoto />}
-          <AppText variant="title" numberOfLines={2} style={{ color: '#FFFFFF' }}>
-            {rec.item.name}
-          </AppText>
-          <AppText variant="caption" numberOfLines={1} style={{ color: 'rgba(255,255,255,0.86)' }}>
-            {meta.filter(Boolean).join(' · ')}
-          </AppText>
-          <RatingBadge rating={rec.item.rating} light />
-        </View>
-      </Pressable>
-    </Link>
+      ) : (
+        <MountainArt style={StyleSheet.absoluteFill} />
+      )}
+      <Scrim
+        id={`rec-${rec.item.id}`}
+        stops={[
+          [0.3, 0],
+          [0.55, 0.35],
+          [1, 0.88],
+        ]}
+      />
+      <View style={styles.recText}>
+        {reason && <Pill label={t(`because.${reason}`)} onPhoto />}
+        <AppText variant="title" numberOfLines={2} style={{ color: '#FFFFFF' }}>
+          {rec.item.name}
+        </AppText>
+        <AppText variant="caption" numberOfLines={1} style={{ color: 'rgba(255,255,255,0.86)' }}>
+          {meta.filter(Boolean).join(' · ')}
+        </AppText>
+        <RatingBadge rating={rec.item.rating} light />
+      </View>
+    </PressableLink>
   );
 }
 

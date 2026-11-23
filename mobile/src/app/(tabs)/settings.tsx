@@ -1,6 +1,5 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -16,6 +15,7 @@ import type { Lang } from '@/lib/types';
 import { useAuth } from '@/store/auth';
 import { useSettings } from '@/store/settings';
 import { colors, radii, spacing } from '@/theme';
+import { PressableLink } from '@/components/PressableLink';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -31,17 +31,19 @@ function LinkRow({
   last?: boolean;
 }) {
   return (
-    <Link href={href} asChild>
-      <Pressable style={[styles.row, !last && styles.divider]} accessibilityRole="button">
-        <View style={styles.rowIcon}>
-          <MaterialCommunityIcons name={icon} size={20} color={colors.primary} />
-        </View>
-        <AppText variant="label" weight="semibold" style={{ flex: 1, fontSize: 15 }}>
-          {label}
-        </AppText>
-        <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
-      </Pressable>
-    </Link>
+    <PressableLink
+      href={href}
+      style={[styles.row, !last && styles.divider]}
+      accessibilityRole="button"
+    >
+      <View style={styles.rowIcon}>
+        <MaterialCommunityIcons name={icon} size={20} color={colors.primary} />
+      </View>
+      <AppText variant="label" weight="semibold" style={{ flex: 1, fontSize: 15 }}>
+        {label}
+      </AppText>
+      <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+    </PressableLink>
   );
 }
 

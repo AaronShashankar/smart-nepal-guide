@@ -1,9 +1,9 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -17,6 +17,7 @@ import { days, formatNumber, km } from '@/lib/format';
 import { useCreateTrip, useTrips } from '@/lib/queries';
 import type { TripSummary } from '@/lib/types';
 import { colors, radii, shadows, spacing } from '@/theme';
+import { PressableLink } from '@/components/PressableLink';
 
 function TripRow({ trip }: { trip: TripSummary }) {
   const { t } = useTranslation();
@@ -26,24 +27,23 @@ function TripRow({ trip }: { trip: TripSummary }) {
   if (trip.total_days) facts.push(days(trip.total_days));
   if (trip.total_km != null) facts.push(km(trip.total_km));
   return (
-    <Link href={{ pathname: '/trip/[id]', params: { id: trip.id } }} asChild>
-      <Pressable
-        style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
-        accessibilityRole="button"
-      >
-        <View style={styles.rowIcon}>
-          <MaterialCommunityIcons name="map-marker-path" size={24} color="#FFFFFF" />
-        </View>
-        <View style={{ flex: 1, gap: 2 }}>
-          <AppText variant="subheading">{trip.title}</AppText>
-          <AppText variant="caption" muted>
-            {facts.join(' · ')}
-            {trip.start_date ? ` · ${trip.start_date}` : ''}
-          </AppText>
-        </View>
-        <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
-      </Pressable>
-    </Link>
+    <PressableLink
+      href={{ pathname: '/trip/[id]', params: { id: trip.id } }}
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
+      accessibilityRole="button"
+    >
+      <View style={styles.rowIcon}>
+        <MaterialCommunityIcons name="map-marker-path" size={24} color="#FFFFFF" />
+      </View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <AppText variant="subheading">{trip.title}</AppText>
+        <AppText variant="caption" muted>
+          {facts.join(' · ')}
+          {trip.start_date ? ` · ${trip.start_date}` : ''}
+        </AppText>
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+    </PressableLink>
   );
 }
 

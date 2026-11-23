@@ -1,17 +1,9 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-  Linking,
-  Platform,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Linking, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -39,6 +31,7 @@ import { districtName, formatNumber, meters, monthRange, npr, provinceName } fro
 import { usePlace, useRefreshDetail } from '@/lib/queries';
 import type { PlaceDetail } from '@/lib/types';
 import { colors, spacing } from '@/theme';
+import { PressableLink } from '@/components/PressableLink';
 
 const HERO = 400;
 
@@ -168,22 +161,22 @@ export default function PlaceDetailScreen() {
             <Section title={t('place.nearby')}>
               <ListCard>
                 {p.nearby.map((n, i) => (
-                  <Link key={n.id} href={{ pathname: '/place/[id]', params: { id: n.id } }} asChild>
-                    <Pressable
-                      style={[styles.nearRow, i < p.nearby.length - 1 && styles.divider]}
-                      accessibilityRole="button"
-                    >
-                      <View style={styles.nearIcon}>
-                        <CategoryIcon category={n.category} size={18} color={colors.primary} />
-                      </View>
-                      <AppText variant="label" weight="semibold" style={{ flex: 1, fontSize: 15 }}>
-                        {n.name}
-                      </AppText>
-                      <AppText variant="caption" weight="bold" muted>
-                        {t('units.km', { value: formatNumber(n.distance_km, 1) })}
-                      </AppText>
-                    </Pressable>
-                  </Link>
+                  <PressableLink
+                    key={n.id}
+                    href={{ pathname: '/place/[id]', params: { id: n.id } }}
+                    style={[styles.nearRow, i < p.nearby.length - 1 && styles.divider]}
+                    accessibilityRole="button"
+                  >
+                    <View style={styles.nearIcon}>
+                      <CategoryIcon category={n.category} size={18} color={colors.primary} />
+                    </View>
+                    <AppText variant="label" weight="semibold" style={{ flex: 1, fontSize: 15 }}>
+                      {n.name}
+                    </AppText>
+                    <AppText variant="caption" weight="bold" muted>
+                      {t('units.km', { value: formatNumber(n.distance_km, 1) })}
+                    </AppText>
+                  </PressableLink>
                 ))}
               </ListCard>
             </Section>

@@ -1,7 +1,7 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -31,6 +31,7 @@ import { days, km, meters, npr, regionName } from '@/lib/format';
 import { useAltitudeProfile, useRefreshDetail, useTrek, useTrekBudget } from '@/lib/queries';
 import type { Permit, TrekDetail } from '@/lib/types';
 import { colors, radii, spacing } from '@/theme';
+import { PressableLink } from '@/components/PressableLink';
 
 function TrekBudget({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -210,35 +211,31 @@ export default function TrekDetailScreen() {
                   { label: t('trek.start'), place: tr.start_place },
                   { label: t('trek.end'), place: tr.end_place },
                 ].map(({ label, place }, i) => (
-                  <Link
+                  <PressableLink
                     key={label}
                     href={{ pathname: '/place/[id]', params: { id: place.id } }}
-                    asChild
+                    accessibilityRole="button"
+                    style={[styles.routeRow, i === 0 && styles.divider]}
                   >
-                    <Pressable
-                      accessibilityRole="button"
-                      style={[styles.routeRow, i === 0 && styles.divider]}
-                    >
-                      <View style={styles.linkIcon}>
-                        <MaterialCommunityIcons
-                          name={i === 0 ? 'flag-outline' : 'flag-checkered'}
-                          size={18}
-                          color={colors.primary}
-                        />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <AppText variant="small" muted>
-                          {label}
-                        </AppText>
-                        <AppText variant="label" weight="semibold">
-                          {place.name}
-                        </AppText>
-                      </View>
-                      <AppText variant="caption" weight="bold" muted>
-                        {meters(place.altitude_m)}
+                    <View style={styles.linkIcon}>
+                      <MaterialCommunityIcons
+                        name={i === 0 ? 'flag-outline' : 'flag-checkered'}
+                        size={18}
+                        color={colors.primary}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <AppText variant="small" muted>
+                        {label}
                       </AppText>
-                    </Pressable>
-                  </Link>
+                      <AppText variant="label" weight="semibold">
+                        {place.name}
+                      </AppText>
+                    </View>
+                    <AppText variant="caption" weight="bold" muted>
+                      {meters(place.altitude_m)}
+                    </AppText>
+                  </PressableLink>
                 ))}
               </ListCard>
             </Section>
