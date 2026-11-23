@@ -6,7 +6,15 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.models.enums import AuthProvider, BudgetLevel, Lang, ReviewStatus, RiskLevel, UserRole
+from app.models.enums import (
+    PLACE_TAGS,
+    AuthProvider,
+    BudgetLevel,
+    Lang,
+    ReviewStatus,
+    RiskLevel,
+    UserRole,
+)
 
 
 class Page[T](BaseModel):
@@ -55,7 +63,16 @@ class PlaceAdminIn(BaseModel):
     en: PlaceText
     ne: PlaceText = Field(default_factory=PlaceText)
     aliases: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list, description="codes from PLACE_TAGS")
     climate: list[ClimateRow] = Field(default_factory=list, description="0 or 12 rows")
+
+    @field_validator("tags")
+    @classmethod
+    def known_tags(cls, v: list[str]) -> list[str]:
+        unknown = sorted(set(v) - set(PLACE_TAGS))
+        if unknown:
+            raise ValueError(f"Unknown tags: {', '.join(unknown)}")
+        return [t for t in PLACE_TAGS if t in v]  # no repeats, always in the same order
 
     @field_validator("en")
     @classmethod

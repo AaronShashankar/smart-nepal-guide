@@ -20,7 +20,7 @@ from app.models.content import (
 )
 from app.models.ml import MlModel, RiskPrediction, TrainingSample
 from app.models.packing import PackingItem, PackingItemTranslation
-from app.models.trip import Review, Trip, TripStop
+from app.models.trip import DismissedItem, Review, Trip, TripStop
 from app.models.user import Interest, InterestTranslation, TravellerProfile, User, UserInterest
 
 __all__ = [
@@ -28,6 +28,7 @@ __all__ = [
     "BudgetRate",
     "Category",
     "CategoryTranslation",
+    "DismissedItem",
     "Interest",
     "InterestTranslation",
     "MlModel",

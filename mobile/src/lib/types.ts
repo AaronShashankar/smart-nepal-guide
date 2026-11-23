@@ -87,6 +87,8 @@ export interface PlaceDetail extends PlaceSummary {
   photos: { url: string; sort_order: number }[];
   best_months: number[];
   nearby: { id: string; name: string; category: Category; distance_km: number }[];
+  /** Codes from PLACE_TAGS (backend enums.py), shown as chips */
+  tags: string[];
 }
 
 export interface PlaceRef {
@@ -132,6 +134,13 @@ export interface SearchHit {
   subtitle: string | null;
   score: number;
   matched: string;
+  /** What matched: the item's own name, its district, its category or a village on the trek */
+  match: 'name' | 'district' | 'category' | 'via';
+  category: Category | null; // places
+  district: string | null; // places
+  region: string | null; // treks
+  total_days: number | null; // treks
+  via: string | null; // treks found through a village they pass
 }
 
 export interface SearchResult {
@@ -324,11 +333,24 @@ export type BecauseCode =
   | 'GOOD_SEASON'
   | 'FITS_BUDGET'
   | 'HIGHLY_RATED'
-  | 'OFTEN_PLANNED';
+  | 'OFTEN_PLANNED'
+  | 'FITS_YOU'
+  | 'NEAR_YOU'
+  | 'NEAR_YOUR_TRIP'
+  | 'SIMILAR_TO_LIKED'
+  | 'EXPLORE_MORE';
 
+interface RecommendationBase {
+  score: number;
+  because: BecauseCode[];
+  /** Treks: our risk model's level for you this month (needs a complete profile) */
+  risk_level: RiskLevel | null;
+  /** From your position (if location is allowed) or your latest trip */
+  distance_km: number | null;
+}
 export type Recommendation =
-  | { type: 'place'; item: PlaceSummary; score: number; because: BecauseCode[] }
-  | { type: 'trek'; item: TrekSummary; score: number; because: BecauseCode[] };
+  | (RecommendationBase & { type: 'place'; item: PlaceSummary })
+  | (RecommendationBase & { type: 'trek'; item: TrekSummary });
 
 export interface Recommendations {
   mode: 'personal' | 'popular';

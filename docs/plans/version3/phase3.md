@@ -56,6 +56,15 @@ premium offline packs in task 4 and an in-app referral, and keep tasks 3, 5 and 
 - [ ] Weekly numbers in the admin dashboard: active users, 4-week retention, offline packs downloaded, agencies (pilot / paying), revenue
 - [ ] Compare with the success measures from Phase 1
 
+## 5b. Search and recommendations at scale (`V3-SR-09` … `V3-SR-12`) — Optional
+
+Stage 3 of [search-recommendation.md](../../product/search-recommendation.md). Only when the numbers from Phase 2 say it is needed.
+
+- [ ] `V3-SR-09` Dedicated search engine (Meilisearch / Typesense), only if PostgreSQL search is too slow or limited
+- [ ] `V3-SR-10` Meaning-based search (multilingual embeddings, pgvector), only if search logs show question-like queries
+- [ ] `V3-SR-11` Collaborative filtering (matrix factorization), only with thousands of active users
+- [ ] `V3-SR-12` A/B testing of ranking changes
+
 ## 6. Grow / change / stop (`V3-P3-06`) — Core
 
 Write the decision in the Decisions tab with the pilot numbers:

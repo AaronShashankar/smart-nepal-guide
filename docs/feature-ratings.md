@@ -28,7 +28,7 @@ Each score weighs four things:
 
 ## Summary
 
-**Overall: 7.6 / 10** (the average of the 24 built features below).
+**Overall: 7.7 / 10** (the average of the 24 built features below; 7.6 before the search and recommendation work of 2026-11-23).
 The code quality is high almost everywhere. The scores are pulled down mainly by
 **data** (teahouses, Nepali content, real training data), **hosting** (the app only works
 on the laptop's network), and **features that were planned but not built yet**
@@ -36,28 +36,28 @@ on the laptop's network), and **features that were planned but not built yet**
 
 | # | Feature | Score | In one line |
 |---|---|---|---|
-| 1 | Fuzzy search | **9** | Trigram search finds candidates, our own Levenshtein ranks them; handles typos, aliases and Devanagari |
+| 1 | Search | **9.5** | Trigram + our own Levenshtein, transliteration, word-by-word, villages → treks, districts, categories, initials; measured: hit@1 92%, MRR 0.958 |
 | 2 | Weather forecast | **9** | Cache-aside with a stale copy kept as a backup; keeps working when Redis or Open-Meteo is down |
 | 3 | "Why this rating?" reasons | **9** | Every reason shown is true for this user and comes from the model's own decision paths |
 | 4 | Itinerary + acclimatisation checker | **8.5** | Rules from WMS / CDC guidance, rest-day suggestions, well tested |
 | 5 | Altitude profile chart | **8.5** | Clear chart, fast climbs coloured, checked in both languages |
 | 6 | Reviews and ratings | **8.5** | Bayesian average, one review per user, moderation survives edits |
 | 7 | Share a trip | **8.5** | Secure token, works without login, a web page for people without the app |
-| 8 | Testing and quality checks | **8.5** | 209 backend tests, 61 manual cases, bug log; no automated tests for the app or admin |
-| 9 | AI risk predictor | **8** | Excellent from-scratch forest; but 95% of the training data comes from our own rule |
-| 10 | Explore, place and trek pages | **8** | Rich pages, 63 of 69 places have photos; treks have none |
-| 11 | Traveller profile | **8** | Simple, optional health questions, prompts when needed |
-| 12 | Packing checklist | **8** | Rule-based expert system with reasons; ticks are remembered |
-| 13 | Near me | **8** | Bounding box + Haversine, permission flows done, passes on a real phone |
-| 14 | UI design | **8** | Redesign checked on a real phone; a few canvas parts left out |
-| 15 | Trip planner | **7.5** | Strong algorithms, but the app doesn't use them fully |
-| 16 | Admin panel | **7.5** | Full CRUD for all content; packing items and trek photos missing |
-| 17 | Accounts and login | **7** | Safe basics; no password reset, account deletion or rate limiting |
-| 18 | Bilingual (English / नेपाली) | **7** | Every screen translated; most place and trek *content* is English only |
-| 19 | Safer alternatives (KNN) | **7** | Correct and honest; only 8 treks to choose from |
-| 20 | Budget estimate | **7** | Sourced rates and nationality fees; no guide fees, which most foreign treks now need |
-| 21 | Map | **6.5** | Works, but basic: no route lines, no "you are here", online only |
-| 22 | Recommendations | **6.5** | Correct cosine similarity, but hand-set weights and no learning from what users do |
+| 8 | Testing and quality checks | **8.5** | 243 backend tests, 66 manual cases, search test set, bug log; no automated tests for the app or admin |
+| 9 | Recommendations | **8.5** | Cosine with tags; learns from reviews, trips and Not interested; risk-aware; nearby bonus; MMR variety (measured); weights still hand-set, no real users yet |
+| 10 | AI risk predictor | **8** | Excellent from-scratch forest; but 95% of the training data comes from our own rule |
+| 11 | Explore, place and trek pages | **8** | Rich pages, 63 of 69 places have photos; treks have none |
+| 12 | Traveller profile | **8** | Simple, optional health questions, prompts when needed |
+| 13 | Packing checklist | **8** | Rule-based expert system with reasons; ticks are remembered |
+| 14 | Near me | **8** | Bounding box + Haversine, permission flows done, passes on a real phone |
+| 15 | UI design | **8** | Redesign checked on a real phone; a few canvas parts left out |
+| 16 | Trip planner | **7.5** | Strong algorithms, but the app doesn't use them fully |
+| 17 | Admin panel | **7.5** | Full CRUD for all content; packing items and trek photos missing |
+| 18 | Accounts and login | **7** | Safe basics; no password reset, account deletion or rate limiting |
+| 19 | Bilingual (English / नेपाली) | **7** | Every screen translated; most place and trek *content* is English only |
+| 20 | Safer alternatives (KNN) | **7** | Correct and honest; only 8 treks to choose from |
+| 21 | Budget estimate | **7** | Sourced rates and nationality fees; no guide fees, which most foreign treks now need |
+| 22 | Map | **6.5** | Works, but basic: no route lines, no "you are here", online only |
 | 23 | Teahouses | **4** | Built end to end, but only 4 lodges in one village |
 | 24 | Hosting and release | **4** | Runs from the laptop; the APK needs the laptop's IP |
 | — | Safety and offline (V2 Phase 3) | **0** | Not started: SOS, emergency contacts, symptom checker, offline treks |
@@ -111,7 +111,7 @@ model feature (this needs new training data).
 
 ## 2. Discover
 
-### Fuzzy search: 9 / 10
+### Search: 9.5 / 10
 
 **What works well**
 - Two steps: PostgreSQL `pg_trgm` finds candidates quickly using the index, then our own
@@ -122,11 +122,18 @@ model feature (this needs new training data).
 - It searches 71 aliases, handles Devanagari, and escapes `%` and `_` in the query.
 - Trek filters for region, duration and difficulty in the app.
 
-**What holds it back:** a Nepali query typed in Roman letters ("pokhara") only finds the
-Nepali name through an alias, so this needs an alias for every place.
+- *Update 2026-11-23 (V2-SR-08 … 10, score 9 → 9.5):* our own Devanagari → Latin transliteration
+  (every name gets a saved `name_latin`), word-by-word matching, villages find the treks through
+  them, districts and categories list their places, trek initials ("ebc"). A 43-query test set
+  runs in pytest: right answer first 72% → 92%, MRR 0.725 → 0.958
+  ([search_quality.md](search_quality.md)).
 
-**To raise the score:** add transliteration (Roman → Devanagari) as a search step, or make
-sure every place has a Roman alias.
+**What holds it back:** the test set is written by us, not taken from real searches; text and
+filters can't be combined in one request; a fuzzy alias can still sneak in ("bhaktapur" also
+lists Kathmandu Durbar Square through its alias "Basantapur").
+
+**To raise the score:** log real searches and add the zero-result ones to the test set
+(V3-SR-01); combine text and filters (V2-SR-12).
 
 ### Explore, place and trek pages: 8 / 10
 
@@ -175,21 +182,37 @@ Treks are not included.
 **To raise the score:** widen the radius automatically when nothing is found, and include
 trek start points.
 
-### Recommendations: 6.5 / 10
+### Recommendations: 8.5 / 10
+
+*Corrected 2026-11-23: the first version of this report said places already reviewed or planned
+were still recommended. They are not (`_already_used()`), so the score went from 6.5 to 7.*
 
 **What works well:** cosine similarity over a 6-value vector (4 interests, season, budget),
-"Popular now" for new users, trek villages are not recommended on their own, and each
-recommendation says why ("Because you like culture")
+"Popular now" for new users, trek villages are not recommended on their own, places and treks the
+user already reviewed or put in a trip are left out, ties are broken by the Bayesian rating, and
+each recommendation says why ("Because you like culture")
 ([services/recommend.py](../backend/app/services/recommend.py)).
 
 **What holds it back**
 - The weights are typed in by hand (`INTEREST_WEIGHTS`). With 6 categories, this is close to
   filtering by category.
-- It never learns from what the user does: reviews, trips and risk checks are not used.
-- Places the user already reviewed or added to a trip are still recommended.
+- It doesn't learn the user's taste: a 5★ or 1★ review from the user doesn't change what they
+  are shown next. Reviews and trips are used only to leave items out, and for "Popular now".
+- The user vector always has season = 1 and budget = 1, so an item that matches **none** of the
+  user's interests still scores about 0.6 (a lake for someone who only likes religious sites:
+  0.65). The order is still right, but the "why" for such items is only "good season, fits
+  budget".
 
-**To raise the score:** leave out places already in the user's trips or reviews, and boost
-categories the user rated highly (a simple step towards learning from feedback).
+*Update 2026-11-23 (V2-SR-01 … 07, score 7 → 8.5):* every point above is now handled. Reviews,
+trips and the new "Not interested" (× with Undo) change the user's vector; items must share an
+interest or tag (12 place tags) with the user, others only fill the list as "Something different to
+explore"; treks risky for you this month go down; places near you or your latest trip go up; MMR
+makes the list varied (λ chosen by measuring: [recommend_quality.md](recommend_quality.md)).
+What still holds it back: the weights are still set by hand, and nobody outside the project has
+used it, so we can't measure whether people like the suggestions.
+
+**To raise the score:** record what users open and plan (V3-SR-05, V3-SR-08) and measure it;
+"people who planned X also planned Y" (V3-SR-06).
 
 ---
 

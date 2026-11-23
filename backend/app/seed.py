@@ -45,7 +45,7 @@ from app.models import (
     TrekStage,
     TrekTranslation,
 )
-from app.models.enums import BudgetLevel, Lang, PackingGroup, RiskLevel
+from app.models.enums import PLACE_TAGS, BudgetLevel, Lang, PackingGroup, RiskLevel
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DATA_DIR = BACKEND_DIR.parent / "data"
@@ -180,6 +180,16 @@ def seed_places(db: Session, data: Path, categories: dict[str, uuid.UUID]) -> di
     places = read_csv(data / "places.csv")
     aliases = read_csv(data / "aliases.csv")
     photos = read_csv(data / "photos.csv") if (data / "photos.csv").exists() else []
+    tags_file = data / "place_tags.csv"
+    tags = (
+        {r["place_slug"]: r["tags"].split() for r in read_csv(tags_file)}
+        if tags_file.exists()
+        else {}
+    )
+    unknown = {t for row in tags.values() for t in row} - set(PLACE_TAGS)
+    if unknown:
+        raise ValueError(f"place_tags.csv: unknown tags {sorted(unknown)} (see PLACE_TAGS)")
+    tags = {slug: [t for t in PLACE_TAGS if t in row] for slug, row in tags.items()}  # one order
     climate = climate_rows(data, places)
     by_slug = {}
     for row in places:
@@ -196,6 +206,7 @@ def seed_places(db: Session, data: Path, categories: dict[str, uuid.UUID]) -> di
                 entry_fee_npr=opt_int(row["entry_fee_npr"]),
                 entry_fee_saarc_npr=opt_int(row.get("entry_fee_saarc_npr", "")),
                 entry_fee_nepali_npr=opt_int(row.get("entry_fee_nepali_npr", "")),
+                tags=tags.get(row["slug"], []),
                 is_published=True,
                 deleted_at=None,
             )

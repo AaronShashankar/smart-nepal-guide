@@ -21,6 +21,8 @@ Version 1 plan: [phase1](../version1/phase1.md) · [phase2](../version1/phase2.m
 
 **Status (2026-11-23):** Phase 1 and Phase 2 code is done and merged into `main` (phone demos still to run); Phase 3 is not started. Summary: [PROGRESS.md](../../../PROGRESS.md).
 
+**Extra work on search and recommendations (V2-SR, 2026-11-23):** Stage 1 of [search-recommendation.md](../../product/search-recommendation.md) is built (V2-SR-01 … 10: transliteration, search by village/district/category, a search test set; recommendations that learn from feedback, use the risk model, a nearby bonus, MMR variety, "Not interested", place tags). V2-SR-11 … 13 are still to do.
+
 **Why this order:** Phase 1 builds on what Version 1 already has (stages, the risk model, Redis in
 docker-compose), so it is the cheapest way to add marks. Phase 2 needs new tables but no new device
 features. Phase 3 needs device features (GPS, SMS, notifications, SQLite), each of which means a new

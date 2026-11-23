@@ -94,3 +94,20 @@ class PackingGroup(enum.StrEnum):
     gear = "gear"
     health = "health"
     documents = "documents"
+
+
+# What a place offers beyond its category (place.tags). Labels are in the app (tags.<code>).
+PLACE_TAGS = (
+    "sunrise",  # sunrise or sunset views
+    "mountain_views",
+    "hiking",
+    "boating",
+    "wildlife",
+    "pilgrimage",
+    "unesco",  # UNESCO World Heritage Site
+    "architecture",  # old temples, palaces, carvings
+    "local_culture",  # village life, festivals, food
+    "family",  # easy to reach, fine for children and older people
+    "high_altitude",  # above 4,000 m
+    "few_crowds",  # remote, quiet
+)

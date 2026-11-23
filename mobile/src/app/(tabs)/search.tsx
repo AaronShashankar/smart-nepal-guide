@@ -10,7 +10,7 @@ import { TrekResultCard } from '@/components/Cards';
 import { ChipGroup, Segmented } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { Empty, ErrorState, Loading } from '@/components/StateViews';
-import { formatNumber, regionName } from '@/lib/format';
+import { days, districtName, formatNumber, regionName } from '@/lib/format';
 import { useSearch, useTrekRegions, useTreks, type TrekFilters } from '@/lib/queries';
 import type { RiskLevel, SearchHit } from '@/lib/types';
 import { useDebounced } from '@/lib/useDebounced';
@@ -26,7 +26,18 @@ const DURATIONS: Record<Duration, Pick<TrekFilters, 'min_days' | 'max_days'>> = 
 };
 const LEVELS: RiskLevel[] = ['easy', 'moderate', 'hard', 'risky'];
 
+/** "Temple · Kathmandu" for places, "Khumbu · 12 days" for treks, from the structured fields. */
+function hitSubtitle(hit: SearchHit): string | null {
+  const parts =
+    hit.type === 'place'
+      ? [hit.category?.name, hit.district && districtName(hit.district)]
+      : [hit.region && regionName(hit.region), hit.total_days != null && days(hit.total_days)];
+  return parts.filter(Boolean).join(' · ') || hit.subtitle;
+}
+
 function HitRow({ hit }: { hit: SearchHit }) {
+  const { t } = useTranslation();
+  const subtitle = hitSubtitle(hit);
   const href =
     hit.type === 'place'
       ? ({ pathname: '/place/[id]', params: { id: hit.id } } as const)
@@ -46,9 +57,14 @@ function HitRow({ hit }: { hit: SearchHit }) {
       </View>
       <View style={{ flex: 1 }}>
         <AppText variant="subheading">{hit.name}</AppText>
-        {hit.subtitle && (
+        {subtitle && (
           <AppText variant="caption" muted>
-            {hit.subtitle}
+            {subtitle}
+          </AppText>
+        )}
+        {hit.match === 'via' && hit.via && (
+          <AppText variant="caption" weight="semibold" style={{ color: colors.primary }}>
+            {t('search.via', { place: hit.via })}
           </AppText>
         )}
       </View>
@@ -89,7 +105,11 @@ export default function SearchScreen() {
   const hits = search.data ? (tab === 'places' ? search.data.places : search.data.treks) : [];
   // The fuzzy search may match a different spelling ("punhill" -> "Poon Hill"): say which.
   const top = hits[0];
-  const spelling = top && !top.matched.toLowerCase().includes(q.toLowerCase()) ? top.matched : null;
+  // Only for name matches: a district, category or village match explains itself in the row.
+  const spelling =
+    top && top.match === 'name' && !top.matched.toLowerCase().includes(q.toLowerCase())
+      ? top.matched
+      : null;
 
   return (
     <Screen tab>

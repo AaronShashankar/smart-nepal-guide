@@ -28,11 +28,31 @@ def normalise(text: str) -> str:
     return "".join(ch for ch in text.casefold() if ch.isalnum() or "ऀ" <= ch <= "ॿ")
 
 
+WORD_MATCH_WEIGHT = 0.95  # a word-by-word match counts a little less than a whole-phrase match
+
+
+def _ratio(a: str, b: str) -> float:
+    return 1 - levenshtein(a, b) / max(len(a), len(b)) if a and b else 0.0
+
+
+def word_similarity(query: str, candidate: str) -> float:
+    """Word by word: each query word is compared with its best word in the candidate, and the
+    scores are averaged (weighted by word length). Handles a skipped word:
+    "chitwan nikunja" ~ "chitwan rashtriya nikunja"."""
+    q_words = [w for w in (normalise(x) for x in query.split()) if w]
+    c_words = [w for w in (normalise(x) for x in candidate.split()) if w]
+    if not q_words or not c_words:
+        return 0.0
+    total = sum(len(w) for w in q_words)
+    return sum(len(w) * max(_ratio(w, c) for c in c_words) for w in q_words) / total
+
+
 def similarity(query: str, candidate: str) -> float:
     """1.0 = identical, 0.0 = nothing in common.
 
     The query is also compared with every run of words in the candidate of
     roughly the same length, so "anapurna" matches "Annapurna Base Camp" well.
+    A query of two or more words is also matched word by word (word_similarity).
     """
     q = normalise(query)
     if not q:
@@ -48,4 +68,6 @@ def similarity(query: str, candidate: str) -> float:
             continue
         score = 1 - levenshtein(q, piece) / max(len(q), len(piece))
         best = max(best, score)
+    if len(query.split()) > 1:
+        best = max(best, WORD_MATCH_WEIGHT * word_similarity(query, candidate))
     return best

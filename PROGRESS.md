@@ -19,9 +19,10 @@ Every task, bug, test case and decision is tracked in the
 | **Version 2 Phase 1:** altitude chart, safer alternatives, weather, packing list | Done: tested on the emulator and a real phone |
 | **Version 2 Phase 2:** recommendations, reviews, Near me, budget, share a trip, teahouses | Done: *Near me* passes on a real phone (TC-47) |
 | **UI redesign:** "Bato App Redesign" canvas | Done: checked on a real phone in both languages (V2-UI-01) |
+| **Search & recommendations (V2-SR):** college → real product | Stage 1 core built (V2-SR-01 … 10): smarter search and recommendations, measured; tested on the emulator in English. Left: TC-66 (admin tags, Nepali labels) and NEAR_YOU on a real phone. Stage 1 extras (V2-SR-11 … 13) and Stages 2–3 planned in [search-recommendation.md](docs/product/search-recommendation.md) |
 | **Version 2 Phase 3:** safety & offline | Not started |
-| **Automated checks** | 209 backend tests; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
-| **Manual test cases** | 61 written; 60 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test |
+| **Automated checks** | 243 backend tests; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
+| **Manual test cases** | 66 written; 64 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66 not run yet |
 | **Bugs** | 17 logged; 16 fixed; BUG-06 fixed a second time and waiting for a phone re-test |
 
 **Size of the code** (Python and TypeScript only): backend ≈ 8,300 lines, mobile app ≈ 8,100 lines,
@@ -39,6 +40,7 @@ admin panel ≈ 3,500 lines.
 | 2026-11-19 | Ran 58 manual test cases on the emulator and fixed BUG-05 to BUG-15. Built V2 Phase 1: smart trek features | `51e4e31`, `726a81e`, `a6bc910` |
 | 2026-11-22 | Plans for Version 3 (Bato as a product after the defense) | `d107ee6` |
 | 2026-11-23 | UI redesign. Merged every branch into `main`. Fixed BUG-16 (Render Error on tappable cards). Feature ratings report. Login and register forms: placeholders, show-password button, keyboard no longer covers the form (BUG-17) | `f448f33`, `66cea3b` |
+| 2026-11-23 | Search and recommendations, Stage 1 (V2-SR-01 … 10): transliteration, search by village/district/category/initials, a 43-query search test set; recommendations learn from feedback, use the risk model, nearby bonus, MMR variety, "Not interested" with Undo, place tags. Migration 0006 | not committed yet |
 
 ---
 
@@ -85,6 +87,11 @@ admin panel ≈ 3,500 lines.
 - **Share a trip:** a read-only link that works without logging in, as an app screen or a small web page.
 - **Teahouses** listed on itinerary days. So far these are 4 sourced lodges in Tengboche.
 
+### Search and recommendations, Stage 1 (V2-SR)
+- **Search understands more:** Nepali typed in English letters ("pashupati mandir", "phewa tal") and in Devanagari, villages ("namche" → Everest Base Camp Trek, "Passes through Namche Bazaar"), districts ("bhaktapur"), categories ("temple"), trek initials ("ebc"). Measured on 43 queries: right answer first 72% → 92%.
+- **Recommendations learn:** from your reviews, trips and the new **×  Not interested** (with Undo). Treks that are risky for you this month go down; places near you (if location is already allowed) or near your latest trip go up; the list is varied (MMR); new reasons such as "Suits your fitness this month" and "Near you".
+- **Place tags** (sunrise, mountain views, pilgrimage, UNESCO…) on the place page, editable in the admin panel.
+
 ### UI redesign (from the Claude Design canvas)
 - **New look:**
   - Nepal-crimson actions and navy panels
@@ -122,6 +129,11 @@ All of these are written by hand. scikit-learn is used only to compare the risk 
 | Cache-aside with a TTL | Weather | [weather.py](backend/app/services/weather.py), [cache.py](backend/app/core/cache.py) |
 | Rule-based expert system | Packing list | [packing.py](backend/app/algorithms/packing.py) |
 | Cosine similarity | Recommendations | [similarity.py](backend/app/algorithms/similarity.py), [recommend.py](backend/app/services/recommend.py) |
+| Learning from feedback (signal-weighted average of item vectors) | Recommendations learn from reviews, trips and "Not interested" | [recommend.py](backend/app/services/recommend.py) |
+| Maximal marginal relevance (MMR) | A varied recommendation list | [recommend.py](backend/app/services/recommend.py), [recommend_benchmark.py](backend/app/recommend_benchmark.py) |
+| Devanagari → Latin transliteration with schwa deletion | Search in either script ("pashupati mandir", "सगरमाथा") | [transliterate.py](backend/app/algorithms/transliterate.py) |
+| Word-by-word similarity, trek initials | Search ("chitwan nikunja", "ebc") | [levenshtein.py](backend/app/algorithms/levenshtein.py), [search.py](backend/app/services/search.py) |
+| hit@k and MRR on a test set | Measuring search quality | [search_benchmark.py](backend/app/search_benchmark.py) |
 | Bayesian average | Ratings | [rating.py](backend/app/algorithms/rating.py) |
 | Bounding box | Near me | [geo_box.py](backend/app/algorithms/geo_box.py) |
 
@@ -145,6 +157,7 @@ All seed data is in [data/](data/), with a source and date for each item in [dat
 |---|---|
 | `places.csv` and `photos.csv` | 69 places, 63 photos (63 places have one; the other 6 show a drawn picture) |
 | `aliases.csv` | 71 alternative names, used by search |
+| `place_tags.csv` | Tags for the 24 places that are not trek villages (sunrise, pilgrimage, UNESCO…), used by recommendations and shown on the place page |
 | `treks.json` | 8 treks with their daily stages: Poon Hill, ABC, EBC, Langtang Valley, Mardi Himal, Annapurna Circuit, Gosaikunda, Manaslu Circuit |
 | `categories.csv` | 6 categories |
 | `permits.csv` | 7 permits |
@@ -154,21 +167,22 @@ All seed data is in [data/](data/), with a source and date for each item in [dat
 | `teahouses.csv` | 4 teahouses |
 | `climate_baseline.csv` and `climate_regions.csv` | Kathmandu's monthly weather plus a rain factor for each district, used for the best-time scores |
 
-The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 Phase 2, then V2 Phase 1.
+The database is PostgreSQL 16 with 6 migrations: Phase 1, Phase 2, Phase 3, V2 Phase 2, V2 Phase 1, then V2-SR (place tags, `name_latin`, `dismissed_item`).
 
 ## Testing and quality
 
 - **Automated:** [`./scripts/verify.sh`](scripts/verify.sh) runs all of these:
   - backend ruff lint and format check
   - a check that the migrations match the models
-  - 209 pytest tests
+  - 243 pytest tests
   - mobile typecheck and lint
   - admin typecheck, build and lint
-- **Manual test cases:** 61 cases, TC-01 to TC-61, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
+- **Manual test cases:** 66 cases, TC-01 to TC-66, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
   - All were run on the emulator (Phone 1). The layout cases, TC-47 (Near me, real GPS) and TC-51 were run on a
     real phone (Phone 2: Samsung Galaxy A07, 720 × 1600) on 2026-11-23.
   - TC-59 to TC-61 (login and register forms) were added on 2026-11-23 and pass on both phones.
-  - 60 pass. TC-01 failed on Phone 2: two Nepali buttons on the welcome screen were cut (BUG-06). It is fixed
+  - TC-62 to TC-66 (search and recommendations) were added on 2026-11-23; TC-62 to TC-65 pass on the emulator, TC-66 (admin tags, Nepali labels) is not run yet.
+  - 64 pass. TC-01 failed on Phone 2: two Nepali buttons on the welcome screen were cut (BUG-06). It is fixed
     again and passes on the emulator; it needs one more check on the phone.
 - **Bugs:** 17 logged in the tracker. The ones worth knowing:
   - BUG-06: Nepali labels lost their last word on Android. The first fix did not hold on a real phone after a
@@ -190,6 +204,7 @@ The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 P
 - **Diagrams** ([docs/diagrams/](docs/diagrams/)): architecture, ER, use case, DFD level 0 and level 1, and the class diagram. They are drawn by Python scripts.
 - **Machine learning** ([docs/ml/](docs/ml/)): confusion matrices, feature importance, the CV depth chart and the data sources chart. There is also the [evaluation notebook](ml/evaluation.ipynb).
 - **Route benchmark** ([docs/route_gap.md](docs/route_gap.md)): how close 2-opt gets to the exact best route.
+- **Search and recommendation quality** ([docs/search_quality.md](docs/search_quality.md), [docs/recommend_quality.md](docs/recommend_quality.md)): search hit@1 72% → 92%, MRR 0.725 → 0.958; MMR adds 37% variety for 1.7% less relevance. Plan: [search-recommendation.md](docs/product/search-recommendation.md).
 - **Plans:**
   - Version 1 phases [1](docs/plans/version1/phase1.md), [2](docs/plans/version1/phase2.md) and [3](docs/plans/version1/phase3.md)
   - [Version 2](docs/plans/version2/README.md)
@@ -215,6 +230,11 @@ The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 P
 - Write Nepali notes for every trek stage (V1-P3-19).
 - Take new screenshots for the report.
 - Record the demo video, and tag `v1.0`.
+
+**Search and recommendations** ([plan](docs/product/search-recommendation.md)):
+- Run TC-66: admin tag editing, and the new labels in नेपाली. Check "Near you" on the real phone with location allowed.
+- Stage 1 extras: ranking boosts (V2-SR-11), text + filters together (V2-SR-12), simple phrases like "easy trek 5 days" (V2-SR-13).
+- Stage 2 (with real users) and Stage 3 (at scale) are Version 3 work (V3-SR-01 … 12).
 
 **Version 2:**
 - Phase 3 (safety & offline) is not started: emergency contacts, SOS by SMS, the symptom checker (Lake Louise score), a daily check-in, and offline treks.

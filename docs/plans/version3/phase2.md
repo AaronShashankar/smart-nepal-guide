@@ -79,6 +79,17 @@ Builds on the V2 offline trek pack (`V2-P3-06`), which has everything except the
 - [ ] Events: app opened, trek viewed, risk checked, trip saved, offline pack downloaded, SOS used (count only)
 - [ ] A weekly view in the admin dashboard or the analytics tool
 
+## 8b. Search and recommendations with real users (`V3-SR-01` … `V3-SR-08`) — Extra
+
+Stage 2 of [search-recommendation.md](../../product/search-recommendation.md). Needs the analytics consent above.
+
+- [ ] `V3-SR-05` Record user actions (opened, saved, added to trip, reviewed, risk checked), with consent; deleted with the account
+- [ ] `V3-SR-01` Log searches; admin page "top searches with no results"
+- [ ] `V3-SR-08` Measure recommendations: shown, opened, added to trip (weekly in the admin dashboard)
+- [ ] `V3-SR-06` "People who planned X also planned Y"
+- [ ] `V3-SR-07` Taste from behaviour, recent actions count more
+- [ ] `V3-SR-02` Offline search · `V3-SR-03` Recent and popular searches · `V3-SR-04` Full-text search in descriptions
+
 ## 9. Play Store release (`V3-P2-09`) — Core
 
 - [ ] **Decide the final package ID first** (Decisions tab). It can't be changed after the first upload. Changing it now also means a new Google OAuth client and a new development build.

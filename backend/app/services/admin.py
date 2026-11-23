@@ -118,6 +118,7 @@ def place_out(p: Place) -> PlaceAdminOut:
         en=text(Lang.en),
         ne=text(Lang.ne),
         aliases=sorted(a.alias for a in p.aliases),
+        tags=list(p.tags or []),
         climate=[
             ClimateRow(
                 month=c.month,
@@ -151,6 +152,7 @@ def save_place(db: Session, p: Place, body: PlaceAdminIn, admin: User) -> None:
     )
     p.district, p.province = _clean(body.district), _clean(body.province)
     p.is_published = body.is_published
+    p.tags = body.tags
 
     rows = [
         PlaceTranslation(

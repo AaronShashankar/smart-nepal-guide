@@ -2,7 +2,7 @@
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -15,32 +15,64 @@ import { Empty, Loading, QueryState } from '@/components/StateViews';
 import { formatNumber } from '@/lib/format';
 import {
   useCategories,
+  useDismissRecommendation,
   useNearPlaces,
   usePlaces,
   useRecommendations,
   useTreks,
+  useUndoDismiss,
   useUpdateMe,
 } from '@/lib/queries';
-import { useLocation } from '@/lib/useLocation';
+import { useKnownPosition, useLocation } from '@/lib/useLocation';
 import { useSettings } from '@/store/settings';
 import { colors, GUTTER, radii, shadows, spacing } from '@/theme';
 
 const NEAR = '__near__';
 
-function Recommended() {
+type Hidden = { type: 'place' | 'trek'; id: string; name: string };
+const UNDO_MS = 6000;
+
+function Recommended({ recs }: { recs: ReturnType<typeof useRecommendations> }) {
   const { t } = useTranslation();
-  const recs = useRecommendations();
+  const dismiss = useDismissRecommendation();
+  const undo = useUndoDismiss();
+  const [hidden, setHidden] = useState<Hidden | null>(null);
+
+  // The "Undo" bar goes away by itself after a few seconds
+  useEffect(() => {
+    if (!hidden) return;
+    const timer = setTimeout(() => setHidden(null), UNDO_MS);
+    return () => clearTimeout(timer);
+  }, [hidden]);
+
   // Keep showing loaded suggestions when a refresh fails (offline); hide only when there are none.
-  if (!recs.data?.items.length) return null;
+  if (!recs.data?.items.length && !hidden) return null;
+  const items = recs.data?.items ?? [];
   return (
     <Section
       big
-      title={recs.data.mode === 'personal' ? t('explore.recommended') : t('explore.popular')}
+      title={recs.data?.mode === 'popular' ? t('explore.popular') : t('explore.recommended')}
     >
-      {recs.data.mode === 'popular' && (
+      {recs.data?.mode === 'popular' && (
         <AppText variant="caption" muted>
           {t('explore.popularHint')}
         </AppText>
+      )}
+      {hidden && (
+        <View style={styles.undoBar} accessibilityLiveRegion="polite">
+          <AppText variant="label" style={{ flex: 1, color: '#FFFFFF' }} numberOfLines={2}>
+            {t('explore.hidden', { name: hidden.name })}
+          </AppText>
+          <Button
+            compact
+            variant="light"
+            title={t('explore.undo')}
+            onPress={() => {
+              undo.mutate({ type: hidden.type, id: hidden.id });
+              setHidden(null);
+            }}
+          />
+        </View>
       )}
       <ScrollView
         horizontal
@@ -48,8 +80,15 @@ function Recommended() {
         style={styles.bleed}
         contentContainerStyle={styles.recRow}
       >
-        {recs.data.items.map((rec) => (
-          <RecommendationCard key={`${rec.type}-${rec.item.id}`} rec={rec} />
+        {items.map((rec) => (
+          <RecommendationCard
+            key={`${rec.type}-${rec.item.id}`}
+            rec={rec}
+            onDismiss={() => {
+              dismiss.mutate({ type: rec.type, id: rec.item.id });
+              setHidden({ type: rec.type, id: rec.item.id, name: rec.item.name });
+            }}
+          />
         ))}
       </ScrollView>
     </Section>
@@ -145,7 +184,7 @@ export default function ExploreScreen() {
   const nearMode = category === NEAR;
   const places = usePlaces({ category: nearMode ? undefined : category, page_size: 100 });
   const treks = useTreks();
-  const recs = useRecommendations();
+  const recs = useRecommendations(useKnownPosition());
   const [refreshing, setRefreshing] = useState(false);
 
   async function refresh() {
@@ -224,7 +263,7 @@ export default function ExploreScreen() {
         <NearMe />
       ) : (
         <>
-          {!category && <Recommended />}
+          {!category && <Recommended recs={recs} />}
 
           {/* Treks are shown first when no category filter is active */}
           {!category && (
@@ -324,6 +363,16 @@ const styles = StyleSheet.create({
   chips: { gap: spacing(2), paddingHorizontal: GUTTER },
   list: { gap: spacing(3) },
   recRow: { gap: 14, paddingHorizontal: GUTTER },
+  undoBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
+    paddingVertical: spacing(2),
+    paddingLeft: spacing(4),
+    paddingRight: spacing(2),
+    borderRadius: radii.card,
+    backgroundColor: colors.navy,
+  },
   notice: {
     gap: spacing(3),
     padding: spacing(4),

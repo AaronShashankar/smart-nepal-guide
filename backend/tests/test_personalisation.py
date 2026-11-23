@@ -1,5 +1,8 @@
 """V2 Phase 2: recommendations (cosine), Near me, budget, share links, teahouses."""
 
+import math
+from types import SimpleNamespace
+
 import pytest
 
 from app.algorithms.geo_box import bounding_box
@@ -7,8 +10,23 @@ from app.algorithms.haversine import haversine_km
 from app.algorithms.similarity import cosine
 from app.models.enums import BudgetLevel
 from app.seed import sid
-from app.services.recommend import INTEREST_WEIGHTS, budget_fit, interest_part, user_vector
+from app.services.recommend import (
+    INTEREST_WEIGHTS,
+    MMR_LAMBDA,
+    NEAR_WEIGHT,
+    TAG_WEIGHT,
+    TAGS,
+    Candidate,
+    budget_fit,
+    interest_part,
+    learned_taste,
+    mmr,
+    near_bonus,
+    tag_part,
+    user_vector,
+)
 from tests.conftest import register
+from tests.test_risk_api import trained_model  # noqa: F401 (a fixture)
 from tests.test_trips import IDS, new_trip
 
 THAMEL = {"lat": 27.7154, "lng": 85.3123}
@@ -46,14 +64,44 @@ def test_cosine_identical_orthogonal_and_zero():
 
 def test_cosine_worked_example_for_the_report():
     """User likes culture + religious; same season and budget fit for all three items."""
-    u = user_vector({"culture", "religious"})  # [0, 1, 0, 1, 1, 1]
-    temple = interest_part(INTEREST_WEIGHTS["temple"]) + [0.8, 1.0]
-    heritage = interest_part(INTEREST_WEIGHTS["heritage"]) + [0.8, 1.0]
-    lake = interest_part(INTEREST_WEIGHTS["lake"]) + [0.8, 1.0]
-    assert u == [0, 1, 0, 1, 1, 1]
-    # temple [0, .7, 0, 1, .8, 1]: dot 3.5, |u| 2, |t| √3.13 -> 0.989
-    assert cosine(u, temple) == pytest.approx(3.5 / (2 * 3.13**0.5))
+    u = user_vector({"culture", "religious"})
+    # 4 interests, then the 12 tags those interests suggest (x TAG_WEIGHT), then season, budget
+    assert u[:4] == [0, 1, 0, 1] and u[-2:] == [1, 1] and len(u) == 4 + len(TAGS) + 2
+    assert u[4 + TAGS.index("pilgrimage")] == TAG_WEIGHT * 1.0
+    assert u[4 + TAGS.index("wildlife")] == 0.0
+    temple = (interest_part(INTEREST_WEIGHTS["temple"])
+              + tag_part(["pilgrimage", "unesco", "architecture"]) + [0.8, 1.0])  # fmt: skip
+    heritage = interest_part(INTEREST_WEIGHTS["heritage"]) + tag_part(["unesco"]) + [0.8, 1.0]
+    lake = interest_part(INTEREST_WEIGHTS["lake"]) + tag_part(["boating"]) + [0.8, 1.0]
     assert cosine(u, temple) > cosine(u, heritage) > cosine(u, lake)
+
+
+def test_learning_from_feedback_moves_the_user_vector():
+    lake = interest_part(INTEREST_WEIGHTS["lake"]) + tag_part(["boating"])
+    temple = interest_part(INTEREST_WEIGHTS["temple"]) + tag_part(["pilgrimage"])
+    learned = learned_taste([(1.0, lake), (-1.0, temple)])  # loved a lake, hid a temple
+    u = user_vector({"culture"}, learned)
+    assert u[0] > 0  # nature is now part of the taste
+    assert u[3] == 0  # religious was pushed below 0 and clipped
+    assert learned_taste([(0.0, lake)]) is None  # a 3-star review teaches nothing
+
+
+def test_mmr_prefers_variety():
+    def c(name, kind, score, content):
+        place = SimpleNamespace(category=SimpleNamespace(code=kind))
+        return Candidate("place", name, place, name, content + [1, 1], score=score)
+
+    a = c("temple A", "temple", 0.99, [0, 1, 0, 1])
+    b = c("temple B", "temple", 0.98, [0, 1, 0, 1])
+    lake = c("lake", "lake", 0.9, [1, 0, 0, 0])
+    assert [x.name for x in mmr([a, b, lake], 2)] == ["temple A", "lake"]
+    assert [x.name for x in mmr([a, b, lake], 2, lam=1.0)] == ["temple A", "temple B"]
+
+
+def test_near_bonus_falls_with_distance():
+    assert near_bonus(0) == NEAR_WEIGHT
+    assert near_bonus(40) == pytest.approx(NEAR_WEIGHT / math.e)
+    assert near_bonus(300) < 0.001
 
 
 def test_budget_fit():
@@ -98,8 +146,8 @@ def test_culture_user_gets_temples_before_lakes(client):
     assert _first(items, {"temple"}) < _first(items, {"lake"})
     assert "INTEREST_RELIGIOUS" in items[0]["because"] or "INTEREST_CULTURE" in items[0]["because"]
     assert all(len(x["because"]) <= 2 for x in items)
-    scores = [x["score"] for x in items]
-    assert scores == sorted(scores, reverse=True)
+    # MMR: the best match comes first, but the list is not sorted by score only (variety)
+    assert items[0]["score"] == max(x["score"] for x in items if "EXPLORE_MORE" not in x["because"])
 
 
 def test_nature_user_gets_the_opposite(client):
@@ -142,6 +190,105 @@ def test_monsoon_lowers_trek_season_fit(client):
     july = {x["item"]["id"]: x for x in _recs(client, headers, month=7)["items"]}
     assert october[EBC]["score"] > july[EBC]["score"]
     assert "GOOD_SEASON" not in july[EBC]["because"]
+
+
+# ------------------------------------------- V2-SR: better recommendations
+POKHARA = {"lat": 28.2096, "lng": 83.9856}
+
+
+def test_only_matching_items_then_explore_more(client):
+    headers = register(client)
+    set_profile(client, headers, interests=["religious"])
+    items = _recs(client, headers)["items"]
+    explore = [i for i, x in enumerate(items) if "EXPLORE_MORE" in x["because"]]
+    assert explore, "30 items cannot all share the religious interest"
+    assert explore == list(range(explore[0], len(items)))  # the filler comes last
+    assert all(x["because"] for x in items[: explore[0]])
+
+
+def test_not_interested_and_undo(client):
+    headers = register(client)
+    set_profile(client, headers, interests=["culture"])
+    top = _recs(client, headers)["items"][0]
+    body = {"type": top["type"], "id": top["item"]["id"]}
+    assert client.post("/recommendations/dismissed", json=body).status_code == 401
+    r = client.post("/recommendations/dismissed", json=body, headers=headers)
+    assert r.status_code == 204
+    again = client.post("/recommendations/dismissed", json=body, headers=headers)
+    assert again.status_code == 204  # saying it twice is fine
+    assert top["item"]["id"] not in [x["item"]["id"] for x in _recs(client, headers)["items"]]
+    url = f"/recommendations/dismissed/{top['type']}/{top['item']['id']}"
+    assert client.delete(url, headers=headers).status_code == 204
+    assert top["item"]["id"] in [x["item"]["id"] for x in _recs(client, headers)["items"]]
+    bad = client.post("/recommendations/dismissed", json={**body, "type": "user"},
+                      headers=headers)  # fmt: skip
+    assert bad.status_code == 422
+
+
+def test_feedback_alone_makes_it_personal(client):
+    headers = register(client)
+    assert _recs(client, headers)["mode"] == "popular"
+    client.post(f"/places/{sid('place', 'phewa_lake')}/reviews", json={"rating": 5},
+                headers=headers)  # fmt: skip
+    data = _recs(client, headers)
+    assert data["mode"] == "personal"  # no interests chosen, but we learned from the review
+    assert _kind(data["items"][0]) in {"lake", "viewpoint", "national_park", "trek"}
+    assert _first(data["items"], {"lake"}) < _first(data["items"], {"temple"})
+
+
+def test_hiding_temples_pushes_them_down(client):
+    headers = register(client)
+    set_profile(client, headers, interests=["culture"])
+    before = _recs(client, headers)["items"]
+    for x in [x for x in before if _kind(x) == "temple"][:3]:
+        client.post("/recommendations/dismissed", json={"type": "place", "id": x["item"]["id"]},
+                    headers=headers)  # fmt: skip
+    after = _recs(client, headers)["items"]
+    temples_before = [x["score"] for x in before if _kind(x) == "temple"][3:]
+    temples_after = [x["score"] for x in after if _kind(x) == "temple"]
+    assert temples_after and max(temples_after) < max(temples_before)
+
+
+def test_gps_position_brings_nearby_items_up(client):
+    headers = register(client)
+    set_profile(client, headers, interests=["nature"])
+    far = _recs(client, headers)["items"]
+    near = _recs(client, headers, **POKHARA)["items"]
+    assert all(x["distance_km"] is None for x in far)
+    first_kaski = next(x for x in near if x["type"] == "place" and x["item"]["district"] == "Kaski")
+    assert first_kaski["distance_km"] < 25 and "NEAR_YOU" in first_kaski["because"]
+    rank = {x["item"]["id"]: i for i, x in enumerate(far)}
+    assert near.index(first_kaski) <= rank[first_kaski["item"]["id"]]
+
+
+def test_latest_trip_is_used_without_gps(client):
+    headers = register(client)
+    set_profile(client, headers, interests=["culture"])
+    new_trip(client, headers, ["boudhanath"], title="Valley")
+    items = _recs(client, headers)["items"]
+    assert any("NEAR_YOUR_TRIP" in x["because"] for x in items)
+    assert all(x["distance_km"] is not None for x in items if x["type"] == "place")
+
+
+@pytest.mark.usefixtures("trained_model")
+def test_risky_treks_go_down_for_a_beginner(client):
+    beginner, expert = register(client), register(client)
+    weak = {"fitness_level": "low", "trek_experience": "none", "has_heart_condition": True,
+            "date_of_birth": "1950-01-01"}  # fmt: skip
+    set_profile(client, beginner, interests=["adventure"], **weak)
+    strong = {"fitness_level": "high", "trek_experience": "experienced"}
+    set_profile(client, expert, interests=["adventure"], **strong)
+    b = {x["item"]["id"]: x for x in _recs(client, beginner, month=1)["items"]}
+    e = {x["item"]["id"]: x for x in _recs(client, expert, month=1)["items"]}
+    assert b[EBC]["risk_level"] in {"hard", "risky"}
+    assert e[EBC]["risk_level"] is not None
+    assert b[EBC]["score"] < e[EBC]["score"]
+    assert "FITS_YOU" not in b[EBC]["because"]
+
+
+def test_no_risk_level_without_a_complete_profile(client):
+    items = _recs(client, register(client))["items"]
+    assert all(x["risk_level"] is None for x in items)
 
 
 # ----------------------------------------------------------------- near me
@@ -376,3 +523,58 @@ def test_admin_place_has_three_fees(client, admin):
         1800, 500, 0)  # fmt: skip
     detail = client.get(f"/places/{sid('place', 'bhaktapur_durbar')}").json()
     assert detail["entry_fee_saarc_npr"] == 500
+
+
+def test_mmr_adds_variety_for_little_relevance(db):
+    """The λ choice (docs/recommend_quality.md) stays true when the data changes."""
+    from app.recommend_benchmark import measure
+
+    plain, used = measure(db, 1.0), measure(db, MMR_LAMBDA)
+    assert used["variety"] > plain["variety"] * 1.25
+    assert used["relevance"] > plain["relevance"] * 0.97
+
+
+def test_place_tags_in_detail_and_admin(client, admin):
+    pid = sid("place", "phewa_lake")
+    assert client.get(f"/places/{pid}").json()["tags"] == [
+        "mountain_views",
+        "boating",
+        "family",
+    ]  # PLACE_TAGS order
+    body = client.get(f"/admin/places/{pid}", headers=admin).json()
+    original = body["tags"]
+    for key in ("id", "photos", "updated_at"):
+        body.pop(key)
+    r = client.put(f"/admin/places/{pid}", json={**body, "tags": ["family", "sunrise", "family"]},
+                   headers=admin)  # fmt: skip
+    assert r.status_code == 200, r.text
+    assert r.json()["tags"] == ["sunrise", "family"]  # no repeats, fixed order
+    bad = client.put(f"/admin/places/{pid}", json={**body, "tags": ["nightlife"]}, headers=admin)
+    assert bad.status_code == 422
+    client.put(f"/admin/places/{pid}", json={**body, "tags": original}, headers=admin)
+
+
+def test_top_five_is_not_all_one_kind(client):
+    headers = register(client)
+    set_profile(client, headers, interests=["culture", "religious"])
+    top5 = _recs(client, headers, limit=5)["items"]
+    assert len({_kind(x) for x in top5}) >= 2
+
+
+def test_low_and_high_ratings_move_the_list(client):
+    """V2-SR-02: a 1-star lake moves lakes down; 5-star temples move temples up."""
+    headers = register(client)
+    set_profile(client, headers, interests=["nature", "religious"])
+    before = _recs(client, headers)["items"]
+    lake = next(x for x in before if _kind(x) == "lake")
+    client.post(f"/places/{lake['item']['id']}/reviews", json={"rating": 1}, headers=headers)
+    after_lake = _recs(client, headers)["items"]
+    lakes = lambda items: [x["score"] for x in items if _kind(x) == "lake"]  # noqa: E731
+    assert max(lakes(after_lake)) < max(s for s in lakes(before) if s != lake["score"]) + 1e-9
+
+    temples = [x for x in after_lake if _kind(x) == "temple"]
+    for t in temples[:2]:
+        client.post(f"/places/{t['item']['id']}/reviews", json={"rating": 5}, headers=headers)
+    rest = {x["item"]["id"]: x["score"] for x in temples[2:]}
+    after = {x["item"]["id"]: x["score"] for x in _recs(client, headers)["items"]}
+    assert all(after[i] > rest[i] for i in rest if i in after)

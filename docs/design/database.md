@@ -98,10 +98,11 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 | entry_fee_npr | int | foreign rate; null = free |
 | entry_fee_saarc_npr | int | SAARC rate; null/0 = free *(V2 Phase 2)* |
 | entry_fee_nepali_npr | int | Nepali rate; null/0 = free *(V2 Phase 2)* |
+| tags | varchar(30)[] | codes from `PLACE_TAGS` (sunrise, mountain_views, …), default `{}`; from `data/place_tags.csv`, edited in the admin panel *(V2-SR-07, migration 0006)* |
 | is_published | boolean | |
 | updated_at, deleted_at | timestamptz | sync |
 
-**place_translation** — PK (place_id, lang); name, description, how_to_reach, is_machine_translated, is_reviewed, reviewed_by (FK → user)
+**place_translation** — PK (place_id, lang); name, description, how_to_reach, is_machine_translated, is_reviewed, reviewed_by (FK → user), **name_latin** *(V2-SR-08, migration 0006)*: the name in Latin letters (पोखरा → "pokhara"), filled automatically on every insert/update by a SQLAlchemy event with `to_latin()`, GIN trigram index `ix_place_translation_name_latin_trgm` for search
 
 **place_alias** — id (PK), place_id (FK), alias (e.g. "Anapurna", "अन्नपूर्ण") — search with trigram + Levenshtein
 
@@ -121,7 +122,7 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 | is_published | boolean | |
 | updated_at, deleted_at | timestamptz | sync |
 
-**trek_translation** — PK (trek_id, lang); name, overview, is_machine_translated, is_reviewed
+**trek_translation** — PK (trek_id, lang); name, overview, is_machine_translated, is_reviewed, **name_latin** (same as on place_translation; index `ix_trek_translation_name_latin_trgm`)
 
 **trek_stage**
 | Column | Type | Notes |
@@ -150,6 +151,8 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 **trip** — id (PK), user_id (FK), title, start_date, total_days, total_km (length of the optimised route), estimated_budget_npr (saved by "Estimate budget"; cleared with the plan when stops change), share_token (unique; `secrets.token_urlsafe(16)` = 128 random bits; null = not shared), updated_at, deleted_at
 
 **trip_stop** — id (PK), trip_id (FK), place_id (FK), visit_order (TSP + 2-opt), day_no (greedy split), visit_hours (default 1.5, CHECK 0 < hours ≤ 12), added_at. The API refuses the same place twice in a trip (409). Adding or removing a stop clears visit_order, day_no and total_km, so the trip must be optimised again
+
+**dismissed_item** *(V2-SR-03, migration 0006)* — id (PK), user_id (FK → user, cascade, indexed), place_id (FK, nullable), trek_id (FK, nullable), created_at. "Not interested" on a recommendation: the item is not recommended again until undone, and it counts as a −1 signal for the user's taste. `CHECK one_target` (exactly one of place/trek); partial unique indexes `uq_dismissed_user_place` / `uq_dismissed_user_trek`, so saying it twice is harmless (`ON CONFLICT DO NOTHING`)
 
 ### D. AI / ML
 

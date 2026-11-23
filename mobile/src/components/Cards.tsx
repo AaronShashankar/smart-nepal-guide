@@ -2,7 +2,7 @@
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { photoUrl } from '@/lib/api';
@@ -164,8 +164,17 @@ export function TrekResultCard({ trek }: { trek: TrekSummary }) {
   );
 }
 
-/** Tall photo card for the sideways "Recommended for you" row, with the reason it was picked. */
-export function RecommendationCard({ rec }: { rec: Recommendation }) {
+/**
+ * Tall photo card for the sideways "Recommended for you" row, with the reason it was picked.
+ * `onDismiss` adds a small × ("Not interested") in the top corner.
+ */
+export function RecommendationCard({
+  rec,
+  onDismiss,
+}: {
+  rec: Recommendation;
+  onDismiss?: () => void;
+}) {
   const { t } = useTranslation();
   const href =
     rec.type === 'place'
@@ -216,6 +225,17 @@ export function RecommendationCard({ rec }: { rec: Recommendation }) {
         </AppText>
         <RatingBadge rating={rec.item.rating} light />
       </View>
+      {onDismiss && (
+        <Pressable
+          onPress={onDismiss}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('explore.notInterested', { name: rec.item.name })}
+          style={({ pressed }) => [styles.dismiss, pressed && { opacity: 0.7 }]}
+        >
+          <MaterialCommunityIcons name="close" size={18} color="#FFFFFF" />
+        </Pressable>
+      )}
     </PressableLink>
   );
 }
@@ -303,6 +323,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.navy,
   },
   recText: { position: 'absolute', left: 18, right: 18, bottom: 18, gap: spacing(2) },
+  dismiss: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
   infoRow: { flexDirection: 'row', gap: spacing(3), alignItems: 'center' },
   infoIcon: {
     width: 36,

@@ -77,7 +77,7 @@ uv run ruff check . && uv run ruff format --check .
 | GET | `/places/{id}` | photos, best months (weighted scoring), 5 nearest places (Haversine) |
 | GET | `/treks`, `/treks/regions` | `region`, `min_days`, `max_days`, `difficulty` |
 | GET | `/treks/{id}` | overview, permits, start/end place derived from first/last stage |
-| GET | `/search?q=` | pg_trgm candidates (names + aliases, any language) ranked by our own Levenshtein |
+| GET | `/search?q=&limit=` | pg_trgm candidates (names, Latin spelling of Nepali names, aliases, districts, categories, villages on treks, trek initials) ranked by our own Levenshtein. Each hit says how it matched (`match`: name / district / category / via) |
 | GET | `/treks/{id}/stages` | **Phase 2.** Day-by-day itinerary (sleeping altitude, gain, km, hours, highest point, rest days) + summary computed from it (max daily gain…) |
 | GET | `/treks/{id}/acclimatisation` | **Phase 2.** Per-day `ok` / `caution` / `danger`, reason codes, suggested rest days |
 | POST | `/predict-risk` | **Phase 2.** `{trek_id, month}` → `{level, confidence, reasons[], acclimatisation, input}`; needs a profile with date of birth, fitness and experience (else 409 `PROFILE_INCOMPLETE`); saved to history |
@@ -90,7 +90,8 @@ uv run ruff check . && uv run ruff format --check .
 | GET / POST | `/places/{id}/reviews`, `/treks/{id}/reviews` | **V2 P2.** List (visible, newest first, `page`; `mine` = your own review when logged in) / write `{rating 1–5, comment ≤ 1,000}`. Posting again **updates** your review (201 new, 200 updated); `lang` comes from `Accept-Language` |
 | DELETE | `/reviews/{id}` | **V2 P2.** Your own review only (someone else's → 404) |
 | GET | `/places`, `/treks`, details | **V2 P2.** Every item now has `rating: {score, count}` (Bayesian average, one grouped query); `sort=rating` |
-| GET | `/recommendations?limit=10` | **V2 P2, login.** `{mode: "personal" \| "popular", items[{type, item, score, because[]}]}` (cosine similarity; "Popular now" without interests) |
+| GET | `/recommendations?limit=10&lat=&lng=` | **V2 P2, login.** `{mode: "personal" \| "popular", items[{type, item, score, because[], risk_level, distance_km}]}` (cosine similarity with tags, learns from feedback, risk-aware, nearby bonus, MMR; "Popular now" when we know nothing about you). `lat`/`lng` optional |
+| POST / DELETE | `/recommendations/dismissed` · `/recommendations/dismissed/{type}/{id}` | **V2-SR, login.** "Not interested" `{type, id}` and Undo (204) |
 | GET | `/places/near?lat=&lng=&radius_km=20&limit=20` | **V2 P2.** Bounding box → Haversine → closest first, with `distance_km` |
 | GET | `/places/{id}/teahouses` | **V2 P2.** Lodges in a village; the itinerary's stages carry `teahouse_count` |
 | GET | `/treks/{id}/budget` | **V2 P2.** Food + stay per day, permits at your nationality's rate, trailhead transport (defaults: medium, foreign) |
@@ -106,7 +107,9 @@ use the matching `*_translation` row, and fall back to English for a missing row
 - Haversine + nearest places: [backend/app/algorithms/haversine.py](backend/app/algorithms/haversine.py)
 - Levenshtein edit distance: [backend/app/algorithms/levenshtein.py](backend/app/algorithms/levenshtein.py)
 - Best time to visit (weighted scoring): [backend/app/algorithms/best_time.py](backend/app/algorithms/best_time.py)
-- Fuzzy search (trigram candidates → Levenshtein ranking): [backend/app/services/search.py](backend/app/services/search.py)
+- Fuzzy search (trigram candidates → Levenshtein ranking, districts, categories, villages, initials): [backend/app/services/search.py](backend/app/services/search.py); test set: [search_benchmark.py](backend/app/search_benchmark.py) → [docs/search_quality.md](docs/search_quality.md)
+- Devanagari → Latin transliteration: [backend/app/algorithms/transliterate.py](backend/app/algorithms/transliterate.py)
+- Recommendations (cosine, learning from feedback, risk-aware, nearby, MMR): [backend/app/services/recommend.py](backend/app/services/recommend.py); λ benchmark: [recommend_benchmark.py](backend/app/recommend_benchmark.py) → [docs/recommend_quality.md](docs/recommend_quality.md)
 - Acclimatisation checker (rule-based): [backend/app/algorithms/acclimatisation.py](backend/app/algorithms/acclimatisation.py)
 - **CART decision tree (Gini), from scratch:** [backend/app/ml/tree.py](backend/app/ml/tree.py)
 - **Random forest (bootstrap + √n features + vote), from scratch:** [backend/app/ml/forest.py](backend/app/ml/forest.py)

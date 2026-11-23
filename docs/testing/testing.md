@@ -26,7 +26,9 @@ Two kinds of testing. **Step-by-step order, test counts and how to check each ca
 
    Login and register forms (2026-11-23): TC-59 to TC-61 were added for the keyboard, the show-password
    button and the placeholders (BUG-17). They pass on the emulator and on Phone 2.
-   Now: **60 Pass, 1 Fail (TC-01, re-test on Phone 2)**.
+   Search and recommendations (V2-SR, 2026-11-23): TC-62 to TC-66 were added. TC-62 to TC-65 pass on the
+   emulator; TC-66 (admin tags, Nepali labels) is not run yet.
+   Now: **64 Pass, 1 Fail (TC-01, re-test on Phone 2), 1 Not run (TC-66)**.
 
 The **Auto** column names the pytest test that checks the same behaviour through the API, where
 there is one. The manual case still checks the screen.
@@ -119,6 +121,19 @@ then checked by hand on Phone 2. Added after BUG-17: on Android the keyboard cov
 | TC-59 | Login keyboard | Welcome → Log in → tap Email, type, press Next; type the password | test@example.com, any password | The login sheet moves above the keyboard: both fields and the Log in button stay visible; Next moves to Password | Sheet sits above the keyboard at both screen sizes; Next moves to Password; the sheet follows when the keyboard gets taller. Before the fix the keyboard covered the whole sheet (BUG-17). Phone 2: works | Pass | (phone only: keyboard) |
 | TC-60 | Show password | On the login sheet and on Create account, type a password, tap the eye, then tap it again | `secret123` | First tap shows the password and the icon changes to a crossed eye; second tap hides it; the keyboard stays open | Shows "secret123" with a crossed eye, button label "पासवर्ड लुकाउनुहोस्"; second tap hides it; keyboard stays open. Phone 2: works | Pass | (phone only) |
 | TC-61 | Register keyboard | Create account → tap Full name, type, Next, type the email, Next; scroll with the keyboard open | Test User, test@example.com | Every field shows a placeholder (EN and NE); Next moves Full name → Email → Password; with the keyboard open the page scrolls to the Create account button | Placeholders "जस्तै: पेम्बा शेर्पा", "you@example.com", "पासवर्ड बनाउनुहोस्"; Next moves through every field; at 720 × 1600 the page scrolls to the error text and the button above the keyboard. Phone 2: works | Pass | (phone only: keyboard) |
+
+### Search and recommendations (V2-SR)
+
+Run on 2026-11-23 on the emulator (Phone 1) in English, with a new account whose profile is complete
+and whose interests are culture + religious. Plan: [search-recommendation.md](../product/search-recommendation.md).
+
+| TC | Feature | Steps | Test data | Expected result | Actual result | Pass/Fail | Automated test |
+|---|---|---|---|---|---|---|---|
+| TC-62 | Search: Nepali in English letters | Search tab → Places → type the query | `pashupati mandir` | Pashupatinath Temple is found; the hint shows the Nepali name that matched | "1 place found", Pashupatinath Temple, "Temples & Stupas · Kathmandu"; hint "Closest spelling match: पशुपतिनाथ मन्दिर" | Pass | `test_benchmark_cases_pass` (Romanised Nepali and Devanagari groups) |
+| TC-63 | Search: village and district | Treks tab → `namche`; Places tab → `bhaktapur` | `namche`, `bhaktapur` | EBC Trek with "Passes through Namche Bazaar"; the places in Bhaktapur district, Bhaktapur Durbar Square first | "Everest Base Camp Trek · Khumbu · 11 days · Passes through Namche Bazaar"; Bhaktapur Durbar Square, Changu Narayan, Nagarkot, then Kathmandu Durbar Square (alias "Basantapur" is two letters from "bhaktapur": a known fuzzy match) | Pass | `test_search_village_finds_trek_with_via`, `test_search_district_lists_its_places` |
+| TC-64 | Not interested + Undo | Explore → × on the first "Recommended for you" card → Undo | first card | The card goes at once; a bar "… hidden. We will show fewer places like it." with Undo; Undo brings it back; the bar goes after 6 s | Pashupatinath went and did not come back after a reload; Bhaktapur Durbar Square: bar shown, Undo brought it back first in the row | Pass | `test_not_interested_and_undo`, `test_hiding_temples_pushes_them_down` |
+| TC-65 | Variety and place tags | Explore → look at the first two cards → open Bhaktapur Durbar Square | culture + religious user | Not all temples at the top; the place page shows its tags with icons | Pashupatinath Temple (temple) then Bhaktapur Durbar Square (heritage); chips "UNESCO World Heritage", "Architecture", "Local culture", "Good for families" | Pass | `test_top_five_is_not_all_one_kind`, `test_place_tags_in_detail_and_admin` |
+| TC-66 | Admin tags; Nepali labels | Admin → Places → edit a place → Tags; app in नेपाली: Explore reasons, place tags, search "via" line | Phewa Lake | Tags can be added and removed and show in the app; every new label is in Nepali | | Not run | `test_place_tags_in_detail_and_admin` |
 
 ## Bugs found and fixed
 

@@ -24,6 +24,7 @@ Draft feature list (2026-11-05). Algorithms will be decided after the feature li
 | Detail page: photos, description, best season, entry fees/permits, how to get there, nearby places | Must-have |
 | Interactive map with markers | Must-have |
 | Search & filters (region, duration, budget, difficulty) | Must-have |
+| Smarter search *(V2-SR)*: Nepali typed in English letters ("pashupati mandir") and Devanagari, a village finds the treks through it ("namche"), a district lists its places, a category word ("temple") lists that category, trek initials ("ebc") | Good |
 | Reviews & ratings from users | Good |
 | "Near me" places using GPS | Good |
 
@@ -52,6 +53,7 @@ Draft feature list (2026-11-05). Algorithms will be decided after the feature li
 | Feature | Priority |
 |---|---|
 | "Recommended for you": treks and places matched to profile, season and budget | Good |
+| Better recommendations *(V2-SR)*: learns from your reviews, trips and "Not interested" (× with Undo); risky treks for you go down; places near you or your trip go up; a varied list; place tags (sunrise, pilgrimage, UNESCO…) shown on the place page | Good |
 | "Best time to visit" suggestion per place | Good |
 | Safer alternative suggestion: if a trek is too risky, suggest a similar but easier one (e.g. EBC → Poon Hill / Mardi Himal) | Wow |
 | Weather forecast for the destination (weather API) | Good |

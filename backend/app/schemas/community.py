@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.models.enums import BudgetLevel, Lang, Nationality, ReviewStatus
+from app.models.enums import BudgetLevel, Lang, Nationality, ReviewStatus, RiskLevel
 from app.schemas.content import PlaceSummary, RatingOut, TrekSummary
 from app.schemas.trip import DayOut, StopOut
 
@@ -51,6 +51,11 @@ Because = Literal[
     "INTEREST_RELIGIOUS",
     "GOOD_SEASON",
     "FITS_BUDGET",
+    "FITS_YOU",
+    "NEAR_YOU",
+    "NEAR_YOUR_TRIP",
+    "SIMILAR_TO_LIKED",
+    "EXPLORE_MORE",
     "HIGHLY_RATED",
     "OFTEN_PLANNED",
 ]
@@ -59,8 +64,17 @@ Because = Literal[
 class RecommendationOut(BaseModel):
     type: Literal["place", "trek"]
     item: PlaceSummary | TrekSummary
-    score: float  # cosine similarity (personal) or Bayesian rating (popular)
+    # cosine x risk factor + nearby bonus (personal), or rating / 5 x risk factor + nearby bonus
+    # (popular); see services/recommend.py
+    score: float
     because: list[Because]
+    risk_level: RiskLevel | None = None  # treks, when the profile is complete (V2-SR-01)
+    distance_km: float | None = None  # from your position or your latest trip (V2-SR-04)
+
+
+class DismissIn(BaseModel):
+    type: Literal["place", "trek"]
+    id: uuid.UUID
 
 
 class RecommendationsOut(BaseModel):

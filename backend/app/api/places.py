@@ -211,6 +211,7 @@ def get_place(
         **summary.model_dump(),
         entry_fee_saarc_npr=place.entry_fee_saarc_npr,
         entry_fee_nepali_npr=place.entry_fee_nepali_npr,
+        tags=list(place.tags or []),
         description=text["description"],
         how_to_reach=text["how_to_reach"],
         photos=[PhotoOut(url=p.url, sort_order=p.sort_order) for p in place.photos],

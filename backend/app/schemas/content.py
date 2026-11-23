@@ -1,4 +1,5 @@
 import uuid
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -55,6 +56,7 @@ class NearbyPlace(BaseModel):
 class PlaceDetail(PlaceSummary):
     entry_fee_saarc_npr: int | None
     entry_fee_nepali_npr: int | None
+    tags: list[str] = []  # codes from PLACE_TAGS; the app shows them as chips (V2-SR-07)
     description: str | None
     how_to_reach: str | None
     photos: list[PhotoOut]
@@ -102,9 +104,17 @@ class SearchHit(BaseModel):
     type: str  # "place" | "trek"
     id: uuid.UUID
     name: str
-    subtitle: str | None
+    subtitle: str | None  # kept for old app versions; the app builds its own from the fields below
     score: float
-    matched: str  # the name or alias that matched
+    matched: str  # the name, alias, district, category or village that matched
+    # What matched: the item's own name (or alias), its district, its category, or (treks) a
+    # village on the way
+    match: Literal["name", "district", "category", "via"] = "name"
+    category: CategoryOut | None = None  # places
+    district: str | None = None  # places
+    region: str | None = None  # treks
+    total_days: int | None = None  # treks
+    via: str | None = None  # treks matched through a village: that village's name
 
 
 class SearchOut(BaseModel):

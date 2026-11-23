@@ -200,7 +200,7 @@ export function useSearch(q: string) {
   const query = q.trim();
   return useQuery({
     queryKey: ['search', lang, query],
-    queryFn: () => get<SearchResult>('/search', { q: query }),
+    queryFn: () => get<SearchResult>('/search', { q: query, limit: 20 }),
     enabled: query.length >= 2,
     placeholderData: keepPreviousData,
   });
@@ -309,13 +309,57 @@ export function useDeleteTrip() {
 
 // ------------------------------------------------- V2 Phase 2: personal & community
 
-export function useRecommendations() {
+/**
+ * "Recommended for you". `coords` is the phone's position only when location was already allowed
+ * (useKnownPosition never asks); without it the server uses the user's latest trip.
+ */
+export function useRecommendations(coords?: { lat: number; lng: number } | null) {
   const lang = useLang();
   const token = useAuth((s) => s.accessToken);
   return useQuery({
-    queryKey: ['recommendations', lang],
-    queryFn: () => get<Recommendations>('/recommendations', { limit: 10 }),
+    queryKey: ['recommendations', lang, coords ?? null],
+    queryFn: () => get<Recommendations>('/recommendations', { limit: 10, ...coords }),
     enabled: !!token,
+    placeholderData: keepPreviousData, // no flash when the position arrives
+  });
+}
+
+type RecTarget = { type: 'place' | 'trek'; id: string };
+// Same scope = run one after another, so a quick "Undo" never reaches the server before the hide.
+const DISMISS_SCOPE = { id: 'recommendation-dismiss' };
+
+/** "Not interested": hide the card at once, then tell the server (V2-SR-03). */
+export function useDismissRecommendation() {
+  const client = useQueryClient();
+  return useMutation({
+    scope: DISMISS_SCOPE,
+    mutationFn: async (target: RecTarget) => {
+      await api.post('/recommendations/dismissed', target);
+    },
+    onMutate: async (target) => {
+      await client.cancelQueries({ queryKey: ['recommendations'] });
+      client.setQueriesData<Recommendations>({ queryKey: ['recommendations'] }, (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.filter((r) => !(r.type === target.type && r.item.id === target.id)),
+            }
+          : old,
+      );
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: ['recommendations'] }),
+  });
+}
+
+/** Undo "Not interested". */
+export function useUndoDismiss() {
+  const client = useQueryClient();
+  return useMutation({
+    scope: DISMISS_SCOPE,
+    mutationFn: async (target: RecTarget) => {
+      await api.delete(`/recommendations/dismissed/${target.type}/${target.id}`);
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: ['recommendations'] }),
   });
 }
 

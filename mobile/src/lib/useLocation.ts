@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type LocationState =
   | { status: 'idle' }
@@ -33,4 +33,33 @@ export function useLocation() {
   }, []);
 
   return { state, request };
+}
+
+/**
+ * The phone's last known position, but only if the user has ALREADY allowed location (we never
+ * ask here). Rounded to 2 decimals (about 1 km): enough for "near you", and the query key stays
+ * the same while the user walks around.
+ */
+export function useKnownPosition() {
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const permission = await Location.getForegroundPermissionsAsync();
+        if (!permission.granted) return;
+        const pos = await Location.getLastKnownPositionAsync();
+        if (pos && alive) {
+          const round = (n: number) => Math.round(n * 100) / 100;
+          setCoords({ lat: round(pos.coords.latitude), lng: round(pos.coords.longitude) });
+        }
+      } catch {
+        // no position: recommendations simply do without it
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return coords;
 }

@@ -48,10 +48,10 @@ Drafted 2026-11-05. See [feature.md](feature.md) for the feature list (all featu
 
 | Feature | Algorithm |
 |---|---|
-| Recommended for you | **Content-based filtering**: turn the user's preferences and each trek into vectors, compare them with **cosine similarity** `cos θ = (A·B)/(‖A‖‖B‖)`, and rank the results |
+| Recommended for you | **Content-based filtering**: turn the user's preferences and each trek into vectors, compare them with **cosine similarity** `cos θ = (A·B)/(‖A‖‖B‖)`, and rank the results. V2-SR adds learning from feedback, the risk model, a nearby bonus and **MMR** for variety ([below](#v2-sr-better-search-and-recommendations)) |
 | Safer alternative | **KNN**: find the K treks most similar to the one chosen, keep only those predicted as a lower risk, and show the closest |
 | Best time to visit | **Weighted scoring** of each month from average rainfall, temperature and visibility |
-| Search with typos ("Anapurna") | **Levenshtein edit distance** for fuzzy matching |
+| Search with typos ("Anapurna") | **Levenshtein edit distance** for fuzzy matching; V2-SR adds **Devanagari → Latin transliteration**, word-by-word matching and search by village, district and category ([below](#v2-sr-better-search-and-recommendations)) |
 | Near me | **Haversine** distance + sorting (a bounding box first, to make it fast) |
 | Review ranking | **Bayesian average**, so a trek with one 5★ review doesn't beat one with a hundred 4.5★ reviews |
 | Packing checklist | **Rule-based expert system** (e.g. altitude above 4,000 m or winter → down jacket) |
@@ -115,6 +115,56 @@ Worked example (the "Valley" trip, medium budget, foreign, 2 days, *K* km after 
 
 **5. Share a trip: random tokens.** `secrets.token_urlsafe(16)` (128 random bits, impossible to guess);
 the token is the only key; a wrong token, a stopped share and a deleted trip all give the same 404.
+
+### V2-SR: better search and recommendations
+
+Plan and status: [search-recommendation.md](../product/search-recommendation.md). Measured with our own
+test sets: [search_quality.md](../search_quality.md), [recommend_quality.md](../recommend_quality.md).
+
+**1. Devanagari → Latin transliteration** ([transliterate.py](../../backend/app/algorithms/transliterate.py)).
+Each word is split into syllables: a consonant carries the inherent "a" (क = ka), a vowel sign replaces
+it (कि = ki), the virama ् removes it (क्त = kt). Then **schwa deletion** drops the "a" Nepali does not
+say: at the end of a word (नगरकोट → nagarkot) unless it follows a consonant cluster (क्षेत्र → kshetra),
+and inside a word in the pattern vowel + C(a) + C + vowel, scanning right to left (दरबार → darbar,
+सगरमाथा → sagarmatha). Every place and trek name also gets a saved `name_latin`, and a Devanagari query
+is searched in both scripts.
+
+**2. Word-by-word similarity** ([levenshtein.py](../../backend/app/algorithms/levenshtein.py)).
+Plain Levenshtein punishes extra words: "chitwan nikunja" vs "chitwan rashtriya nikunja" scores 0.6.
+Word similarity matches each query word with its best word in the name and averages, weighted by word
+length (here 1.0). Score = max(plain, 0.95 × word similarity) → 0.95.
+
+**3. Search over more than names** ([search.py](../../backend/app/services/search.py)).
+Candidates also come from districts (score × 0.9), categories (× 0.85), villages on a trek (× 0.95,
+shown as "Passes through …") and trek initials ("ebc"). Rules from the test set: anything below 0.7 is
+dropped, and a query shorter than 5 letters needs 0.85 ("lake" must not find "Larke"). Result on 43
+queries: hit@1 72% → **92%**, hit@3 72% → **100%**, MRR 0.725 → **0.958**.
+
+**4. Recommendations, step by step** ([recommend.py](../../backend/app/services/recommend.py)).
+
+1. *Vectors with tags.* Item = 4 interests + 12 tags × 0.5 + season_fit + budget_fit (18 numbers).
+   The user gets the tags their interests suggest, e.g. religious → pilgrimage 1, unesco 0.3.
+2. *Learning from feedback.* Signal s: review 5★ +1, 4★ +0.5, 3★ 0, 2★ −0.5, 1★ −1; trip stop +0.5;
+   "Not interested" −1. learned = average of s × item vector; user = max(0, interests + learned).
+3. *Risk-aware.* For treks, our risk model predicts the level for this user and month. Score × 1.0
+   (easy, moderate), × 0.7 (hard), × 0.4 (risky).
+4. *Nearby.* + 0.15 × e^(−d / 40), d = km from the phone (only if location is already allowed) or from the
+   middle of the latest trip. 0 km → +0.15, 40 km → +0.055, 200 km → +0.001.
+5. *Only matching items.* An item must share an interest or tag with the user; empty places are filled
+   with popular items marked "Something different to explore".
+6. *MMR for variety.* Pick one item at a time:
+   `next = argmax λ·score − (1 − λ)·max sim(item, picked)`, sim = ½ cosine + ½ (same kind of item).
+
+Worked example of MMR (λ = 0.75, culture + religious user): after Pashupatinath (0.989) is picked,
+Janaki Temple (score 0.972, sim to Pashupatinath 0.974) gets 0.75 × 0.972 − 0.25 × 0.974 = **0.486**,
+while Bhaktapur Durbar Square (heritage, score 0.888, sim 0.384) gets 0.75 × 0.888 − 0.25 × 0.384 =
+**0.570**, so the heritage site comes second (October, dev data). Choosing λ (6 typical users, top 10):
+
+| λ | Relevance | Variety | Kinds of item |
+|---|---|---|---|
+| 1 (no MMR) | 0.877 | 0.297 | 2.2 |
+| **0.75 (used)** | 0.862 (−1.7%) | 0.406 (+37%) | 3.3 |
+| 0.6 | 0.819 (−6.5%) | 0.537 (+81%) | 4.5 |
 
 ### Version 2 Phase 1: how they were built (with worked examples for the report)
 

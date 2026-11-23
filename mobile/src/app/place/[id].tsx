@@ -33,6 +33,22 @@ import type { PlaceDetail } from '@/lib/types';
 import { colors, spacing } from '@/theme';
 import { PressableLink } from '@/components/PressableLink';
 
+/** An icon for each place tag (PLACE_TAGS in backend/app/models/enums.py) */
+const TAG_ICONS: Record<string, keyof typeof MaterialCommunityIcons.glyphMap> = {
+  sunrise: 'weather-sunset-up',
+  mountain_views: 'image-filter-hdr',
+  hiking: 'hiking',
+  boating: 'rowing',
+  wildlife: 'paw',
+  pilgrimage: 'hands-pray',
+  unesco: 'bank',
+  architecture: 'pillar',
+  local_culture: 'account-group',
+  family: 'human-male-female-child',
+  high_altitude: 'summit',
+  few_crowds: 'leaf',
+};
+
 const HERO = 400;
 
 function openDirections(p: PlaceDetail) {
@@ -127,6 +143,14 @@ export default function PlaceDetailScreen() {
             ]}
           />
 
+          {p.tags.length > 0 && (
+            <View style={styles.tags} accessibilityLabel={t('place.tagsLabel')}>
+              {p.tags.map((tag) => (
+                <Pill key={tag} label={t(`tags.${tag}`)} icon={TAG_ICONS[tag]} />
+              ))}
+            </View>
+          )}
+
           {p.description && (
             <Section title={t('place.about')}>
               <AppText style={{ color: colors.textBody }}>{p.description}</AppText>
@@ -216,6 +240,7 @@ export default function PlaceDetailScreen() {
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(2) },
   nearRow: {
     flexDirection: 'row',
     alignItems: 'center',

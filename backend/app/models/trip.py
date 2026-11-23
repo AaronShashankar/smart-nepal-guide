@@ -119,3 +119,39 @@ class Review(Base):
     user: Mapped[User] = relationship()
     place: Mapped[Place | None] = relationship()
     trek: Mapped[Trek | None] = relationship()
+
+
+class DismissedItem(Base):
+    """'Not interested' on a recommendation: the item is not recommended to this user again
+    (until undone), and it counts as negative feedback for the user's taste (V2-SR-03)."""
+
+    __tablename__ = "dismissed_item"
+    __table_args__ = (
+        CheckConstraint("(place_id IS NULL) <> (trek_id IS NULL)", name="one_target"),
+        Index(
+            "uq_dismissed_user_place",
+            "user_id",
+            "place_id",
+            unique=True,
+            postgresql_where=text("place_id IS NOT NULL"),
+        ),
+        Index(
+            "uq_dismissed_user_trek",
+            "user_id",
+            "trek_id",
+            unique=True,
+            postgresql_where=text("trek_id IS NOT NULL"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    place_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("place.id", ondelete="CASCADE")
+    )
+    trek_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("trek.id", ondelete="CASCADE")
+    )
+    created_at: Mapped[datetime] = created_at_col()

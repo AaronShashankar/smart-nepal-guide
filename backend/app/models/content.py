@@ -16,10 +16,12 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.algorithms.transliterate import to_latin
 from app.models.base import Base, pg_enum, updated_at_col, uuid_pk
 from app.models.enums import RiskLevel
 from app.models.user import LANG, Lang
@@ -68,6 +70,10 @@ class Place(Base):
     entry_fee_npr: Mapped[int | None] = mapped_column(Integer)  # foreign rate
     entry_fee_saarc_npr: Mapped[int | None] = mapped_column(Integer)
     entry_fee_nepali_npr: Mapped[int | None] = mapped_column(Integer)
+    # What the place offers beyond its category (PLACE_TAGS), used by recommendations
+    tags: Mapped[list[str]] = mapped_column(
+        ARRAY(String(30)), nullable=False, default=list, server_default="{}"
+    )
     is_published: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     updated_at: Mapped[datetime] = updated_at_col()
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -94,11 +100,19 @@ class PlaceTranslation(Base):
             postgresql_using="gin",
             postgresql_ops={"name": "gin_trgm_ops"},
         ),
+        Index(
+            "ix_place_translation_name_latin_trgm",
+            "name_latin",
+            postgresql_using="gin",
+            postgresql_ops={"name_latin": "gin_trgm_ops"},
+        ),
     )
 
     place_id: Mapped[uuid.UUID] = _fk("place.id", primary_key=True)
     lang: Mapped[Lang] = mapped_column(LANG, primary_key=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
+    # The name in Latin letters (to_latin), filled automatically: see _fill_name_latin below
+    name_latin: Mapped[str | None] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(Text)
     how_to_reach: Mapped[str | None] = mapped_column(Text)
     is_machine_translated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -178,11 +192,18 @@ class TrekTranslation(Base):
             postgresql_using="gin",
             postgresql_ops={"name": "gin_trgm_ops"},
         ),
+        Index(
+            "ix_trek_translation_name_latin_trgm",
+            "name_latin",
+            postgresql_using="gin",
+            postgresql_ops={"name_latin": "gin_trgm_ops"},
+        ),
     )
 
     trek_id: Mapped[uuid.UUID] = _fk("trek.id", primary_key=True)
     lang: Mapped[Lang] = mapped_column(LANG, primary_key=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
+    name_latin: Mapped[str | None] = mapped_column(Text)  # filled automatically, like places
     overview: Mapped[str | None] = mapped_column(Text)
     is_machine_translated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_reviewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -249,3 +270,15 @@ class TrekPermit(Base):
 
     trek_id: Mapped[uuid.UUID] = _fk("trek.id", primary_key=True)
     permit_id: Mapped[uuid.UUID] = _fk("permit.id", primary_key=True)
+
+
+# ------------------------------------------------------------- search helpers
+def _fill_name_latin(_mapper, _connection, target) -> None:
+    """Keep name_latin in step with name on every insert and update made through the ORM
+    (seed, admin panel), so search can match "pashupati mandir" to पशुपतिनाथ मन्दिर."""
+    target.name_latin = to_latin(target.name) if target.name else None
+
+
+for _model in (PlaceTranslation, TrekTranslation):
+    event.listen(_model, "before_insert", _fill_name_latin)
+    event.listen(_model, "before_update", _fill_name_latin)

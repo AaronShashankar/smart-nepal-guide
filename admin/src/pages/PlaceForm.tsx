@@ -4,6 +4,7 @@ import {
   FileButton,
   Grid,
   Group,
+  MultiSelect,
   NumberInput,
   Paper,
   Select,
@@ -16,15 +17,15 @@ import {
   Textarea,
   TextInput,
   Title,
-} from '@mantine/core';
-import { useState, type FormEvent } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+} from "@mantine/core";
+import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router";
 
-import { photoUrl } from '../api';
-import { MapPicker } from '../components/MapPicker';
-import { PageHeader, QueryState } from '../components/ui';
-import { numOrNull, orNull, withToast } from '../lib';
+import { photoUrl } from "../api";
+import { MapPicker } from "../components/MapPicker";
+import { PageHeader, QueryState } from "../components/ui";
+import { numOrNull, orNull, withToast } from "../lib";
 import {
   useCategories,
   useDeletePhoto,
@@ -32,19 +33,42 @@ import {
   usePlace,
   useSavePlace,
   useUploadPhoto,
-} from '../queries';
-import type { ClimateRow, Place, PlaceIn, PlaceText } from '../types';
+} from "../queries";
+import {
+  PLACE_TAGS,
+  type ClimateRow,
+  type Place,
+  type PlaceIn,
+  type PlaceText,
+} from "../types";
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const emptyText = (): PlaceText => ({ name: '', description: '', how_to_reach: '' });
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+const emptyText = (): PlaceText => ({
+  name: "",
+  description: "",
+  how_to_reach: "",
+});
 
 const EMPTY: PlaceIn = {
-  category_code: '',
+  category_code: "",
   latitude: 27.7172,
   longitude: 85.324,
   altitude_m: null,
-  district: '',
-  province: '',
+  district: "",
+  province: "",
   entry_fee_npr: null,
   entry_fee_saarc_npr: null,
   entry_fee_nepali_npr: null,
@@ -52,6 +76,7 @@ const EMPTY: PlaceIn = {
   en: emptyText(),
   ne: emptyText(),
   aliases: [],
+  tags: [],
   climate: [],
 };
 
@@ -94,25 +119,29 @@ function TextTab({
   return (
     <Stack pt="sm">
       <TextInput
-        label={t('places.name')}
+        label={t("places.name")}
         required={required}
-        value={value.name ?? ''}
+        value={value.name ?? ""}
         onChange={(e) => onChange({ ...value, name: e.currentTarget.value })}
         maxLength={200}
       />
       <Textarea
-        label={t('places.description')}
+        label={t("places.description")}
         autosize
         minRows={4}
-        value={value.description ?? ''}
-        onChange={(e) => onChange({ ...value, description: e.currentTarget.value })}
+        value={value.description ?? ""}
+        onChange={(e) =>
+          onChange({ ...value, description: e.currentTarget.value })
+        }
       />
       <Textarea
-        label={t('places.howToReach')}
+        label={t("places.howToReach")}
         autosize
         minRows={2}
-        value={value.how_to_reach ?? ''}
-        onChange={(e) => onChange({ ...value, how_to_reach: e.currentTarget.value })}
+        value={value.how_to_reach ?? ""}
+        onChange={(e) =>
+          onChange({ ...value, how_to_reach: e.currentTarget.value })
+        }
       />
     </Stack>
   );
@@ -142,7 +171,7 @@ function ClimateTable({
           )
         }
       >
-        {t('places.addClimate')}
+        {t("places.addClimate")}
       </Button>
     );
   }
@@ -154,10 +183,10 @@ function ClimateTable({
         <Table>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>{t('places.month')}</Table.Th>
-              <Table.Th>{t('places.temp')}</Table.Th>
-              <Table.Th>{t('places.rain')}</Table.Th>
-              <Table.Th>{t('places.visibility')}</Table.Th>
+              <Table.Th>{t("places.month")}</Table.Th>
+              <Table.Th>{t("places.temp")}</Table.Th>
+              <Table.Th>{t("places.rain")}</Table.Th>
+              <Table.Th>{t("places.visibility")}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -170,7 +199,7 @@ function ClimateTable({
                     min={-60}
                     max={50}
                     decimalScale={1}
-                    value={r.avg_temp_c ?? ''}
+                    value={r.avg_temp_c ?? ""}
                     onChange={(v) => set(i, { avg_temp_c: numOrNull(v) })}
                   />
                 </Table.Td>
@@ -180,7 +209,7 @@ function ClimateTable({
                     min={0}
                     max={3000}
                     allowDecimal={false}
-                    value={r.rainfall_mm ?? ''}
+                    value={r.rainfall_mm ?? ""}
                     onChange={(v) => set(i, { rainfall_mm: numOrNull(v) })}
                   />
                 </Table.Td>
@@ -190,7 +219,7 @@ function ClimateTable({
                     min={1}
                     max={10}
                     allowDecimal={false}
-                    value={r.visibility_score ?? ''}
+                    value={r.visibility_score ?? ""}
                     onChange={(v) => set(i, { visibility_score: numOrNull(v) })}
                   />
                 </Table.Td>
@@ -199,8 +228,13 @@ function ClimateTable({
           </Table.Tbody>
         </Table>
       </Table.ScrollContainer>
-      <Button variant="subtle" color="red" w="fit-content" onClick={() => onChange([])}>
-        {t('places.removeClimate')}
+      <Button
+        variant="subtle"
+        color="red"
+        w="fit-content"
+        onClick={() => onChange([])}
+      >
+        {t("places.removeClimate")}
       </Button>
     </Stack>
   );
@@ -220,13 +254,19 @@ function Photos({ place }: { place: Place }) {
               color="red"
               variant="filled"
               size="sm"
-              aria-label={t('common.delete')}
+              aria-label={t("common.delete")}
               loading={remove.isPending && remove.variables?.photoId === ph.id}
               onClick={() => {
-                if (window.confirm(t('common.confirmDelete', { name: ph.url.split('/').pop() }))) {
+                if (
+                  window.confirm(
+                    t("common.confirmDelete", {
+                      name: ph.url.split("/").pop(),
+                    }),
+                  )
+                ) {
                   withToast(
                     remove.mutateAsync({ placeId: place.id, photoId: ph.id }),
-                    t('common.deleted'),
+                    t("common.deleted"),
                   );
                 }
               }}
@@ -240,17 +280,18 @@ function Photos({ place }: { place: Place }) {
         <FileButton
           accept="image/jpeg,image/png,image/webp"
           onChange={(file) => {
-            if (file) withToast(upload.mutateAsync({ placeId: place.id, file }));
+            if (file)
+              withToast(upload.mutateAsync({ placeId: place.id, file }));
           }}
         >
           {(props) => (
             <Button {...props} variant="light" loading={upload.isPending}>
-              {t('places.upload')}
+              {t("places.upload")}
             </Button>
           )}
         </FileButton>
         <Text size="sm" c="dimmed">
-          {t('places.uploadHint')}
+          {t("places.uploadHint")}
         </Text>
       </Group>
     </Stack>
@@ -263,38 +304,54 @@ function PlaceEditor({ place }: { place?: Place }) {
   const categories = useCategories();
   const savePlace = useSavePlace();
   const deletePlace = useDeletePlace();
-  const [form, setForm] = useState<PlaceIn>(() => (place ? toInput(place) : EMPTY));
+  const [form, setForm] = useState<PlaceIn>(() =>
+    place ? toInput(place) : EMPTY,
+  );
   const set = (patch: Partial<PlaceIn>) => setForm((f) => ({ ...f, ...patch }));
-  const ne = i18n.language.startsWith('ne');
+  const ne = i18n.language.startsWith("ne");
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const saved = await withToast(savePlace.mutateAsync({ id: place?.id, body: clean(form) }));
+    const saved = await withToast(
+      savePlace.mutateAsync({ id: place?.id, body: clean(form) }),
+    );
     if (saved && !place) navigate(`/places/${saved.id}`, { replace: true });
   }
 
   async function onDelete() {
-    if (!place || !window.confirm(t('common.confirmDelete', { name: place.en.name }))) return;
-    const ok = await withToast(deletePlace.mutateAsync(place.id), t('common.deleted'));
-    if (ok !== undefined) navigate('/places');
+    if (
+      !place ||
+      !window.confirm(t("common.confirmDelete", { name: place.en.name }))
+    )
+      return;
+    const ok = await withToast(
+      deletePlace.mutateAsync(place.id),
+      t("common.deleted"),
+    );
+    if (ok !== undefined) navigate("/places");
   }
 
   return (
     <form onSubmit={submit}>
       <PageHeader
-        title={place ? (place.en.name ?? t('places.edit')) : t('places.new')}
+        title={place ? (place.en.name ?? t("places.edit")) : t("places.new")}
         right={
           <Group>
-            <Button variant="default" onClick={() => navigate('/places')}>
-              {t('common.back')}
+            <Button variant="default" onClick={() => navigate("/places")}>
+              {t("common.back")}
             </Button>
             {place && (
-              <Button color="red" variant="light" onClick={onDelete} loading={deletePlace.isPending}>
-                {t('common.delete')}
+              <Button
+                color="red"
+                variant="light"
+                onClick={onDelete}
+                loading={deletePlace.isPending}
+              >
+                {t("common.delete")}
               </Button>
             )}
             <Button type="submit" loading={savePlace.isPending}>
-              {t('common.save')}
+              {t("common.save")}
             </Button>
           </Group>
         }
@@ -305,15 +362,19 @@ function PlaceEditor({ place }: { place?: Place }) {
             <Paper withBorder p="md">
               <Tabs defaultValue="en">
                 <Tabs.List>
-                  <Tabs.Tab value="en">{t('common.english')}</Tabs.Tab>
-                  <Tabs.Tab value="ne">{t('common.nepali')}</Tabs.Tab>
+                  <Tabs.Tab value="en">{t("common.english")}</Tabs.Tab>
+                  <Tabs.Tab value="ne">{t("common.nepali")}</Tabs.Tab>
                 </Tabs.List>
                 <Tabs.Panel value="en">
-                  <TextTab value={form.en} onChange={(en) => set({ en })} required />
+                  <TextTab
+                    value={form.en}
+                    onChange={(en) => set({ en })}
+                    required
+                  />
                 </Tabs.Panel>
                 <Tabs.Panel value="ne">
                   <Text size="sm" c="dimmed" pt="sm">
-                    {t('common.nepaliHint')}
+                    {t("common.nepaliHint")}
                   </Text>
                   <TextTab value={form.ne} onChange={(v) => set({ ne: v })} />
                 </Tabs.Panel>
@@ -321,18 +382,32 @@ function PlaceEditor({ place }: { place?: Place }) {
             </Paper>
             <Paper withBorder p="md">
               <TagsInput
-                label={t('places.aliases')}
-                description={t('places.aliasesHint')}
+                label={t("places.aliases")}
+                description={t("places.aliasesHint")}
                 value={form.aliases}
                 onChange={(aliases) => set({ aliases })}
               />
+              <MultiSelect
+                mt="md"
+                label={t("places.tags")}
+                description={t("places.tagsHint")}
+                value={form.tags}
+                onChange={(tags) => set({ tags })}
+                data={PLACE_TAGS.map((code) => ({
+                  value: code,
+                  label: t(`places.tagNames.${code}`),
+                }))}
+              />
             </Paper>
             <Paper withBorder p="md">
-              <Title order={5}>{t('places.climate')}</Title>
+              <Title order={5}>{t("places.climate")}</Title>
               <Text size="sm" c="dimmed" mb="sm">
-                {t('places.climateHint')}
+                {t("places.climateHint")}
               </Text>
-              <ClimateTable rows={form.climate} onChange={(climate) => set({ climate })} />
+              <ClimateTable
+                rows={form.climate}
+                onChange={(climate) => set({ climate })}
+              />
             </Paper>
           </Stack>
         </Grid.Col>
@@ -342,68 +417,72 @@ function PlaceEditor({ place }: { place?: Place }) {
             <Paper withBorder p="md">
               <Stack>
                 <Select
-                  label={t('places.category')}
+                  label={t("places.category")}
                   required
                   searchable
                   value={form.category_code || null}
-                  onChange={(v) => set({ category_code: v ?? '' })}
+                  onChange={(v) => set({ category_code: v ?? "" })}
                   data={(categories.data ?? []).map((c) => ({
                     value: c.code,
                     label: (ne && c.name_ne) || c.name_en,
                   }))}
                 />
                 <Switch
-                  label={t('common.published')}
+                  label={t("common.published")}
                   checked={form.is_published}
-                  onChange={(e) => set({ is_published: e.currentTarget.checked })}
+                  onChange={(e) =>
+                    set({ is_published: e.currentTarget.checked })
+                  }
                 />
                 <Group grow>
                   <TextInput
-                    label={t('places.district')}
-                    value={form.district ?? ''}
+                    label={t("places.district")}
+                    value={form.district ?? ""}
                     onChange={(e) => set({ district: e.currentTarget.value })}
                   />
                   <TextInput
-                    label={t('places.province')}
-                    value={form.province ?? ''}
+                    label={t("places.province")}
+                    value={form.province ?? ""}
                     onChange={(e) => set({ province: e.currentTarget.value })}
                   />
                 </Group>
                 <Group grow>
                   <NumberInput
-                    label={t('places.altitude')}
+                    label={t("places.altitude")}
                     min={0}
                     max={8849}
                     allowDecimal={false}
-                    value={form.altitude_m ?? ''}
+                    value={form.altitude_m ?? ""}
                     onChange={(v) => set({ altitude_m: numOrNull(v) })}
                   />
                 </Group>
                 <Group grow>
                   <NumberInput
-                    label={t('places.entryFee')}
-                    description={t('places.feeHint')}
+                    label={t("places.entryFee")}
+                    description={t("places.feeHint")}
                     min={0}
                     allowDecimal={false}
                     thousandSeparator=","
-                    value={form.entry_fee_npr ?? ''}
+                    value={form.entry_fee_npr ?? ""}
                     onChange={(v) => set({ entry_fee_npr: numOrNull(v) })}
                   />
                   <NumberInput
-                    label={t('places.entryFeeSaarc')}
+                    label={t("places.entryFeeSaarc")}
                     min={0}
                     allowDecimal={false}
                     thousandSeparator=","
-                    value={form.entry_fee_saarc_npr ?? ''}
+                    value={form.entry_fee_saarc_npr ?? ""}
                     onChange={(v) => set({ entry_fee_saarc_npr: numOrNull(v) })}
                   />
                   <NumberInput
-                    label={t('places.entryFeeNepali')}
+                    label={t("places.entryFeeNepali")}
                     min={0}
                     allowDecimal={false}
                     thousandSeparator=","
-                    value={form.entry_fee_nepali_npr ?? ''}
-                    onChange={(v) => set({ entry_fee_nepali_npr: numOrNull(v) })}
+                    value={form.entry_fee_nepali_npr ?? ""}
+                    onChange={(v) =>
+                      set({ entry_fee_nepali_npr: numOrNull(v) })
+                    }
                   />
                 </Group>
               </Stack>
@@ -412,7 +491,7 @@ function PlaceEditor({ place }: { place?: Place }) {
               <Stack gap="xs">
                 <Group grow>
                   <NumberInput
-                    label={t('places.latitude')}
+                    label={t("places.latitude")}
                     required
                     min={26.3}
                     max={30.5}
@@ -421,7 +500,7 @@ function PlaceEditor({ place }: { place?: Place }) {
                     onChange={(v) => set({ latitude: Number(v) })}
                   />
                   <NumberInput
-                    label={t('places.longitude')}
+                    label={t("places.longitude")}
                     required
                     min={80}
                     max={88.3}
@@ -431,20 +510,26 @@ function PlaceEditor({ place }: { place?: Place }) {
                   />
                 </Group>
                 <Text size="sm" c="dimmed">
-                  {t('places.mapHint')}
+                  {t("places.mapHint")}
                 </Text>
                 <MapPicker
                   latitude={form.latitude}
                   longitude={form.longitude}
-                  onChange={(latitude, longitude) => set({ latitude, longitude })}
+                  onChange={(latitude, longitude) =>
+                    set({ latitude, longitude })
+                  }
                 />
               </Stack>
             </Paper>
             <Paper withBorder p="md">
               <Title order={5} mb="sm">
-                {t('places.photos')}
+                {t("places.photos")}
               </Title>
-              {place ? <Photos place={place} /> : <Text c="dimmed">{t('places.saveFirst')}</Text>}
+              {place ? (
+                <Photos place={place} />
+              ) : (
+                <Text c="dimmed">{t("places.saveFirst")}</Text>
+              )}
             </Paper>
           </Stack>
         </Grid.Col>
@@ -458,5 +543,9 @@ export default function PlaceForm() {
   const place = usePlace(id);
   if (!id) return <PlaceEditor />;
   // key: a fresh form when moving between places
-  return <QueryState query={place}>{(p) => <PlaceEditor key={p.id} place={p} />}</QueryState>;
+  return (
+    <QueryState query={place}>
+      {(p) => <PlaceEditor key={p.id} place={p} />}
+    </QueryState>
+  );
 }
