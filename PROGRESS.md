@@ -143,7 +143,7 @@ All seed data is in [data/](data/), with a source and date for each item in [dat
 
 | File | Contents |
 |---|---|
-| `places.csv` and `photos.csv` | 69 places, 36 photos |
+| `places.csv` and `photos.csv` | 69 places, 63 photos (63 places have one; the other 6 show a drawn picture) |
 | `aliases.csv` | 71 alternative names, used by search |
 | `treks.json` | 8 treks with their daily stages: Poon Hill, ABC, EBC, Langtang Valley, Mardi Himal, Annapurna Circuit, Gosaikunda, Manaslu Circuit |
 | `categories.csv` | 6 categories |

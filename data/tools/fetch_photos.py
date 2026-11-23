@@ -73,6 +73,44 @@ WIKI_TITLES = {
     "samagaun": "Samagaun",
 }
 
+# place slug -> Commons file, picked by hand (2026-11-23) for places whose Wikipedia article
+# has no free lead image or no article at all. These win over WIKI_TITLES.
+# Bamboo, Siding, Machha Khola, Deng, Namrung and Tilije have no free photo on Commons yet;
+# the app shows its drawn mountain picture for them. Add your own as rows with source=own.
+COMMONS_FILES = {
+    "world_peace_pagoda": "World Peace Pagoda in Pokhara - 2026.jpg",
+    "nayapul": "Nayapul-10-Daecher-2013-gje.jpg",
+    "tikhedhunga": "Suspension bridge in Hile Tikhedhunga-3459.jpg",
+    # trail between Ghorepani and Tadapani; Commons has no good photo of the village itself
+    "tadapani": "Ghorepani-Tadapani-10-Rastplatz-2013-gje.jpg",
+    "chhomrong": "Intl guest house chhomrong.jpg",
+    "deurali_abc": "ABC - Deurali on the Annapurna Base Camp trek, Nepal, 2016.jpg",
+    "jhinu_danda": "Jhinu Danda Bridge (Kadoorie Bridge)-1.jpg",
+    "lama_hotel": "Lamahotel.jpg",
+    "langtang_village": "View of village from langtang (2).JPG",
+    "kyanjin_gompa": "Kyanjin Gompa Village Rasuwa.jpg",
+    "kande": "Pokhara Baglung Highway from Kande kaski1.jpg",
+    "forest_camp": "Forest Camp .. The way to Maardi Himal.jpg",
+    "low_camp": "Mardi Low Camp (1) 03.jpg",
+    "high_camp_mardi": "High Camp of Mardi Himal Trek 07.jpg",
+    "dharapani": "Dharapani village.jpg",
+    "chame": "Chame village Nepal.jpg",
+    "upper_pisang": "Upper Pisang - Annapurna Circuit, Nepal - panoramio.jpg",
+    "manang": "Manang village.jpg",
+    "yak_kharka": "Yak Kharka (4020 m) - Annapurna Circuit, Nepal - panoramio.jpg",
+    "thorong_phedi": "Way to Thorong Phedi - Annapurna Circuit, Nepal - panoramio.jpg",
+    "chandanbari": "Chandanbari view.jpg",
+    "laurebina": "First look of Laurebina,Gosaikunda at 3900m.jpg",
+    # trail from Yaru Bagar to Jagat, just before the village
+    "jagat": "Yaru Bagar to Jagat, Gorkha District, Manaslu Trek, Nepal (39995998083).jpg",
+    "samagaun": "Samagaun Village Manaslu Circuit 17.jpg",
+    "samdo": "Samdo Village 33.jpg",
+    "dharamsala_larkya": (
+        "Dharmasala (Larke Phedi) before Larke Pass (Larkya La), Manaslu Circuit, Nepal.jpg"
+    ),
+    "bimthang": "Bimthang, Nepal.jpg",
+}
+
 
 def get_json(url: str, params: dict) -> dict:
     full = f"{url}?{urllib.parse.urlencode(params)}"
@@ -133,17 +171,19 @@ def commons_info(file_names: list[str]) -> dict[str, dict]:
 
 
 def main() -> int:
-    titles = list(WIKI_TITLES.values())
+    titles = [t for s, t in WIKI_TITLES.items() if s not in COMMONS_FILES]
     names: dict[str, str] = {}
     for i in range(0, len(titles), 40):
         names.update(lead_image_names(titles[i : i + 40]))
-    files = sorted(set(names.values()))
+    files = sorted(set(names.values()) | set(COMMONS_FILES.values()))
     infos: dict[str, dict] = {}
     for i in range(0, len(files), 40):
         infos.update(commons_info(files[i : i + 40]))
+    # slug -> Commons file: Wikipedia lead images first, then the hand-picked files
+    chosen = {s: names.get(t) for s, t in WIKI_TITLES.items() if s not in COMMONS_FILES}
+    chosen.update(COMMONS_FILES)
     rows, skipped = [], []
-    for slug, title in WIKI_TITLES.items():
-        name = names.get(title)
+    for slug, name in chosen.items():
         info = infos.get(name.replace(" ", "_")) if name else None
         if not info or not FREE.match(info["licence"]):
             skipped.append(f"{slug} ({'no image' if not info else info['licence']})")

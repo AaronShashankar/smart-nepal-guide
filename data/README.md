@@ -14,7 +14,7 @@ derived from the slugs/codes, so updates happen in place).
 | `budget_rates.csv` | 18 | **V2 Phase 2.** Per-person daily food and stay cost per budget level (low/medium/high) for `city` trips and each trek region (+ `other`), city transport per km, and the Kathmandu ↔ trailhead return trip for treks. See "Budget rates" below |
 | `teahouses.csv` | 4 | **V2 Phase 2.** Real lodges in Tengboche, each with its **source**. No phone numbers (none found in a source we can name) |
 | `packing_items.csv` | 34 | **V2 Phase 1.** Packing checklist rules: code, group (clothing / gear / health / documents), sort order, and the conditions `always`, `min_altitude_m`, `months` (`;`-separated, e.g. `12;1;2`; only winter or monsoon months) and `min_days`, with English + Nepali name and tip. Nepali text is an AI draft to review. Permits are not listed here: they come from each trek's permits |
-| `photos.csv` | 36 | Wikimedia Commons photos with **author, licence and source page** (for the report) |
+| `photos.csv` | 63 | Wikimedia Commons photos with **author, licence and source page** (for the report) |
 | `climate_baseline.csv`, `climate_regions.csv` | | inputs to the approximate climate model below |
 | `training_samples.csv` | 592 | risk-model training rows (Phase 2): 32 `agency` + 560 `rule` (+ `survey` rows when added). **Generated** by `cd backend && uv run python -m app.ml.dataset [--survey form.csv]`, don't edit by hand; the labelling rules are in `backend/app/ml/dataset.py` |
 
@@ -141,3 +141,10 @@ its Commons licence is free (CC0 / CC BY / CC BY-SA / public domain) and writes 
 `photos.csv`. Re-run with `../backend/.venv/bin/python -I tools/fetch_photos.py`. Add your own photos as
 extra rows with `licence=own`. CC BY / BY-SA photos must be credited (author + licence) wherever shown,
 e.g. in the report's figure captions and an app "credits" screen (Phase 3).
+
+Many trek villages have no Wikipedia article, or no free lead image. For those, the script's
+`COMMONS_FILES` list names a Commons file picked by hand and checked by eye (27 places, added
+2026-11-23). Two of these show the trail just before the place, not the village itself: Tadapani
+(the trail from Ghorepani) and Jagat (the trail from Yaru Bagar). Commons has no free photo yet of
+Bamboo, Siding, Machha Khola, Deng, Namrung or Tilije, so the app shows its drawn mountain picture
+for them. Add your own photos of these if you can.
