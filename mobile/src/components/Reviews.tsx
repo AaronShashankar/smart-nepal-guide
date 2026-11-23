@@ -10,9 +10,9 @@ import { errorMessage } from '@/lib/api';
 import { formatNumber } from '@/lib/format';
 import { type ReviewTarget, useDeleteReview, useReviews, useSaveReview } from '@/lib/queries';
 import type { Review } from '@/lib/types';
-import { colors, fonts, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 
-import { AppText } from './AppText';
+import { AppText, fontFor } from './AppText';
 import { Button } from './Button';
 import { Section } from './Cards';
 import { StarPicker, Stars } from './Stars';
@@ -166,13 +166,7 @@ export function ReviewsSection({ target }: { target: ReviewTarget }) {
               <Button
                 title={page.mine ? t('reviews.edit') : t('reviews.write')}
                 variant="secondary"
-                icon={
-                  <MaterialCommunityIcons
-                    name="star-plus-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-                }
+                icon="star-plus-outline"
                 onPress={() => setWriting(true)}
               />
               {page.mine && (
@@ -205,7 +199,7 @@ const styles = StyleSheet.create({
   card: {
     padding: spacing(3.5),
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 20,
     gap: spacing(1.5),
   },
   mine: { borderWidth: 1, borderColor: colors.primary },
@@ -225,11 +219,11 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: spacing(3),
     backgroundColor: colors.surface,
     color: colors.text,
-    fontFamily: fonts.regular,
+    fontFamily: fontFor('regular'),
     fontSize: 15,
   },
 });

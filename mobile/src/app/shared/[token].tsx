@@ -81,9 +81,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing(2),
     padding: spacing(3),
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: '#E8EEF8',
   },
-  card: { padding: spacing(3.5), backgroundColor: colors.surface, borderRadius: 14, gap: 2 },
+  card: { padding: spacing(3.5), backgroundColor: colors.surface, borderRadius: 20, gap: 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
 });

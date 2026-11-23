@@ -22,7 +22,7 @@ import type {
   TravelStyle,
   TrekExperience,
 } from '@/lib/types';
-import { colors, fonts, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 
 const toInput = (p: Profile): ProfileInput => ({ ...p, interests: p.interests.map((i) => i.code) });
 const isoDate = (d: Date) =>
@@ -93,9 +93,7 @@ function ProfileForm({ initial, isNew }: { initial: ProfileInput; isNew: boolean
           onPress={() => setShowPicker(true)}
           accessibilityRole="button"
         >
-          <AppText style={{ fontFamily: fonts.medium }}>
-            {form.date_of_birth ?? t('profile.pickDate')}
-          </AppText>
+          <AppText weight="semibold">{form.date_of_birth ?? t('profile.pickDate')}</AppText>
         </Pressable>
         {showPicker && (
           <DateTimePicker
@@ -232,10 +230,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: 'center',
     paddingHorizontal: spacing(4),
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  why: { padding: spacing(3), borderRadius: 12, backgroundColor: '#E8EEF8' },
+  why: { padding: spacing(3), borderRadius: 16, backgroundColor: '#E0ECFF' },
 });

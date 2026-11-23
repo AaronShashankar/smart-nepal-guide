@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   card: {
     padding: spacing(4),
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 20,
     gap: spacing(1.5),
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing(3), flexWrap: 'wrap' },

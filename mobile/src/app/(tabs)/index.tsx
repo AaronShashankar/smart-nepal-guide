@@ -1,8 +1,9 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -18,9 +19,11 @@ import {
   usePlaces,
   useRecommendations,
   useTreks,
+  useUpdateMe,
 } from '@/lib/queries';
 import { useLocation } from '@/lib/useLocation';
-import { colors, spacing } from '@/theme';
+import { useSettings } from '@/store/settings';
+import { colors, GUTTER, radii, shadows, spacing } from '@/theme';
 
 const NEAR = '__near__';
 
@@ -31,6 +34,7 @@ function Recommended() {
   if (!recs.data?.items.length) return null;
   return (
     <Section
+      big
       title={recs.data.mode === 'personal' ? t('explore.recommended') : t('explore.popular')}
     >
       {recs.data.mode === 'popular' && (
@@ -41,6 +45,7 @@ function Recommended() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.bleed}
         contentContainerStyle={styles.recRow}
       >
         {recs.data.items.map((rec) => (
@@ -59,8 +64,10 @@ function NearMe() {
   if (state.status === 'idle') {
     return (
       <View style={styles.notice}>
-        <MaterialCommunityIcons name="crosshairs-gps" size={22} color={colors.accent} />
-        <AppText style={{ flex: 1 }}>{t('near.why')}</AppText>
+        <View style={styles.noticeIcon}>
+          <MaterialCommunityIcons name="crosshairs-gps" size={22} color={colors.primary} />
+        </View>
+        <AppText style={{ color: colors.textBody }}>{t('near.why')}</AppText>
         <Button title={t('near.allow')} onPress={request} />
       </View>
     );
@@ -69,8 +76,10 @@ function NearMe() {
   if (state.status === 'denied' || state.status === 'error') {
     return (
       <View style={styles.notice}>
-        <MaterialCommunityIcons name="map-marker-off-outline" size={22} color={colors.warning} />
-        <AppText style={{ flex: 1 }}>
+        <View style={styles.noticeIcon}>
+          <MaterialCommunityIcons name="map-marker-off-outline" size={22} color={colors.warning} />
+        </View>
+        <AppText style={{ color: colors.textBody }}>
           {state.status === 'denied' ? t('near.denied') : t('near.error')}
         </AppText>
         {state.status === 'denied' && !state.canAskAgain ? (
@@ -86,7 +95,7 @@ function NearMe() {
     );
   }
   return (
-    <Section title={t('near.title')}>
+    <Section big title={t('near.title')}>
       <QueryState query={near}>
         {(places) =>
           places.length === 0 ? (
@@ -101,6 +110,31 @@ function NearMe() {
         }
       </QueryState>
     </Section>
+  );
+}
+
+/** "EN · ने" pill: switches the app language in one tap. */
+function LanguageToggle() {
+  const { t } = useTranslation();
+  const language = useSettings((s) => s.language);
+  const setLanguage = useSettings((s) => s.setLanguage);
+  const updateMe = useUpdateMe();
+  const next = language === 'ne' ? 'en' : 'ne';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('explore.changeLanguage')}
+      onPress={async () => {
+        await setLanguage(next);
+        updateMe.mutate({ preferred_lang: next });
+      }}
+      style={({ pressed }) => [styles.langButton, pressed && { opacity: 0.8 }]}
+    >
+      <MaterialCommunityIcons name="web" size={18} color={colors.ink} />
+      <AppText variant="caption" weight="bold">
+        EN · ने
+      </AppText>
+    </Pressable>
   );
 }
 
@@ -120,13 +154,49 @@ export default function ExploreScreen() {
     setRefreshing(false);
   }
 
+  const openSearch = () => router.navigate('/search');
+
   return (
-    <Screen refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
-      <AppText variant="title">{t('explore.title')}</AppText>
+    <Screen tab refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
+      <View style={styles.header}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText variant="label" weight="semibold" muted>
+            {t('explore.hello')}
+          </AppText>
+          <AppText variant="display" accessibilityRole="header">
+            {t('explore.whereNext')}
+          </AppText>
+        </View>
+        <LanguageToggle />
+      </View>
+
+      <View style={styles.searchRow}>
+        {/* Looks like a field; typing happens on the Search tab, which has the results. */}
+        <Pressable
+          accessibilityRole="search"
+          accessibilityLabel={t('search.placeholder')}
+          onPress={openSearch}
+          style={styles.searchField}
+        >
+          <MaterialCommunityIcons name="magnify" size={20} color={colors.textMuted} />
+          <AppText variant="label" weight="medium" muted numberOfLines={1} style={{ flex: 1 }}>
+            {t('explore.searchHint')}
+          </AppText>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('explore.trekFilters')}
+          onPress={openSearch}
+          style={styles.filterButton}
+        >
+          <MaterialCommunityIcons name="tune-variant" size={22} color="#FFFFFF" />
+        </Pressable>
+      </View>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.bleed}
         contentContainerStyle={styles.chips}
       >
         <Chip
@@ -134,7 +204,12 @@ export default function ExploreScreen() {
           selected={!category}
           onPress={() => setCategory(undefined)}
         />
-        <Chip label={t('near.chip')} selected={nearMode} onPress={() => setCategory(NEAR)} />
+        <Chip
+          label={t('near.chip')}
+          icon="map-marker-outline"
+          selected={nearMode}
+          onPress={() => setCategory(NEAR)}
+        />
         {categories.data?.map((c) => (
           <Chip
             key={c.code}
@@ -153,7 +228,17 @@ export default function ExploreScreen() {
 
           {/* Treks are shown first when no category filter is active */}
           {!category && (
-            <Section title={t('explore.treks')}>
+            <Section
+              big
+              title={t('explore.popularTreks')}
+              right={
+                <Pressable accessibilityRole="button" onPress={openSearch} hitSlop={10}>
+                  <AppText variant="label" style={{ color: colors.primary }}>
+                    {t('common.seeAll')}
+                  </AppText>
+                </Pressable>
+              }
+            >
               <QueryState query={treks} onRetry={refresh}>
                 {(data) =>
                   data.items.length === 0 ? (
@@ -171,10 +256,11 @@ export default function ExploreScreen() {
           )}
 
           <Section
+            big
             title={t('explore.places')}
             right={
               places.data ? (
-                <AppText muted variant="caption">
+                <AppText muted variant="caption" weight="bold">
                   {formatNumber(places.data.total)}
                 </AppText>
               ) : null
@@ -201,13 +287,55 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  chips: { gap: spacing(2), paddingRight: spacing(4) },
-  list: { gap: spacing(2.5) },
-  recRow: { gap: spacing(3), paddingRight: spacing(4) },
+  header: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing(3), paddingTop: spacing(2) },
+  langButton: {
+    height: 44,
+    paddingHorizontal: 14,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  searchField: {
+    flex: 1,
+    height: 52,
+    borderRadius: radii.button,
+    backgroundColor: colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: spacing(4),
+    ...shadows.raised,
+  },
+  filterButton: {
+    width: 52,
+    height: 52,
+    borderRadius: radii.button,
+    backgroundColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Sideways rows run to the screen edge, like the design.
+  bleed: { marginHorizontal: -GUTTER },
+  chips: { gap: spacing(2), paddingHorizontal: GUTTER },
+  list: { gap: spacing(3) },
+  recRow: { gap: 14, paddingHorizontal: GUTTER },
   notice: {
     gap: spacing(3),
     padding: spacing(4),
     backgroundColor: colors.surface,
+    borderRadius: radii.card,
+  },
+  noticeIcon: {
+    width: 44,
+    height: 44,
     borderRadius: 14,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -1,59 +1,63 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { WelcomeBackdrop, welcomeStyles } from '@/components/Welcome';
 import type { Lang } from '@/lib/types';
 import { useSettings } from '@/store/settings';
-import { colors, spacing } from '@/theme';
+import { colors, radii, spacing } from '@/theme';
 
 const OPTIONS: { lang: Lang; label: string; sample: string }[] = [
-  { lang: 'en', label: 'English', sample: 'Explore Nepal' },
-  { lang: 'ne', label: 'नेपाली', sample: 'नेपाल घुमौँ' },
+  { lang: 'en', label: 'English', sample: 'Explore Nepal, in your own language.' },
+  { lang: 'ne', label: 'नेपाली', sample: 'नेपाल घुम्नुहोस्, आफ्नै भाषामा।' },
 ];
 
+/** First launch: pick a language (shown in both, since we do not know which one yet). */
 export default function LanguageScreen() {
-  const { t } = useTranslation();
   const setLanguage = useSettings((s) => s.setLanguage);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <AppText variant="title">{t('language.title')}</AppText>
-        <AppText variant="title" muted>
+    <WelcomeBackdrop>
+      <View style={{ gap: spacing(2) }}>
+        <AppText variant="display" style={welcomeStyles.title} accessibilityRole="header">
+          Choose your language
+        </AppText>
+        <AppText variant="title" style={{ color: 'rgba(255,255,255,0.82)' }}>
           भाषा छान्नुहोस्
         </AppText>
-        <AppText muted>{t('language.subtitle')}</AppText>
+        <AppText style={welcomeStyles.body}>
+          You can change this later · पछि परिवर्तन गर्न सकिन्छ
+        </AppText>
       </View>
-      {OPTIONS.map((o) => (
-        <Pressable
-          key={o.lang}
-          accessibilityRole="button"
-          onPress={() => setLanguage(o.lang)}
-          style={({ pressed }) => [styles.option, pressed && { borderColor: colors.primary }]}
-        >
-          <AppText variant="heading">{o.label}</AppText>
-          <AppText muted>{o.sample}</AppText>
-        </Pressable>
-      ))}
-    </SafeAreaView>
+      <View style={{ gap: 10 }}>
+        {OPTIONS.map((o) => (
+          <Pressable
+            key={o.lang}
+            accessibilityRole="button"
+            onPress={() => setLanguage(o.lang)}
+            style={({ pressed }) => [styles.option, pressed && { opacity: 0.85 }]}
+          >
+            <View style={{ flex: 1, gap: 2 }}>
+              <AppText variant="title">{o.label}</AppText>
+              <AppText variant="caption" muted>
+                {o.sample}
+              </AppText>
+            </View>
+            <MaterialCommunityIcons name="arrow-right" size={24} color={colors.primary} />
+          </Pressable>
+        ))}
+      </View>
+    </WelcomeBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: spacing(6),
-    justifyContent: 'center',
-    gap: spacing(4),
-  },
-  header: { gap: spacing(1), marginBottom: spacing(4) },
   option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
     padding: spacing(5),
-    borderRadius: 16,
+    borderRadius: radii.card,
     backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
   },
 });

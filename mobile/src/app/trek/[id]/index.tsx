@@ -1,52 +1,36 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { AltitudeSparkline } from '@/components/AltitudeChart';
 import { AppText } from '@/components/AppText';
 import { BudgetTable } from '@/components/BudgetTable';
 import { Button } from '@/components/Button';
 import { DifficultyBadge, Section } from '@/components/Cards';
+import { Pill } from '@/components/Chip';
 import { ForecastStrip } from '@/components/ForecastStrip';
+import {
+  ACTION_BAR_SPACE,
+  BottomActionBar,
+  ContentSheet,
+  HeroHeader,
+  HighlightLink,
+  ListCard,
+  ListRow,
+  PageHeader,
+  StatTiles,
+} from '@/components/Layout';
 import { ReviewsSection } from '@/components/Reviews';
 import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
 import { days, km, meters, npr, regionName } from '@/lib/format';
-import { useRefreshDetail, useTrek, useTrekBudget } from '@/lib/queries';
-import type { PlaceRef } from '@/lib/types';
-import { colors, spacing } from '@/theme';
-
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
-
-function Stat({ icon, label, value }: { icon: IconName; label: string; value: React.ReactNode }) {
-  return (
-    <View style={styles.stat}>
-      <MaterialCommunityIcons name={icon} size={20} color={colors.accent} />
-      <AppText variant="caption" muted>
-        {label}
-      </AppText>
-      {typeof value === 'string' ? <AppText variant="subheading">{value}</AppText> : value}
-    </View>
-  );
-}
-
-function PlaceStop({ label, place }: { label: string; place: PlaceRef }) {
-  return (
-    <Link href={{ pathname: '/place/[id]', params: { id: place.id } }} asChild>
-      <Pressable style={styles.stop} accessibilityRole="button">
-        <AppText variant="caption" muted>
-          {label}
-        </AppText>
-        <AppText variant="subheading">{place.name}</AppText>
-        <AppText variant="caption" muted>
-          {meters(place.altitude_m)}
-        </AppText>
-      </Pressable>
-    </Link>
-  );
-}
+import { useAltitudeProfile, useRefreshDetail, useTrek, useTrekBudget } from '@/lib/queries';
+import type { Permit, TrekDetail } from '@/lib/types';
+import { colors, radii, spacing } from '@/theme';
 
 function TrekBudget({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -58,170 +42,267 @@ function TrekBudget({ id }: { id: string }) {
   );
 }
 
+function Permits({ permits }: { permits: Permit[] }) {
+  const { t } = useTranslation();
+  const other = (p: Permit) =>
+    [
+      p.fee_saarc_npr != null && `${t('trek.feeSaarc')} ${npr(p.fee_saarc_npr)}`,
+      p.fee_nepali_npr != null && `${t('trek.feeNepali')} ${npr(p.fee_nepali_npr)}`,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  return (
+    <Section title={t('trek.permits')}>
+      <ListCard>
+        {permits.map((p, i) => (
+          <ListRow
+            key={p.code}
+            last={i === permits.length - 1}
+            label={p.name}
+            sub={[p.description, other(p)].filter(Boolean).join('\n') || undefined}
+            value={npr(p.fee_foreign_npr)}
+          />
+        ))}
+      </ListCard>
+      <AppText variant="small" weight="regular" muted>
+        {t('trek.feeForeignNote')}
+      </AppText>
+    </Section>
+  );
+}
+
+/** "Itinerary & altitude" card with a small chart, opening the full itinerary. */
+function ItineraryCard({ trek }: { trek: TrekDetail }) {
+  const { t } = useTranslation();
+  const profile = useAltitudeProfile(trek.id);
+  const top = profile.data?.points.reduce((a, b) => (b.altitude_m > a.altitude_m ? b : a));
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push({ pathname: '/trek/[id]/itinerary', params: { id: trek.id } })}
+      style={({ pressed }) => [styles.itinerary, pressed && { opacity: 0.85 }]}
+    >
+      <View style={styles.between}>
+        <AppText variant="subheading" weight="extrabold">
+          {t('trek.itineraryTitle')}
+        </AppText>
+        <View style={styles.inline}>
+          <AppText variant="label" style={{ color: colors.primary }}>
+            {t('trek.open')}
+          </AppText>
+          <MaterialCommunityIcons name="chevron-right" size={18} color={colors.primary} />
+        </View>
+      </View>
+      {profile.data && <AltitudeSparkline profile={profile.data} />}
+      {(trek.start_place || top) && (
+        <View style={styles.between}>
+          <AppText variant="small" muted>
+            {trek.start_place?.name ?? ''}
+          </AppText>
+          {top?.place ? (
+            <AppText variant="small" muted>
+              {top.place} · {meters(top.altitude_m)}
+            </AppText>
+          ) : null}
+          <AppText variant="small" muted>
+            {trek.end_place?.name ?? ''}
+          </AppText>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+function LinkRow({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.linkRow, pressed && { opacity: 0.85 }]}
+    >
+      <View style={styles.linkIcon}>
+        <MaterialCommunityIcons name={icon} size={20} color={colors.primary} />
+      </View>
+      <AppText variant="subheading" style={{ flex: 1 }}>
+        {label}
+      </AppText>
+      <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+    </Pressable>
+  );
+}
+
 export default function TrekDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const trek = useTrek(id);
   const refresh = useRefreshDetail('trek', id);
 
+  if (!trek.data) {
+    return (
+      <SafeAreaView style={styles.fill}>
+        <View style={{ padding: spacing(5), gap: spacing(5) }}>
+          <PageHeader title="" />
+          <QueryState query={trek}>{() => null}</QueryState>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  const tr = trek.data;
+  const openRisk = () => router.push({ pathname: '/trek/[id]/risk', params: { id: tr.id } });
+
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={styles.body}
-      keyboardShouldPersistTaps="handled" // the review sheet is a Modal inside (BUG-11)
-      refreshControl={<RefreshControl {...refresh} />}
-    >
-      <Stack.Screen options={{ title: trek.data?.name ?? '' }} />
-      <QueryState query={trek}>
-        {(tr) => (
-          <>
-            <View style={{ gap: spacing(1) }}>
-              <AppText variant="title">{tr.name}</AppText>
-              <View style={styles.inline}>
-                <AppText muted>{regionName(tr.region)}</AppText>
-                <RatingBadge rating={tr.rating} />
-              </View>
-            </View>
+    <View style={styles.fill}>
+      <ScrollView
+        style={styles.fill}
+        contentContainerStyle={{ paddingBottom: ACTION_BAR_SPACE + spacing(12) }}
+        keyboardShouldPersistTaps="handled" // the review sheet is a Modal inside (BUG-11)
+        refreshControl={<RefreshControl {...refresh} />}
+      >
+        <HeroHeader height={440}>
+          <View style={styles.inline}>
+            <DifficultyBadge level={tr.base_difficulty} />
+            <Pill label={regionName(tr.region)} onPhoto />
+          </View>
+          <AppText variant="display" style={{ color: '#FFFFFF' }} accessibilityRole="header">
+            {tr.name}
+          </AppText>
+          <RatingBadge rating={tr.rating} light />
+        </HeroHeader>
 
-            <View style={styles.stats}>
-              <Stat icon="calendar-range" label={t('trek.days')} value={days(tr.total_days)} />
-              <Stat
-                icon="map-marker-distance"
-                label={t('trek.distance')}
-                value={km(tr.total_distance_km)}
-              />
-              <Stat
-                icon="image-filter-hdr"
-                label={t('trek.maxAltitude')}
-                value={meters(tr.max_altitude_m)}
-              />
-              <Stat
-                icon="speedometer"
-                label={t('trek.difficulty')}
-                value={<DifficultyBadge level={tr.base_difficulty} />}
-              />
-            </View>
+        <ContentSheet>
+          <StatTiles
+            tiles={[
+              { label: t('trek.duration'), value: days(tr.total_days) },
+              { label: t('trek.distance'), value: km(tr.total_distance_km) },
+              { label: t('trek.highest'), value: meters(tr.max_altitude_m) },
+            ]}
+          />
 
-            <ForecastStrip type="trek" id={tr.id} />
+          <HighlightLink
+            icon="shield-check-outline"
+            title={t('trek.riskTitle')}
+            body={t('trek.checkRiskHint')}
+            onPress={openRisk}
+          />
 
-            {tr.overview && (
-              <Section title={t('trek.overview')}>
-                <AppText>{tr.overview}</AppText>
-              </Section>
-            )}
+          <ForecastStrip type="trek" id={tr.id} />
 
-            {tr.start_place && tr.end_place && (
-              <Section title={t('trek.route')}>
-                <View style={styles.route}>
-                  <PlaceStop label={t('trek.start')} place={tr.start_place} />
-                  <MaterialCommunityIcons name="arrow-right" size={22} color={colors.textMuted} />
-                  <PlaceStop label={t('trek.end')} place={tr.end_place} />
-                </View>
-              </Section>
-            )}
+          {tr.overview && (
+            <Section title={t('trek.overview')}>
+              <AppText style={{ color: colors.textBody }}>{tr.overview}</AppText>
+            </Section>
+          )}
 
-            {tr.permits.length > 0 && (
-              <Section title={t('trek.permits')}>
-                {tr.permits.map((p) => (
-                  <View key={p.code} style={styles.card}>
-                    <AppText variant="subheading">
-                      {p.name} ({p.code})
-                    </AppText>
-                    {p.description && (
-                      <AppText muted variant="caption">
-                        {p.description}
-                      </AppText>
-                    )}
-                    <View style={styles.fees}>
-                      <AppText variant="caption">
-                        {t('trek.feeForeign')}: {npr(p.fee_foreign_npr)}
-                      </AppText>
-                      {p.fee_saarc_npr != null && (
-                        <AppText variant="caption">
-                          {t('trek.feeSaarc')}: {npr(p.fee_saarc_npr)}
+          <ItineraryCard trek={tr} />
+
+          {tr.start_place && tr.end_place && (
+            <Section title={t('trek.route')}>
+              <ListCard>
+                {[
+                  { label: t('trek.start'), place: tr.start_place },
+                  { label: t('trek.end'), place: tr.end_place },
+                ].map(({ label, place }, i) => (
+                  <Link
+                    key={label}
+                    href={{ pathname: '/place/[id]', params: { id: place.id } }}
+                    asChild
+                  >
+                    <Pressable
+                      accessibilityRole="button"
+                      style={[styles.routeRow, i === 0 && styles.divider]}
+                    >
+                      <View style={styles.linkIcon}>
+                        <MaterialCommunityIcons
+                          name={i === 0 ? 'flag-outline' : 'flag-checkered'}
+                          size={18}
+                          color={colors.primary}
+                        />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <AppText variant="small" muted>
+                          {label}
                         </AppText>
-                      )}
-                      {p.fee_nepali_npr != null && (
-                        <AppText variant="caption">
-                          {t('trek.feeNepali')}: {npr(p.fee_nepali_npr)}
+                        <AppText variant="label" weight="semibold">
+                          {place.name}
                         </AppText>
-                      )}
-                    </View>
-                  </View>
+                      </View>
+                      <AppText variant="caption" weight="bold" muted>
+                        {meters(place.altitude_m)}
+                      </AppText>
+                    </Pressable>
+                  </Link>
                 ))}
-              </Section>
-            )}
+              </ListCard>
+            </Section>
+          )}
 
-            <TrekBudget id={tr.id} />
+          {tr.permits.length > 0 && <Permits permits={tr.permits} />}
 
-            <View style={styles.actions}>
-              <Button
-                title={t('trek.checkRisk')}
-                icon={<MaterialCommunityIcons name="shield-check-outline" size={20} color="#fff" />}
-                onPress={() => router.push({ pathname: '/trek/[id]/risk', params: { id: tr.id } })}
-              />
-              <AppText variant="caption" muted>
-                {t('trek.checkRiskHint')}
-              </AppText>
-              <Button
-                title={t('trek.viewItinerary')}
-                variant="secondary"
-                icon={
-                  <MaterialCommunityIcons
-                    name="calendar-text-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-                }
-                onPress={() =>
-                  router.push({ pathname: '/trek/[id]/itinerary', params: { id: tr.id } })
-                }
-              />
-              <Button
-                title={t('trek.packingList')}
-                variant="secondary"
-                icon={
-                  <MaterialCommunityIcons
-                    name="bag-personal-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-                }
-                onPress={() =>
-                  router.push({ pathname: '/trek/[id]/packing', params: { id: tr.id } })
-                }
-              />
-            </View>
+          <TrekBudget id={tr.id} />
 
-            <ReviewsSection target={{ type: 'trek', id: tr.id }} />
-          </>
-        )}
-      </QueryState>
-    </ScrollView>
+          <LinkRow
+            icon="bag-personal-outline"
+            label={t('trek.packingList')}
+            onPress={() => router.push({ pathname: '/trek/[id]/packing', params: { id: tr.id } })}
+          />
+
+          <ReviewsSection target={{ type: 'trek', id: tr.id }} />
+        </ContentSheet>
+      </ScrollView>
+
+      <BottomActionBar>
+        <Button
+          title={t('trek.viewItinerary')}
+          variant="secondary"
+          style={{ flex: 1 }}
+          onPress={() => router.push({ pathname: '/trek/[id]/itinerary', params: { id: tr.id } })}
+        />
+        <Button title={t('trek.checkRisk')} style={{ flex: 1.3 }} onPress={openRisk} />
+      </BottomActionBar>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: spacing(4), gap: spacing(5), paddingBottom: spacing(10) },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(2.5) },
-  stat: {
-    flexBasis: '47%',
-    flexGrow: 1,
-    padding: spacing(3),
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    gap: 2,
-    alignItems: 'flex-start',
-  },
-  route: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
-  stop: { flex: 1, padding: spacing(3), backgroundColor: colors.surface, borderRadius: 14 },
-  card: {
+  fill: { flex: 1, backgroundColor: colors.background },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing(2), flexWrap: 'wrap' },
+  between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  itinerary: {
+    gap: spacing(3),
     padding: spacing(4),
+    borderRadius: 22,
     backgroundColor: colors.surface,
-    borderRadius: 14,
-    gap: spacing(1.5),
   },
-  fees: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing(4) },
-  actions: { gap: spacing(2.5) },
-  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
+    padding: spacing(4),
+    borderRadius: radii.card,
+    backgroundColor: colors.surface,
+  },
+  linkIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  routeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
+    paddingVertical: spacing(3),
+    paddingHorizontal: spacing(4),
+  },
+  divider: { borderBottomWidth: 1, borderBottomColor: colors.divider },
 });

@@ -3,8 +3,16 @@ import {
   NotoSansDevanagari_500Medium,
   NotoSansDevanagari_600SemiBold,
   NotoSansDevanagari_700Bold,
+  NotoSansDevanagari_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/noto-sans-devanagari';
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -15,7 +23,8 @@ import { useTranslation } from 'react-i18next';
 import '@/i18n';
 import { useAuth } from '@/store/auth';
 import { useSettings } from '@/store/settings';
-import { colors, fonts } from '@/theme';
+import { fontFor } from '@/components/AppText';
+import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,6 +39,12 @@ export default function RootLayout() {
     NotoSansDevanagari_500Medium,
     NotoSansDevanagari_600SemiBold,
     NotoSansDevanagari_700Bold,
+    NotoSansDevanagari_800ExtraBold,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
   });
   const token = useAuth((s) => s.accessToken);
   const authReady = useAuth((s) => s.hydrated);
@@ -58,8 +73,10 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
-          headerTintColor: colors.primary,
-          headerTitleStyle: { fontFamily: fonts.semibold, color: colors.text },
+          headerTintColor: colors.ink,
+          headerTitleStyle: { fontFamily: fontFor('extrabold'), color: colors.text, fontSize: 18 },
+          headerStyle: { backgroundColor: colors.background },
+          headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
           headerBackButtonDisplayMode: 'minimal',
         }}
@@ -71,17 +88,18 @@ export default function RootLayout() {
         {/* 2. Not logged in */}
         <Stack.Protected guard={!!language && !token}>
           <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="register" options={{ title: t('auth.register') }} />
+          <Stack.Screen name="register" options={{ headerShown: false }} />
         </Stack.Protected>
         {/* 3. Logged in */}
         <Stack.Protected guard={!!language && !!token}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="place/[id]" options={{ title: '' }} />
-          <Stack.Screen name="trek/[id]/index" options={{ title: '' }} />
-          <Stack.Screen name="trek/[id]/itinerary" options={{ title: t('itinerary.title') }} />
-          <Stack.Screen name="trek/[id]/risk" options={{ title: t('risk.title') }} />
+          {/* These draw their own photo hero or page header (design: "Bato App Redesign") */}
+          <Stack.Screen name="place/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="trek/[id]/index" options={{ headerShown: false }} />
+          <Stack.Screen name="trek/[id]/itinerary" options={{ headerShown: false }} />
+          <Stack.Screen name="trek/[id]/risk" options={{ headerShown: false }} />
           <Stack.Screen name="trek/[id]/packing" options={{ title: t('packing.title') }} />
-          <Stack.Screen name="trip/[id]" options={{ title: '' }} />
+          <Stack.Screen name="trip/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="profile" options={{ title: t('profile.title') }} />
           <Stack.Screen name="predictions" options={{ title: t('risk.history') }} />
           <Stack.Screen name="teahouses/[placeId]" options={{ title: '' }} />

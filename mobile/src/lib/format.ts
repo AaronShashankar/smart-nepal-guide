@@ -29,6 +29,24 @@ export const days = (count: number) =>
     .t('units.days', { count, value: formatNumber(count) })
     .replace(String(count), formatNumber(count));
 export const monthName = (month: number) => i18n.t(`months.${month}`);
+const shortMonth = (month: number) => i18n.t(`monthsShort.${month}`);
+
+/** [11, 12, 1] -> "Nov–Jan"; months that are not one run -> "Mar, Oct"; all 12 -> "All year". */
+export function monthRange(months: number[]): string {
+  const set = new Set(months);
+  if (set.size === 0) return '—';
+  if (set.size === 12) return i18n.t('place.allYear');
+  const prev = (m: number) => (m === 1 ? 12 : m - 1);
+  const starts = [...set].filter((m) => !set.has(prev(m))).sort((a, b) => a - b);
+  if (starts.length !== 1)
+    return [...set]
+      .sort((a, b) => a - b)
+      .map(shortMonth)
+      .join(', ');
+  const first = starts[0];
+  const last = ((first - 1 + set.size - 1) % 12) + 1;
+  return first === last ? shortMonth(first) : `${shortMonth(first)}–${shortMonth(last)}`;
+}
 
 /**
  * Region, district and province are plain text in the database (English). Known names have a

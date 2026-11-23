@@ -10,7 +10,7 @@ import { Chip } from '@/components/Chip';
 import { ErrorState, Loading } from '@/components/StateViews';
 import { MAP_FONT, OSM_STYLE } from '@/lib/mapStyle';
 import { useCategories, usePlaces } from '@/lib/queries';
-import { categoryColors, colors, spacing } from '@/theme';
+import { categoryColors, colors, spacing, TAB_BAR_SPACE } from '@/theme';
 
 const NEPAL_CENTER: [number, number] = [84.1, 28.3];
 
@@ -89,16 +89,15 @@ export default function MapScreen() {
             onPress={() => setCategory(undefined)}
           />
           {categories.data?.map((c) => (
-            <View key={c.code} style={styles.legendChip}>
-              <View
-                style={[styles.dot, { backgroundColor: categoryColors[c.code] ?? colors.accent }]}
-              />
-              <Chip
-                label={c.name}
-                selected={category === c.code}
-                onPress={() => setCategory(c.code)}
-              />
-            </View>
+            // The dot is the marker colour on the map: the chip doubles as the legend.
+            <Chip
+              key={c.code}
+              label={c.name}
+              icon="circle"
+              iconColor={categoryColors[c.code] ?? colors.accent}
+              selected={category === c.code}
+              onPress={() => setCategory(c.code)}
+            />
           ))}
         </ScrollView>
         {places.isPending && <Loading label={t('map.loadingMarkers')} />}
@@ -114,20 +113,11 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   overlay: { position: 'absolute', top: 0, left: 0, right: 0 },
-  chips: { gap: spacing(2), padding: spacing(3) },
-  legendChip: { flexDirection: 'row', alignItems: 'center' },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: -6,
-    zIndex: 1,
-    borderWidth: 1.5,
-    borderColor: '#fff',
-  },
+  chips: { gap: spacing(2), paddingHorizontal: spacing(4), paddingVertical: spacing(3) },
+  // Above the floating tab bar.
   attribution: {
     position: 'absolute',
-    bottom: spacing(1),
+    bottom: TAB_BAR_SPACE - spacing(4),
     right: spacing(2),
     backgroundColor: '#ffffffcc',
     paddingHorizontal: spacing(1.5),

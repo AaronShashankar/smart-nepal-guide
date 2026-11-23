@@ -76,62 +76,79 @@ export function ForecastStrip({ type, id }: { type: 'place' | 'trek'; id: string
 
   return (
     <View style={styles.box}>
-      <AppText variant="label">{t('weather.title', { place: data.place.name })}</AppText>
+      <View style={styles.header}>
+        <AppText variant="heading" style={{ flex: 1 }} accessibilityRole="header">
+          {t('weather.title', { place: data.place.name })}
+        </AppText>
+        <AppText variant="small" muted style={data.stale && { color: colors.warning }}>
+          {updatedText(t, data)}
+        </AppText>
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.row}
+        style={styles.scroller}
       >
-        {data.days.map((d, i) => (
-          <Pressable
-            key={d.date}
-            onPress={() => setSelected(i)}
-            style={[styles.day, i === selected && styles.selected]}
-            accessibilityRole="button"
-            accessibilityState={{ selected: i === selected }}
-            accessibilityLabel={describe(t, d, i)}
-          >
-            <AppText variant="caption" muted>
-              {dayName(t, d.date, i)}
-            </AppText>
-            <MaterialCommunityIcons name={weatherIcon(d.code)} size={26} color={colors.accent} />
-            <AppText variant="label">{degrees(d.max_c)}</AppText>
-            <AppText variant="caption" muted>
-              {degrees(d.min_c)}
-            </AppText>
-            {!!d.rain_mm && (
-              <AppText variant="caption" style={{ color: colors.accent }}>
-                {t('weather.rain', { value: formatNumber(d.rain_mm, 1) })}
+        {data.days.map((d, i) => {
+          const on = i === selected;
+          const fg = on ? '#FFFFFF' : colors.text;
+          const icon = weatherIcon(d.code);
+          return (
+            <Pressable
+              key={d.date}
+              onPress={() => setSelected(i)}
+              style={[styles.day, on && styles.selected]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={describe(t, d, i)}
+            >
+              <AppText variant="small" weight="bold" style={{ color: fg, opacity: 0.8 }}>
+                {dayName(t, d.date, i)}
               </AppText>
-            )}
-          </Pressable>
-        ))}
+              <MaterialCommunityIcons
+                name={icon}
+                size={26}
+                color={on ? '#FFFFFF' : icon === 'weather-sunny' ? colors.sun : colors.textMuted}
+              />
+              <AppText variant="label" weight="extrabold" style={{ color: fg, fontSize: 15 }}>
+                {degrees(d.max_c)}
+              </AppText>
+              <AppText variant="small" style={{ color: fg, opacity: 0.7 }}>
+                {degrees(d.min_c)}
+              </AppText>
+              {!!d.rain_mm && (
+                <AppText
+                  variant="small"
+                  style={{ color: on ? '#FFFFFF' : colors.accent, fontSize: 11 }}
+                >
+                  {t('weather.rain', { value: formatNumber(d.rain_mm, 1) })}
+                </AppText>
+              )}
+            </Pressable>
+          );
+        })}
       </ScrollView>
-      <AppText variant="caption">{describe(t, day, selected)}</AppText>
-      <AppText variant="caption" muted style={data.stale && { color: colors.warning }}>
-        {updatedText(t, data)} · {t('weather.source')}
+      <AppText variant="caption" weight="regular" style={{ color: colors.textSecondary }}>
+        {describe(t, day, selected)} · {t('weather.source')}
       </AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  box: {
-    padding: spacing(3.5),
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    gap: spacing(2),
-  },
-  row: { gap: spacing(2) },
+  box: { gap: spacing(3) },
+  header: { flexDirection: 'row', alignItems: 'baseline', gap: spacing(2) },
+  // Bleed to the right edge of the screen like the design (the gutter is 20).
+  scroller: { marginRight: -20 },
+  row: { gap: spacing(2), paddingRight: 20 },
   day: {
     width: 64,
     alignItems: 'center',
-    gap: 2,
-    paddingVertical: spacing(2),
-    borderRadius: 12,
-    backgroundColor: colors.background,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
+    gap: 6,
+    paddingVertical: spacing(3),
+    borderRadius: 18,
+    backgroundColor: colors.surface,
   },
-  selected: { borderColor: colors.accent },
+  selected: { backgroundColor: colors.ink },
 });

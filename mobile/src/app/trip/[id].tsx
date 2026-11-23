@@ -1,17 +1,17 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, Pressable, Share, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
-import { BudgetTable } from '@/components/BudgetTable';
-import { Button } from '@/components/Button';
+import { Button, IconButton } from '@/components/Button';
 import { CategoryIcon, Section } from '@/components/Cards';
+import { ListCard, ListRow, PageHeader, StatTiles } from '@/components/Layout';
 import { Screen } from '@/components/Screen';
 import { QueryState } from '@/components/StateViews';
-import { TripMap } from '@/components/TripMap';
+import { dayColor, TripMap } from '@/components/TripMap';
 import { errorMessage } from '@/lib/api';
 import { formatNumber, km, npr } from '@/lib/format';
 import {
@@ -24,31 +24,44 @@ import {
   useTripBudget,
 } from '@/lib/queries';
 import type { TripDetail, TripStop } from '@/lib/types';
-import { colors, spacing } from '@/theme';
+import { colors, radii, spacing } from '@/theme';
 
 const hours = (h: number) => formatNumber(Math.round(h * 10) / 10, 1);
 
-function StopRow({ stop, onRemove }: { stop: TripStop; onRemove: () => void }) {
+/** One stop: number in the day's colour, name, then the leg or visit time, and remove. */
+function StopRow({
+  stop,
+  color,
+  sub,
+  onRemove,
+  last,
+}: {
+  stop: TripStop;
+  color: string;
+  sub: string;
+  onRemove: () => void;
+  last: boolean;
+}) {
   const { t } = useTranslation();
   return (
-    <View style={styles.stop}>
-      <View style={styles.number}>
-        <AppText variant="label" style={{ color: '#fff' }}>
+    <View style={[styles.stop, !last && styles.divider]}>
+      <View style={[styles.number, { backgroundColor: color }]}>
+        <AppText variant="caption" weight="extrabold" style={{ color: '#fff' }}>
           {stop.visit_order != null ? formatNumber(stop.visit_order) : '•'}
         </AppText>
       </View>
       <Pressable
-        style={{ flex: 1 }}
+        style={{ flex: 1, minWidth: 0 }}
         accessibilityRole="button"
         onPress={() => router.push({ pathname: '/place/[id]', params: { id: stop.place.id } })}
       >
-        <AppText variant="subheading" numberOfLines={1}>
+        <AppText variant="label" style={{ fontSize: 15 }} numberOfLines={1}>
           {stop.place.name}
         </AppText>
         <View style={styles.inline}>
-          <CategoryIcon category={stop.place.category} size={14} />
-          <AppText variant="caption" muted>
-            {t('trips.visitHours', { value: hours(stop.visit_hours) })}
+          <CategoryIcon category={stop.place.category} size={13} />
+          <AppText variant="small" weight="regular" muted numberOfLines={1} style={{ flex: 1 }}>
+            {sub}
           </AppText>
         </View>
       </Pressable>
@@ -56,86 +69,128 @@ function StopRow({ stop, onRemove }: { stop: TripStop; onRemove: () => void }) {
         onPress={onRemove}
         accessibilityRole="button"
         accessibilityLabel={t('trips.remove')}
-        hitSlop={10}
+        style={styles.remove}
       >
-        <MaterialCommunityIcons name="close-circle-outline" size={22} color={colors.textMuted} />
+        <MaterialCommunityIcons name="close" size={20} color={colors.iconMuted} />
       </Pressable>
     </View>
   );
 }
 
-function DayPlan({ trip }: { trip: TripDetail }) {
+/** After optimising: one section per day, stops numbered in visiting order. */
+function DayPlan({ trip, onRemove }: { trip: TripDetail; onRemove: (stopId: string) => void }) {
   const { t } = useTranslation();
   const byId = new Map(trip.stops.map((s) => [s.id, s]));
   return (
-    <Section
-      title={t('trips.plan')}
-      right={
-        <AppText variant="caption" muted>
-          {km(trip.total_km)}
-        </AppText>
-      }
-    >
-      {trip.days.map((d) => (
-        <View key={d.day_no} style={styles.day}>
-          <AppText variant="label" style={{ color: colors.primary }}>
-            {t('itinerary.day', { day: formatNumber(d.day_no) })}
-          </AppText>
-          <AppText>{d.stop_ids.map((id) => byId.get(id)?.place.name).join(' → ')}</AppText>
-          <AppText variant="caption" muted>
-            {t('trips.dayFacts', {
-              km: km(d.km),
-              travel: hours(d.travel_hours),
-              visit: hours(d.visit_hours),
-            })}
-          </AppText>
-        </View>
-      ))}
+    <>
+      {trip.days.map((d) => {
+        const stops = d.stop_ids.map((id) => byId.get(id)).filter((s): s is TripStop => !!s);
+        const color = dayColor(d.day_no);
+        return (
+          <View key={d.day_no} style={{ gap: 10 }}>
+            <View style={styles.between}>
+              <View style={styles.inline}>
+                <View style={[styles.dot, { backgroundColor: color }]} />
+                <AppText variant="heading" accessibilityRole="header">
+                  {t('itinerary.day', { day: formatNumber(d.day_no) })}
+                </AppText>
+              </View>
+              <AppText variant="caption" weight="bold" muted>
+                {km(d.km)}
+              </AppText>
+            </View>
+            <View style={styles.dayCard}>
+              {stops.map((s, i) => (
+                <StopRow
+                  key={s.id}
+                  stop={s}
+                  color={color}
+                  last={i === stops.length - 1}
+                  sub={t('trips.visitHours', { value: hours(s.visit_hours) })}
+                  onRemove={() => onRemove(s.id)}
+                />
+              ))}
+            </View>
+            <AppText variant="small" weight="regular" muted>
+              {t('trips.dayFacts', {
+                km: km(d.km),
+                travel: hours(d.travel_hours),
+                visit: hours(d.visit_hours),
+              })}
+            </AppText>
+          </View>
+        );
+      })}
       {trip.nearest_neighbour_km != null && trip.total_km != null && (
-        <AppText variant="caption" muted>
+        <AppText variant="small" weight="regular" muted>
           {t('trips.improvement', {
             before: km(trip.nearest_neighbour_km),
             after: km(trip.total_km),
           })}
         </AppText>
       )}
-    </Section>
+    </>
   );
 }
 
+/** Navy panel with the estimated total; the lines open under it after an estimate. */
 function TripBudget({ trip }: { trip: TripDetail }) {
   const { t } = useTranslation();
   const budget = useTripBudget();
   // A new estimate is only valid for the current plan: forget it when the plan changes.
   const current = budget.data && trip.estimated_budget_npr === budget.data.total_npr;
+  const total = current ? budget.data!.total_npr : trip.estimated_budget_npr;
   return (
-    <Section title={t('budget.title')}>
-      {current ? (
-        <BudgetTable budget={budget.data!} />
-      ) : (
-        trip.estimated_budget_npr != null && (
-          <AppText muted>{t('budget.last', { total: npr(trip.estimated_budget_npr) })}</AppText>
-        )
+    <View style={{ gap: spacing(3) }}>
+      <View style={styles.budget}>
+        <AppText variant="subheading" weight="extrabold" style={{ color: '#FFFFFF' }}>
+          {t('budget.title')}
+        </AppText>
+        {total != null ? (
+          <AppText variant="display" style={{ color: '#FFFFFF', fontSize: 32, lineHeight: 38 }}>
+            {npr(total)}
+          </AppText>
+        ) : (
+          <AppText variant="caption" weight="regular" style={{ color: 'rgba(255,255,255,0.78)' }}>
+            {t('budget.none')}
+          </AppText>
+        )}
+        {current && (
+          <AppText variant="caption" weight="regular" style={{ color: 'rgba(255,255,255,0.78)' }}>
+            {t('budget.basis', {
+              level: t(`profile.budget_${budget.data!.budget_level}`),
+              nationality: t(`profile.nationality_${budget.data!.nationality}`),
+            })}
+          </AppText>
+        )}
+        <Button
+          title={current ? t('budget.again') : t('budget.estimate')}
+          variant="light"
+          compact
+          icon="calculator-variant-outline"
+          loading={budget.isPending}
+          onPress={() => budget.mutate(trip.id)}
+        />
+      </View>
+      {current && (
+        <ListCard>
+          {budget.data!.lines.map((line, i) => (
+            <ListRow
+              key={`${line.code}-${i}`}
+              last={i === budget.data!.lines.length - 1}
+              label={line.label ?? t(`budget.code_${line.code}`)}
+              sub={line.label ? t(`budget.code_${line.code}`) : undefined}
+              value={npr(line.amount)}
+            />
+          ))}
+        </ListCard>
       )}
-      <Button
-        title={current ? t('budget.again') : t('budget.estimate')}
-        variant="secondary"
-        icon={
-          <MaterialCommunityIcons
-            name="calculator-variant-outline"
-            size={20}
-            color={colors.primary}
-          />
-        }
-        loading={budget.isPending}
-        onPress={() => budget.mutate(trip.id)}
-      />
       {budget.isError && (
         <AppText style={{ color: colors.danger }}>
           {errorMessage(budget.error, t('common.error'))}
         </AppText>
       )}
-    </Section>
+    </View>
   );
 }
 
@@ -165,15 +220,13 @@ function ShareButtons({ trip }: { trip: TripDetail }) {
       <Button
         title={t('share.button')}
         variant="secondary"
-        icon={
-          <MaterialCommunityIcons name="share-variant-outline" size={20} color={colors.primary} />
-        }
+        icon="share-variant-outline"
         loading={share.isPending}
         onPress={onShare}
       />
       {trip.is_shared && (
         <>
-          <AppText variant="caption" muted>
+          <AppText variant="caption" muted style={{ textAlign: 'center' }}>
             {t('share.isShared')}
           </AppText>
           <Button
@@ -210,92 +263,158 @@ export default function TripScreen() {
     ]);
   }
 
+  function more() {
+    Alert.alert(trip.data?.title ?? '', undefined, [
+      { text: t('trips.addPlaces'), onPress: () => router.navigate('/') },
+      { text: t('trips.delete'), style: 'destructive', onPress: confirmDelete },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
+  }
+
   return (
-    <Screen edges={[]}>
-      <Stack.Screen options={{ title: trip.data?.title ?? '' }} />
+    <Screen>
+      <PageHeader
+        title={trip.data?.title ?? ''}
+        subtitle={t('trips.title')}
+        right={<IconButton icon="dots-horizontal" label={t('trips.more')} onPress={more} />}
+      />
       <QueryState query={trip}>
-        {(tr) => (
-          <>
-            {tr.stops.length === 0 ? (
-              <View style={styles.hint}>
-                <MaterialCommunityIcons name="map-marker-plus" size={22} color={colors.accent} />
-                <AppText style={{ flex: 1 }}>{t('trips.noStops')}</AppText>
-              </View>
-            ) : (
-              <>
-                <TripMap stops={tr.stops} />
-                <AppText variant="caption" muted>
-                  {t('map.attribution')} · {t('trips.straightLines')}
-                </AppText>
-              </>
-            )}
+        {(tr) => {
+          const saved =
+            tr.is_optimised && tr.nearest_neighbour_km != null && tr.total_km != null
+              ? tr.nearest_neighbour_km - tr.total_km
+              : 0;
+          const remove = (stopId: string) => removeStop.mutate({ tripId: tr.id, stopId });
+          return (
+            <>
+              {tr.stops.length > 0 && (
+                <StatTiles
+                  compact
+                  tiles={[
+                    { label: t('trips.placesL'), value: formatNumber(tr.stops.length) },
+                    {
+                      label: t('trips.daysL'),
+                      value: tr.is_optimised ? formatNumber(tr.days.length) : '—',
+                    },
+                    {
+                      label: t('trips.distanceL'),
+                      value: km(tr.total_km),
+                      sub: saved >= 0.1 ? t('trips.shorter', { km: km(saved) }) : undefined,
+                      subColor: colors.success,
+                    },
+                  ]}
+                />
+              )}
 
-            {tr.stops.length > 0 && (
-              <Section title={t('trips.stopsTitle')}>
-                {tr.stops.map((s) => (
-                  <StopRow
-                    key={s.id}
-                    stop={s}
-                    onRemove={() => removeStop.mutate({ tripId: tr.id, stopId: s.id })}
+              {tr.stops.length === 0 ? (
+                <View style={styles.hint}>
+                  <MaterialCommunityIcons
+                    name="map-marker-plus-outline"
+                    size={22}
+                    color={colors.primary}
                   />
-                ))}
-              </Section>
-            )}
+                  <AppText style={{ flex: 1, color: colors.textBody }}>
+                    {t('trips.noStops')}
+                  </AppText>
+                </View>
+              ) : (
+                <View style={{ gap: spacing(2) }}>
+                  <TripMap stops={tr.stops} />
+                  <AppText variant="small" weight="regular" muted>
+                    {t('map.attribution')} · {t('trips.straightLines')}
+                  </AppText>
+                </View>
+              )}
 
-            {tr.stops.length >= 2 && (
-              <Button
-                title={tr.is_optimised ? t('trips.reoptimise') : t('trips.optimise')}
-                icon={<MaterialCommunityIcons name="routes" size={20} color="#fff" />}
-                loading={optimise.isPending}
-                onPress={() => optimise.mutate({ tripId: tr.id })}
-              />
-            )}
-            {optimise.isError && (
-              <AppText style={{ color: colors.danger }}>
-                {errorMessage(optimise.error, t('common.error'))}
-              </AppText>
-            )}
-            {tr.is_optimised && <DayPlan trip={tr} />}
-            {tr.is_optimised && <TripBudget trip={tr} />}
-            {tr.stops.length > 0 && <ShareButtons trip={tr} />}
+              {tr.is_optimised ? (
+                <DayPlan trip={tr} onRemove={remove} />
+              ) : (
+                tr.stops.length > 0 && (
+                  <Section title={t('trips.stopsTitle')}>
+                    <View style={styles.dayCard}>
+                      {tr.stops.map((s, i) => (
+                        <StopRow
+                          key={s.id}
+                          stop={s}
+                          color={colors.ink}
+                          last={i === tr.stops.length - 1}
+                          sub={t('trips.visitHours', { value: hours(s.visit_hours) })}
+                          onRemove={() => remove(s.id)}
+                        />
+                      ))}
+                    </View>
+                  </Section>
+                )
+              )}
 
-            <Button
-              title={t('trips.addPlaces')}
-              variant="secondary"
-              onPress={() => router.push('/')}
-            />
-            <Button title={t('trips.delete')} variant="ghost" onPress={confirmDelete} />
-          </>
-        )}
+              {tr.stops.length >= 2 && (
+                <Button
+                  title={tr.is_optimised ? t('trips.reoptimise') : t('trips.optimise')}
+                  icon="routes"
+                  variant={tr.is_optimised ? 'secondary' : 'primary'}
+                  loading={optimise.isPending}
+                  onPress={() => optimise.mutate({ tripId: tr.id })}
+                />
+              )}
+              {optimise.isError && (
+                <AppText style={{ color: colors.danger }}>
+                  {errorMessage(optimise.error, t('common.error'))}
+                </AppText>
+              )}
+              {tr.is_optimised && <TripBudget trip={tr} />}
+              {tr.stops.length > 0 && <ShareButtons trip={tr} />}
+              {tr.stops.length === 0 && (
+                <Button
+                  title={t('trips.addPlaces')}
+                  variant="secondary"
+                  onPress={() => router.navigate('/')}
+                />
+              )}
+            </>
+          );
+        }}
       </QueryState>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing(1.5) },
+  dot: { width: 10, height: 10, borderRadius: 5 },
+  dayCard: {
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
   stop: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing(3),
-    padding: spacing(3),
-    backgroundColor: colors.surface,
-    borderRadius: 14,
+    paddingVertical: spacing(2),
   },
+  divider: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   number: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing(1.5) },
-  day: { padding: spacing(3.5), backgroundColor: colors.surface, borderRadius: 14, gap: 2 },
+  remove: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  budget: {
+    padding: 18,
+    borderRadius: radii.panel,
+    backgroundColor: colors.navy,
+    gap: spacing(3),
+    alignItems: 'flex-start',
+  },
   hint: {
     flexDirection: 'row',
-    gap: spacing(2),
+    gap: spacing(3),
     padding: spacing(4),
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: radii.card,
   },
 });

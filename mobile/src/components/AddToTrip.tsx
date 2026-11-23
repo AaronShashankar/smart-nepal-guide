@@ -9,15 +9,29 @@ import { useTranslation } from 'react-i18next';
 import { errorMessage } from '@/lib/api';
 import { formatNumber } from '@/lib/format';
 import { useAddStop, useCreateTrip, useTrips } from '@/lib/queries';
-import { colors, spacing } from '@/theme';
+import { colors, radii, spacing } from '@/theme';
 
 import { AppText } from './AppText';
 import { Button } from './Button';
 import { Loading } from './StateViews';
 import { TextField } from './TextField';
 
-/** "Add to My Trip" button + a bottom sheet: choose an existing trip or make a new one. */
-export function AddToTrip({ placeId, placeName }: { placeId: string; placeName: string }) {
+/**
+ * "Add to trip" button + a bottom sheet: choose an existing trip or make a new one. `trigger` draws
+ * a custom button (the place page's bottom bar); then the result goes to `onResult` instead of
+ * being shown under the button.
+ */
+export function AddToTrip({
+  placeId,
+  placeName,
+  trigger,
+  onResult,
+}: {
+  placeId: string;
+  placeName: string;
+  trigger?: (open: () => void) => React.ReactNode;
+  onResult?: (message: { text: string; ok: boolean }) => void;
+}) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
@@ -28,14 +42,19 @@ export function AddToTrip({ placeId, placeName }: { placeId: string; placeName: 
   const createTrip = useCreateTrip();
   const busy = addStop.isPending || createTrip.isPending;
 
+  const report = (m: { text: string; ok: boolean }) => (onResult ? onResult(m) : setMessage(m));
   const done = (tripTitle: string) => {
     setOpen(false);
     setTitle('');
-    setMessage({ text: t('trips.added', { place: placeName, trip: tripTitle }), ok: true });
+    report({ text: t('trips.added', { place: placeName, trip: tripTitle }), ok: true });
   };
   const fail = (e: unknown) => {
     setOpen(false);
-    setMessage({ text: errorMessage(e, t('common.error')), ok: false });
+    report({ text: errorMessage(e, t('common.error')), ok: false });
+  };
+  const show = () => {
+    setMessage(null);
+    setOpen(true);
   };
 
   async function addTo(tripId: string, tripTitle: string) {
@@ -58,16 +77,17 @@ export function AddToTrip({ placeId, placeName }: { placeId: string; placeName: 
   }
 
   return (
-    <View style={{ gap: spacing(2) }}>
-      <Button
-        title={t('trips.addToTrip')}
-        variant="secondary"
-        icon={<MaterialCommunityIcons name="map-marker-plus" size={20} color={colors.primary} />}
-        onPress={() => {
-          setMessage(null);
-          setOpen(true);
-        }}
-      />
+    <View style={trigger ? { flex: 1.2 } : { gap: spacing(2) }}>
+      {trigger ? (
+        trigger(show)
+      ) : (
+        <Button
+          title={t('trips.addToTrip')}
+          variant="secondary"
+          icon="map-marker-plus"
+          onPress={show}
+        />
+      )}
       {message && (
         <AppText variant="caption" style={{ color: message.ok ? colors.success : colors.danger }}>
           {message.text}
@@ -77,6 +97,7 @@ export function AddToTrip({ placeId, placeName }: { placeId: string; placeName: 
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)} />
         <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing(4) }]}>
+          <View style={styles.grabber} />
           <AppText variant="heading">{t('trips.chooseTrip')}</AppText>
           {trips.isPending ? (
             <Loading />
@@ -117,20 +138,30 @@ export function AddToTrip({ placeId, placeName }: { placeId: string; placeName: 
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: '#0006' },
+  backdrop: { flex: 1, backgroundColor: 'rgba(8,16,31,0.45)' },
   sheet: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: spacing(4),
+    borderTopLeftRadius: radii.sheet,
+    borderTopRightRadius: radii.sheet,
+    padding: spacing(5),
+    paddingTop: spacing(3),
     gap: spacing(3),
+  },
+  grabber: {
+    alignSelf: 'center',
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.border,
+    marginBottom: spacing(1),
   },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing(3),
-    padding: spacing(3.5),
+    padding: spacing(4),
+    minHeight: 56,
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radii.tile,
   },
 });

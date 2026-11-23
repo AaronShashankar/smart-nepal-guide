@@ -1,150 +1,252 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { Link, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  Linking,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { AddToTrip } from '@/components/AddToTrip';
 import { AppText } from '@/components/AppText';
-import { CategoryIcon, InfoRow, Section } from '@/components/Cards';
-import { Chip } from '@/components/Chip';
+import { Button } from '@/components/Button';
+import { CategoryIcon, Section } from '@/components/Cards';
+import { Pill } from '@/components/Chip';
 import { ForecastStrip } from '@/components/ForecastStrip';
+import {
+  ACTION_BAR_SPACE,
+  BottomActionBar,
+  ContentSheet,
+  HeroHeader,
+  ListCard,
+  ListRow,
+  PageHeader,
+  StatTiles,
+} from '@/components/Layout';
 import { PhotoCarousel } from '@/components/PhotoCarousel';
 import { ReviewsSection } from '@/components/Reviews';
 import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
-import { districtName, formatNumber, meters, monthName, npr, provinceName } from '@/lib/format';
+import { districtName, formatNumber, meters, monthRange, npr, provinceName } from '@/lib/format';
 import { usePlace, useRefreshDetail } from '@/lib/queries';
+import type { PlaceDetail } from '@/lib/types';
 import { colors, spacing } from '@/theme';
+
+const HERO = 400;
+
+function openDirections(p: PlaceDetail) {
+  const label = encodeURIComponent(p.name);
+  const url =
+    Platform.OS === 'ios'
+      ? `maps:0,0?q=${label}&ll=${p.latitude},${p.longitude}`
+      : `geo:${p.latitude},${p.longitude}?q=${p.latitude},${p.longitude}(${label})`;
+  Linking.openURL(url).catch(() =>
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}`),
+  );
+}
 
 export default function PlaceDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const place = usePlace(id);
   const refresh = useRefreshDetail('place', id);
+  const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  if (!place.data) {
+    return (
+      <SafeAreaView style={styles.fill}>
+        <View style={{ padding: spacing(5), gap: spacing(5) }}>
+          <PageHeader title="" />
+          <QueryState query={place}>{() => null}</QueryState>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  const p = place.data;
+  const where = [p.district && districtName(p.district), p.province && provinceName(p.province)]
+    .filter(Boolean)
+    .join(', ');
+  const fees = [
+    { label: t('place.feeForeign'), value: p.entry_fee_npr },
+    { label: t('place.feeSaarc'), value: p.entry_fee_saarc_npr },
+    { label: t('place.feeNepali'), value: p.entry_fee_nepali_npr },
+  ];
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: spacing(10) }}
-      // The trip and review sheets are Modals inside this ScrollView: without "handled" the first
-      // tap on their buttons only closes the keyboard (BUG-11).
-      keyboardShouldPersistTaps="handled"
-      refreshControl={<RefreshControl {...refresh} />}
-    >
-      <Stack.Screen options={{ title: place.data?.name ?? '' }} />
-      <QueryState query={place}>
-        {(p) => (
-          <>
-            <PhotoCarousel photos={p.photos} category={p.category} />
-            <View style={styles.body}>
-              <View style={{ gap: spacing(1) }}>
-                <AppText variant="title">{p.name}</AppText>
-                <View style={styles.row}>
-                  <CategoryIcon category={p.category} />
-                  <AppText muted>{p.category.name}</AppText>
-                  <RatingBadge rating={p.rating} />
-                </View>
-              </View>
-
-              <View style={styles.card}>
-                <InfoRow
-                  icon="image-filter-hdr"
-                  label={t('place.altitude')}
-                  value={meters(p.altitude_m)}
+    <View style={styles.fill}>
+      <ScrollView
+        style={styles.fill}
+        contentContainerStyle={{ paddingBottom: ACTION_BAR_SPACE + spacing(12) }}
+        // The trip and review sheets are Modals inside this ScrollView: without "handled" the first
+        // tap on their buttons only closes the keyboard (BUG-11).
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl {...refresh} />}
+      >
+        <HeroHeader
+          height={HERO}
+          background={<PhotoCarousel photos={p.photos} category={p.category} height={HERO} />}
+        >
+          <Pill label={p.category.name} onPhoto />
+          <AppText variant="display" style={{ color: '#FFFFFF' }} accessibilityRole="header">
+            {p.name}
+          </AppText>
+          <View style={styles.inline}>
+            {where ? (
+              <>
+                <MaterialCommunityIcons
+                  name="map-marker-outline"
+                  size={16}
+                  color="rgba(255,255,255,0.9)"
                 />
-                <InfoRow
-                  icon="map-marker-outline"
-                  label={t('place.location')}
-                  value={
-                    [p.district && districtName(p.district), p.province && provinceName(p.province)]
-                      .filter(Boolean)
-                      .join(', ') || '—'
-                  }
+                <AppText
+                  variant="label"
+                  weight="semibold"
+                  style={{ color: 'rgba(255,255,255,0.9)' }}
+                >
+                  {where}
+                </AppText>
+              </>
+            ) : null}
+            <RatingBadge rating={p.rating} light />
+          </View>
+        </HeroHeader>
+
+        <ContentSheet>
+          <StatTiles
+            tiles={[
+              { label: t('place.altitude'), value: meters(p.altitude_m) },
+              { label: t('place.bestMonths'), value: monthRange(p.best_months) },
+              { label: t('place.entry'), value: npr(p.entry_fee_npr) },
+            ]}
+          />
+
+          {p.description && (
+            <Section title={t('place.about')}>
+              <AppText style={{ color: colors.textBody }}>{p.description}</AppText>
+            </Section>
+          )}
+
+          <ForecastStrip type="place" id={p.id} />
+
+          <Section title={t('place.entryFees')}>
+            <ListCard>
+              {fees.map((f, i) => (
+                <ListRow
+                  key={f.label}
+                  last={i === fees.length - 1}
+                  label={f.label}
+                  value={npr(f.value || null)}
+                  valueColor={f.value ? undefined : colors.success}
                 />
-                <InfoRow
-                  icon="ticket-outline"
-                  label={t('place.entryFee')}
-                  value={
-                    p.entry_fee_npr == null
-                      ? npr(null)
-                      : [
-                          `${t('trek.feeForeign')} ${npr(p.entry_fee_npr)}`,
-                          `${t('trek.feeSaarc')} ${npr(p.entry_fee_saarc_npr || null)}`,
-                          `${t('trek.feeNepali')} ${npr(p.entry_fee_nepali_npr || null)}`,
-                        ].join(' · ')
-                  }
-                />
-              </View>
+              ))}
+            </ListCard>
+          </Section>
 
-              <AddToTrip placeId={p.id} placeName={p.name} />
+          {p.how_to_reach && (
+            <Section title={t('place.howToReach')}>
+              <AppText style={{ color: colors.textBody }}>{p.how_to_reach}</AppText>
+            </Section>
+          )}
 
-              <ForecastStrip type="place" id={p.id} />
+          <ReviewsSection target={{ type: 'place', id: p.id }} />
 
-              {p.description && (
-                <Section title={t('place.about')}>
-                  <AppText>{p.description}</AppText>
-                </Section>
-              )}
-
-              {p.best_months.length > 0 && (
-                <Section title={t('place.bestSeason')}>
-                  <View style={styles.row}>
-                    {p.best_months.map((m) => (
-                      <Chip key={m} label={monthName(m)} selected />
-                    ))}
-                  </View>
-                </Section>
-              )}
-
-              {p.how_to_reach && (
-                <Section title={t('place.howToReach')}>
-                  <AppText>{p.how_to_reach}</AppText>
-                </Section>
-              )}
-
-              <ReviewsSection target={{ type: 'place', id: p.id }} />
-
-              {p.nearby.length > 0 && (
-                <Section title={t('place.nearby')}>
-                  {p.nearby.map((n) => (
-                    <Link
-                      key={n.id}
-                      href={{ pathname: '/place/[id]', params: { id: n.id } }}
-                      asChild
+          {p.nearby.length > 0 && (
+            <Section title={t('place.nearby')}>
+              <ListCard>
+                {p.nearby.map((n, i) => (
+                  <Link key={n.id} href={{ pathname: '/place/[id]', params: { id: n.id } }} asChild>
+                    <Pressable
+                      style={[styles.nearRow, i < p.nearby.length - 1 && styles.divider]}
+                      accessibilityRole="button"
                     >
-                      <Pressable
-                        style={StyleSheet.flatten([styles.card, styles.row])}
-                        accessibilityRole="button"
-                      >
-                        <CategoryIcon category={n.category} />
-                        <View style={{ flex: 1 }}>
-                          <AppText variant="subheading">{n.name}</AppText>
-                          <AppText variant="caption" muted>
-                            {t('units.kmAway', { value: formatNumber(n.distance_km, 1) })}
-                          </AppText>
-                        </View>
-                        <MaterialCommunityIcons
-                          name="chevron-right"
-                          size={22}
-                          color={colors.textMuted}
-                        />
-                      </Pressable>
-                    </Link>
-                  ))}
-                </Section>
-              )}
-            </View>
-          </>
+                      <View style={styles.nearIcon}>
+                        <CategoryIcon category={n.category} size={18} color={colors.primary} />
+                      </View>
+                      <AppText variant="label" weight="semibold" style={{ flex: 1, fontSize: 15 }}>
+                        {n.name}
+                      </AppText>
+                      <AppText variant="caption" weight="bold" muted>
+                        {t('units.km', { value: formatNumber(n.distance_km, 1) })}
+                      </AppText>
+                    </Pressable>
+                  </Link>
+                ))}
+              </ListCard>
+            </Section>
+          )}
+        </ContentSheet>
+      </ScrollView>
+
+      <BottomActionBar>
+        {toast && (
+          <View
+            style={[styles.toast, { backgroundColor: toast.ok ? colors.ink : colors.danger }]}
+            accessibilityLiveRegion="polite"
+          >
+            <AppText variant="caption" weight="semibold" style={{ color: '#FFFFFF' }}>
+              {toast.text}
+            </AppText>
+          </View>
         )}
-      </QueryState>
-    </ScrollView>
+        <Button
+          title={t('place.directions')}
+          variant="secondary"
+          icon="navigation-variant-outline"
+          style={{ flex: 1 }}
+          onPress={() => openDirections(p)}
+        />
+        <AddToTrip
+          placeId={p.id}
+          placeName={p.name}
+          onResult={setToast}
+          trigger={(open) => <Button title={t('trips.addToTrip')} icon="plus" onPress={open} />}
+        />
+      </BottomActionBar>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: spacing(4), gap: spacing(5) },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing(2), flexWrap: 'wrap' },
-  card: { padding: spacing(4), backgroundColor: colors.surface, borderRadius: 14, gap: spacing(3) },
+  fill: { flex: 1, backgroundColor: colors.background },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  nearRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
+    paddingVertical: spacing(3),
+    paddingHorizontal: spacing(4),
+    minHeight: 48,
+  },
+  divider: { borderBottomWidth: 1, borderBottomColor: colors.divider },
+  nearIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toast: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: '100%',
+    marginBottom: spacing(3),
+    padding: spacing(3),
+    borderRadius: 14,
+  },
 });

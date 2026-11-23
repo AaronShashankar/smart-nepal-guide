@@ -57,6 +57,6 @@ export default function PredictionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  card: { padding: spacing(4), backgroundColor: colors.surface, borderRadius: 14, gap: spacing(2) },
+  card: { padding: spacing(4), backgroundColor: colors.surface, borderRadius: 20, gap: spacing(2) },
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
 });

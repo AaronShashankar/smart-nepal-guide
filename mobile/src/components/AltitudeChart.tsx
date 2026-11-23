@@ -3,11 +3,11 @@
 import { type ComponentRef, useRef, useState } from 'react';
 import { type GestureResponderEvent, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop } from 'react-native-svg';
 
 import { days as daysText, formatNumber, km, meters } from '@/lib/format';
 import type { AltitudePoint, AltitudeProfile } from '@/lib/types';
-import { colors, spacing, statusColors } from '@/theme';
+import { colors, radii, shadows, spacing, statusColors } from '@/theme';
 
 import { AppText } from './AppText';
 
@@ -66,13 +66,23 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
 
   const where =
     shown.day === 0 ? t('altitude.start') : t('itinerary.day', { day: formatNumber(shown.day) });
+  const isTop = shown === highest;
 
   return (
     <View style={styles.card}>
-      <AppText variant="label">{t('altitude.title')}</AppText>
-      <AppText variant="caption" style={{ color: statusColors[shown.status] }}>
-        {`${where} · ${shown.place || t('altitude.highPoint')} · ${meters(shown.altitude_m)} · ${km(shown.km)}`}
-      </AppText>
+      <View style={styles.readout}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText variant="small" weight="bold" muted style={styles.upper}>
+            {isTop ? `${where} · ${t('altitude.highest')}` : `${where} · ${km(shown.km)}`}
+          </AppText>
+          <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }} numberOfLines={1}>
+            {shown.place || t('altitude.highPoint')}
+          </AppText>
+        </View>
+        <AppText variant="display" style={{ fontSize: 26, lineHeight: 32, color: colors.primary }}>
+          {meters(shown.altitude_m)}
+        </AppText>
+      </View>
 
       <View
         ref={box}
@@ -95,6 +105,12 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
         {width > 0 && (
           <>
             <Svg width={width} height={HEIGHT}>
+              <Defs>
+                <LinearGradient id="altfill" x1="0" x2="0" y1="0" y2="1">
+                  <Stop offset="0" stopColor={colors.navy} stopOpacity={0.16} />
+                  <Stop offset="1" stopColor={colors.navy} stopOpacity={0} />
+                </LinearGradient>
+              </Defs>
               {REFERENCE_M.filter((a) => a > lo && a < hi).map((a) => (
                 <Line
                   key={a}
@@ -102,7 +118,8 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
                   x2={width - PAD.right}
                   y1={sy(a)}
                   y2={sy(a)}
-                  stroke={colors.textMuted}
+                  stroke={a >= 5000 ? colors.danger : colors.textMuted}
+                  strokeOpacity={0.5}
                   strokeDasharray="4 4"
                   strokeWidth={1}
                 />
@@ -114,7 +131,7 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
                 y2={sy(lo)}
                 stroke={colors.border}
               />
-              <Path d={area} fill={colors.primary} fillOpacity={0.08} />
+              <Path d={area} fill="url(#altfill)" />
               {points.slice(1).map((p, i) => (
                 <Line
                   key={`${p.day}-${p.kind}`}
@@ -123,24 +140,32 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
                   x2={sx(xOf(p))}
                   y2={sy(p.altitude_m)}
                   stroke={statusColors[p.status]}
-                  strokeWidth={2.5}
+                  strokeWidth={p.status === 'ok' ? 2.5 : 3.5}
                   strokeLinecap="round"
                 />
               ))}
+              <Line
+                x1={sx(xOf(shown))}
+                x2={sx(xOf(shown))}
+                y1={PAD.top}
+                y2={sy(lo)}
+                stroke={colors.primary}
+                strokeWidth={1.5}
+              />
               <Circle
                 cx={sx(xOf(shown))}
                 cy={sy(shown.altitude_m)}
-                r={5}
-                fill={statusColors[shown.status]}
+                r={6}
+                fill={colors.primary}
                 stroke={colors.surface}
-                strokeWidth={2}
+                strokeWidth={2.5}
               />
             </Svg>
 
             {yLabels.map((alt) => (
               <AppText
                 key={alt}
-                variant="caption"
+                variant="small"
                 muted
                 style={[styles.yLabel, { top: sy(alt) - LABEL_H / 2 - 1 }]}
               >
@@ -150,7 +175,7 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
             {dayTicks.map((d) => (
               <AppText
                 key={d}
-                variant="caption"
+                variant="small"
                 muted
                 style={[styles.xLabel, { left: sx(d) - 12, top: HEIGHT - PAD.bottom + 2 }]}
               >
@@ -160,7 +185,21 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
           </>
         )}
       </View>
-      <AppText variant="caption" muted>
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.swatch, { backgroundColor: statusColors.ok, height: 3 }]} />
+          <AppText variant="small" style={{ color: colors.textSecondary }}>
+            {t('altitude.legendOk')}
+          </AppText>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.swatch, { backgroundColor: statusColors.caution }]} />
+          <AppText variant="small" style={{ color: colors.textSecondary }}>
+            {t('altitude.legendCaution')}
+          </AppText>
+        </View>
+      </View>
+      <AppText variant="small" weight="regular" muted>
         {t('altitude.tapHint')}
       </AppText>
     </View>
@@ -168,7 +207,68 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
 }
 
 const styles = StyleSheet.create({
-  card: { padding: spacing(3.5), backgroundColor: colors.surface, borderRadius: 14, gap: 2 },
-  yLabel: { position: 'absolute', left: 0, width: PAD.left - 6, textAlign: 'right', fontSize: 11 },
-  xLabel: { position: 'absolute', width: 24, textAlign: 'center', fontSize: 11 },
+  card: {
+    padding: spacing(4),
+    backgroundColor: colors.surface,
+    borderRadius: radii.panel,
+    gap: spacing(3),
+    ...shadows.card,
+  },
+  readout: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing(3) },
+  upper: { textTransform: 'uppercase', letterSpacing: 0.4 },
+  yLabel: { position: 'absolute', left: 0, width: PAD.left - 6, textAlign: 'right', fontSize: 10 },
+  xLabel: { position: 'absolute', width: 24, textAlign: 'center', fontSize: 10 },
+  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  swatch: { width: 14, height: 4, borderRadius: 2 },
 });
+
+/** Small crimson altitude line for the "Itinerary & altitude" card on the trek page. */
+export function AltitudeSparkline({
+  profile,
+  height = 90,
+}: {
+  profile: AltitudeProfile;
+  height?: number;
+}) {
+  const points = profile.points;
+  if (points.length < 2) return null;
+  const W = 350;
+  const alts = points.map((p) => p.altitude_m);
+  const lo = Math.min(...alts);
+  const hi = Math.max(Math.max(...alts), lo + 1);
+  const dayCount = Math.max(profile.total_days, 1);
+  const x = (p: AltitudePoint) => (xOf(p) / dayCount) * W;
+  const y = (alt: number) => 8 + ((hi - alt) / (hi - lo)) * (height - 16);
+  const line = `M${points.map((p) => `${x(p).toFixed(1)} ${y(p.altitude_m).toFixed(1)}`).join(' L')}`;
+  const last = points.at(-1)!;
+  const area = `${line} L${x(last).toFixed(1)} ${height} L0 ${height} Z`;
+  const top = points.reduce((a, b) => (b.altitude_m > a.altitude_m ? b : a));
+  return (
+    <Svg width="100%" height={height} viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none">
+      <Defs>
+        <LinearGradient id="spark" x1="0" x2="0" y1="0" y2="1">
+          <Stop offset="0" stopColor={colors.primary} stopOpacity={0.22} />
+          <Stop offset="1" stopColor={colors.primary} stopOpacity={0} />
+        </LinearGradient>
+      </Defs>
+      <Path d={area} fill="url(#spark)" />
+      <Path
+        d={line}
+        fill="none"
+        stroke={colors.primary}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <Circle
+        cx={x(top)}
+        cy={y(top.altitude_m)}
+        r={4}
+        fill={colors.primary}
+        stroke="#FFFFFF"
+        strokeWidth={2}
+      />
+    </Svg>
+  );
+}

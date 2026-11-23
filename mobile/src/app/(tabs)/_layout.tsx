@@ -1,23 +1,11 @@
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, Tabs } from 'expo-router';
 import { useEffect } from 'react';
-import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { FloatingTabBar } from '@/components/Layout';
 import { markProfilePromptShown, profilePromptShown } from '@/lib/profilePrompt';
 import { useMe } from '@/lib/queries';
-import { colors, fonts } from '@/theme';
-
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
-
-function TabIcon({ name, color, size }: { name: IconName; color: ColorValue; size: number }) {
-  return <MaterialCommunityIcons name={name} color={color as string} size={size} />;
-}
-
-const icon = (name: IconName) =>
-  function Icon(props: { color: ColorValue; size: number }) {
-    return <TabIcon name={name} {...props} />;
-  };
+import { colors } from '@/theme';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
@@ -33,29 +21,15 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 12 },
-      }}
+      // Floating dark bar over the content; tab screens leave TAB_BAR_SPACE at the bottom.
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.background } }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{ title: t('tabs.explore'), tabBarIcon: icon('compass-outline') }}
-      />
-      <Tabs.Screen name="map" options={{ title: t('tabs.map'), tabBarIcon: icon('map-outline') }} />
-      <Tabs.Screen
-        name="search"
-        options={{ title: t('tabs.search'), tabBarIcon: icon('magnify') }}
-      />
-      <Tabs.Screen
-        name="trips"
-        options={{ title: t('tabs.trips'), tabBarIcon: icon('map-marker-path') }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{ title: t('tabs.settings'), tabBarIcon: icon('cog-outline') }}
-      />
+      <Tabs.Screen name="index" options={{ title: t('tabs.explore') }} />
+      <Tabs.Screen name="map" options={{ title: t('tabs.map') }} />
+      <Tabs.Screen name="search" options={{ title: t('tabs.search') }} />
+      <Tabs.Screen name="trips" options={{ title: t('tabs.trips') }} />
+      <Tabs.Screen name="settings" options={{ title: t('tabs.profile') }} />
     </Tabs>
   );
 }

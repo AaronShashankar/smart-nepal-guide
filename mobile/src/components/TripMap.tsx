@@ -5,9 +5,11 @@ import { StyleSheet, View } from 'react-native';
 
 import { MAP_FONT, OSM_STYLE } from '@/lib/mapStyle';
 import type { TripStop } from '@/lib/types';
-import { colors } from '@/theme';
+import { colors, radii } from '@/theme';
 
-const DAY_COLORS = ['#C8102E', '#003893', '#2E7D32', '#B26A00', '#6A1B9A', '#00838F'];
+/** Day 1 crimson, day 2 navy, then more colours that stay readable under white numbers. */
+export const DAY_COLORS = ['#C8102E', '#0B1F4D', '#0F7B4D', '#B45309', '#6A1B9A', '#00838F'];
+export const dayColor = (day: number | null) => DAY_COLORS[((day ?? 1) - 1) % DAY_COLORS.length];
 
 /**
  * Numbered markers in visiting order, joined by straight lines
@@ -28,7 +30,7 @@ export function TripMap({ stops }: { stops: TripStop[] }) {
           geometry: { type: 'Point', coordinates: coords[i] },
           properties: {
             label: String(s.visit_order ?? i + 1),
-            color: DAY_COLORS[((s.day_no ?? 1) - 1) % DAY_COLORS.length],
+            color: dayColor(s.day_no),
           },
         })),
       } as GeoJSON.FeatureCollection,
@@ -67,7 +69,7 @@ export function TripMap({ stops }: { stops: TripStop[] }) {
               id="trip-line-layer"
               type="line"
               paint={{
-                'line-color': colors.accent,
+                'line-color': colors.navy,
                 'line-width': 3,
                 'line-dasharray': [2, 1.5],
               }}
@@ -79,9 +81,9 @@ export function TripMap({ stops }: { stops: TripStop[] }) {
             id="trip-stop-dots"
             type="circle"
             paint={{
-              'circle-radius': 12,
+              'circle-radius': 13,
               'circle-color': ['get', 'color'] as never,
-              'circle-stroke-width': 2,
+              'circle-stroke-width': 3,
               'circle-stroke-color': '#ffffff',
             }}
           />
@@ -103,5 +105,5 @@ export function TripMap({ stops }: { stops: TripStop[] }) {
 }
 
 const styles = StyleSheet.create({
-  box: { height: 260, borderRadius: 14, overflow: 'hidden', backgroundColor: colors.chip },
+  box: { height: 230, borderRadius: radii.panel, overflow: 'hidden', backgroundColor: '#E8EEF2' },
 });

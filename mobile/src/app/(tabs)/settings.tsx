@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Section } from '@/components/Cards';
-import { Chip } from '@/components/Chip';
+import { Segmented } from '@/components/Chip';
+import { ListCard, PageHeader } from '@/components/Layout';
 import { Screen } from '@/components/Screen';
 import { API_URL } from '@/lib/api';
 import { googleSignOut } from '@/lib/google';
@@ -14,13 +15,41 @@ import { useMe, useUpdateMe } from '@/lib/queries';
 import type { Lang } from '@/lib/types';
 import { useAuth } from '@/store/auth';
 import { useSettings } from '@/store/settings';
-import { colors, spacing } from '@/theme';
+import { colors, radii, spacing } from '@/theme';
+
+type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
+
+function LinkRow({
+  href,
+  icon,
+  label,
+  last,
+}: {
+  href: '/profile' | '/predictions';
+  icon: IconName;
+  label: string;
+  last?: boolean;
+}) {
+  return (
+    <Link href={href} asChild>
+      <Pressable style={[styles.row, !last && styles.divider]} accessibilityRole="button">
+        <View style={styles.rowIcon}>
+          <MaterialCommunityIcons name={icon} size={20} color={colors.primary} />
+        </View>
+        <AppText variant="label" weight="semibold" style={{ flex: 1, fontSize: 15 }}>
+          {label}
+        </AppText>
+        <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+      </Pressable>
+    </Link>
+  );
+}
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const me = useMe();
   const updateMe = useUpdateMe();
-  const language = useSettings((s) => s.language);
+  const language = useSettings((s) => s.language) ?? 'en';
   const setLanguage = useSettings((s) => s.setLanguage);
   const logout = useAuth((s) => s.logout);
 
@@ -29,53 +58,68 @@ export default function SettingsScreen() {
     updateMe.mutate({ preferred_lang: lang }); // remember it on the account too
   }
 
+  const name = me.data?.full_name ?? me.data?.email ?? '…';
+  const initial = (me.data?.full_name ?? me.data?.email ?? '?').trim().charAt(0).toUpperCase();
+
   return (
-    <Screen>
-      <AppText variant="title">{t('settings.title')}</AppText>
+    <Screen tab>
+      <PageHeader back={false} title={t('settings.title')} />
+
+      <View style={styles.account}>
+        <View style={styles.avatar}>
+          <AppText variant="title" style={{ color: '#FFFFFF' }}>
+            {initial}
+          </AppText>
+        </View>
+        <View style={{ flex: 1 }}>
+          <AppText variant="subheading" numberOfLines={1} style={{ color: '#FFFFFF' }}>
+            {name}
+          </AppText>
+          {me.data?.full_name && (
+            <AppText
+              variant="caption"
+              numberOfLines={1}
+              style={{ color: 'rgba(255,255,255,0.75)' }}
+            >
+              {me.data.email}
+            </AppText>
+          )}
+        </View>
+      </View>
 
       <Section title={t('settings.account')}>
-        <View style={styles.card}>
-          <AppText variant="subheading">{me.data?.full_name ?? me.data?.email ?? '…'}</AppText>
-          {me.data?.full_name && <AppText muted>{me.data.email}</AppText>}
-        </View>
-        <Link href="/profile" asChild>
-          <Pressable
-            style={StyleSheet.flatten([styles.card, styles.row])}
-            accessibilityRole="button"
-          >
-            <MaterialCommunityIcons name="account-edit-outline" size={22} color={colors.accent} />
-            <AppText style={{ flex: 1 }}>{t('settings.profile')}</AppText>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
-          </Pressable>
-        </Link>
-        <Link href="/predictions" asChild>
-          <Pressable
-            style={StyleSheet.flatten([styles.card, styles.row])}
-            accessibilityRole="button"
-          >
-            <MaterialCommunityIcons name="shield-check-outline" size={22} color={colors.accent} />
-            <AppText style={{ flex: 1 }}>{t('settings.predictions')}</AppText>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
-          </Pressable>
-        </Link>
+        <ListCard>
+          <LinkRow href="/profile" icon="account-edit-outline" label={t('settings.profile')} />
+          <LinkRow
+            href="/predictions"
+            icon="shield-check-outline"
+            label={t('settings.predictions')}
+            last
+          />
+        </ListCard>
       </Section>
 
       <Section title={t('settings.language')}>
-        <View style={styles.row}>
-          <Chip label="English" selected={language === 'en'} onPress={() => changeLanguage('en')} />
-          <Chip label="नेपाली" selected={language === 'ne'} onPress={() => changeLanguage('ne')} />
-        </View>
+        <Segmented<Lang>
+          value={language}
+          onChange={changeLanguage}
+          options={[
+            { value: 'en', label: 'English' },
+            { value: 'ne', label: 'नेपाली' },
+          ]}
+        />
       </Section>
 
       <Button
         title={t('settings.logout')}
         variant="secondary"
+        icon="logout"
         onPress={async () => {
           await googleSignOut();
           await logout();
         }}
       />
-      <AppText variant="caption" muted>
+      <AppText variant="small" weight="regular" muted>
         {t('settings.apiServer')}: {API_URL}
       </AppText>
     </Screen>
@@ -83,6 +127,37 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  card: { padding: spacing(4), backgroundColor: colors.surface, borderRadius: 14, gap: spacing(1) },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing(2) },
+  account: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
+    padding: spacing(4),
+    backgroundColor: colors.navy,
+    borderRadius: radii.panel,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(3),
+    paddingVertical: spacing(3),
+    paddingHorizontal: spacing(4),
+    minHeight: 56,
+  },
+  divider: { borderBottomWidth: 1, borderBottomColor: colors.divider },
+  rowIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

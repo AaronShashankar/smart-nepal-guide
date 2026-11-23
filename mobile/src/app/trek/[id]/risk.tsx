@@ -1,23 +1,24 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Section } from '@/components/Cards';
-import { Chip } from '@/components/Chip';
-import { AcclimatisationBox, ReasonList, SaferAlternatives } from '@/components/Risk';
+import { Chip, Pill } from '@/components/Chip';
+import { PageHeader } from '@/components/Layout';
+import { AcclimatisationBox, ReasonList, RiskGauge, SaferAlternatives } from '@/components/Risk';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/StateViews';
 import { errorMessage } from '@/lib/api';
 import { formatNumber, monthName } from '@/lib/format';
 import { usePredictRisk, useProfile, useTrek } from '@/lib/queries';
 import type { Profile, RiskResult } from '@/lib/types';
-import { colors, difficultyColors, spacing } from '@/theme';
+import { colors, difficultyTints, GUTTER, radii, shadows, spacing } from '@/theme';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -26,19 +27,36 @@ const isComplete = (p: Profile) =>
 
 function Result({ result }: { result: RiskResult }) {
   const { t } = useTranslation();
-  const color = difficultyColors[result.level];
+  const level = t(`difficulty.${result.level}`);
   return (
-    <View style={{ gap: spacing(4) }}>
-      <View style={[styles.level, { backgroundColor: `${color}14`, borderColor: color }]}>
-        <AppText variant="caption" muted>
-          {t('risk.result')} · {monthName(result.month)}
+    <View style={{ gap: 18 }}>
+      <View style={styles.gaugeCard} accessibilityLiveRegion="polite">
+        <RiskGauge level={result.level} label={t('risk.gaugeLabel', { level })} />
+        <AppText variant="small" weight="bold" muted style={styles.upper}>
+          {t('risk.forYou')}
         </AppText>
-        <AppText variant="title" style={{ color }}>
-          {t(`difficulty.${result.level}`)}
+        <AppText
+          variant="display"
+          style={{ fontSize: 38, lineHeight: 44, color: difficultyTints[result.level].fg }}
+        >
+          {level}
         </AppText>
-        <AppText variant="caption" muted>
+        <AppText variant="label" weight="semibold" style={{ color: colors.textSecondary }}>
           {t('risk.confidence', { value: formatNumber(Math.round(result.confidence * 100)) })}
         </AppText>
+        <View style={styles.inputs}>
+          <Pill label={monthName(result.month)} />
+          <Pill
+            label={t('risk.fitness', { level: t(`profile.fitness_${result.input.fitness_level}`) })}
+          />
+          <Pill label={t(`risk.experience_${result.input.trek_experience}`)} />
+        </View>
+        <Button
+          title={t('risk.changeDetails')}
+          variant="ghost"
+          compact
+          onPress={() => router.push('/profile')}
+        />
       </View>
 
       <Section title={t('risk.why')}>
@@ -65,7 +83,7 @@ function Result({ result }: { result: RiskResult }) {
 
       <View style={styles.disclaimer}>
         <MaterialCommunityIcons name="information-outline" size={18} color={colors.textMuted} />
-        <AppText variant="caption" muted style={{ flex: 1 }}>
+        <AppText variant="small" weight="regular" muted style={{ flex: 1, lineHeight: 18 }}>
           {t('risk.disclaimer')}
         </AppText>
       </View>
@@ -84,8 +102,8 @@ export default function RiskScreen() {
   const check = () => predict.mutate({ trek_id: id, month });
 
   return (
-    <Screen edges={[]}>
-      <Stack.Screen options={{ title: t('risk.title') }} />
+    <Screen>
+      <PageHeader title={t('risk.screenTitle')} subtitle={trek.data?.name} />
       {profile.isPending || trek.isPending ? (
         <Loading />
       ) : profile.data && !isComplete(profile.data) ? (
@@ -95,9 +113,19 @@ export default function RiskScreen() {
         </View>
       ) : (
         <>
-          <AppText muted>{t('risk.intro', { trek: trek.data?.name ?? '' })}</AppText>
-          <Section title={t('risk.month')}>
-            <View style={styles.months}>
+          <View style={styles.card}>
+            <AppText style={{ color: colors.textBody }}>
+              {t('risk.intro', { trek: trek.data?.name ?? '' })}
+            </AppText>
+            <AppText variant="caption" weight="bold" muted>
+              {t('risk.month')}
+            </AppText>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.monthScroll}
+              contentContainerStyle={styles.months}
+            >
               {MONTHS.map((m) => (
                 <Chip
                   key={m}
@@ -109,9 +137,14 @@ export default function RiskScreen() {
                   }}
                 />
               ))}
-            </View>
-          </Section>
-          <Button title={t('risk.check')} onPress={check} loading={predict.isPending} />
+            </ScrollView>
+            <Button
+              title={predict.data ? t('risk.checkAgain') : t('risk.check')}
+              icon="shield-check-outline"
+              onPress={check}
+              loading={predict.isPending}
+            />
+          </View>
           {predict.isError && (
             <AppText style={{ color: colors.danger }}>
               {errorMessage(predict.error, t('risk.failed'))}
@@ -125,8 +158,36 @@ export default function RiskScreen() {
 }
 
 const styles = StyleSheet.create({
-  months: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(2) },
-  level: { borderWidth: 1.5, borderRadius: 16, padding: spacing(4), alignItems: 'center' },
-  card: { padding: spacing(4), backgroundColor: colors.surface, borderRadius: 14, gap: spacing(3) },
-  disclaimer: { flexDirection: 'row', gap: spacing(2), alignItems: 'flex-start' },
+  card: {
+    padding: spacing(4),
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    gap: spacing(3),
+  },
+  monthScroll: { marginHorizontal: -spacing(4) },
+  months: { gap: spacing(2), paddingHorizontal: spacing(4) },
+  gaugeCard: {
+    paddingTop: 22,
+    paddingHorizontal: GUTTER,
+    paddingBottom: spacing(3),
+    borderRadius: radii.sheet,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    gap: 6,
+    ...shadows.card,
+  },
+  upper: { textTransform: 'uppercase', letterSpacing: 0.7 },
+  inputs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: spacing(2),
+  },
+  disclaimer: {
+    flexDirection: 'row',
+    gap: spacing(2),
+    alignItems: 'flex-start',
+    paddingHorizontal: 4,
+  },
 });

@@ -14,7 +14,8 @@
     "seeAll": "See all",
     "cancel": "Cancel",
     "offline": "No internet connection. Check Wi-Fi or mobile data and try again.",
-    "invalidInput": "Please check what you entered and try again."
+    "invalidInput": "Please check what you entered and try again.",
+    "back": "Back"
   },
   "units": {
     "m": "{{value}} m",
@@ -48,14 +49,20 @@
     "googleFailed": "Google sign-in failed.",
     "googleNotConfigured": "Google sign-in is not set up in this build.",
     "fillAll": "Please enter your email and password.",
-    "passwordTooShort": "Password must be at least 8 characters."
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "headline": "Explore Nepal, in your own language.",
+    "pitch": "Find places, check how risky a trek is for you, and plan your trip day by day.",
+    "createAccount": "Create an account",
+    "haveAccountQ": "Already have an account?",
+    "loginTitle": "Log in with email"
   },
   "tabs": {
     "explore": "Explore",
     "map": "Map",
     "search": "Search",
     "settings": "Settings",
-    "trips": "Trips"
+    "trips": "Trips",
+    "profile": "Profile"
   },
   "explore": {
     "title": "Explore Nepal",
@@ -67,7 +74,13 @@
     "recommended": "Recommended for you",
     "popular": "Popular now",
     "popularHint": "Choose your interests in the traveller profile to get personal suggestions.",
-    "trek": "Trek"
+    "trek": "Trek",
+    "hello": "Namaste",
+    "whereNext": "Where to next?",
+    "searchHint": "Places, treks… try “punhill”",
+    "trekFilters": "Trek filters",
+    "popularTreks": "Popular treks",
+    "changeLanguage": "Change language: English or Nepali"
   },
   "place": {
     "about": "About",
@@ -78,7 +91,15 @@
     "altitude": "Altitude",
     "location": "Location",
     "noPhotos": "No photos yet",
-    "notFound": "Place not found."
+    "notFound": "Place not found.",
+    "bestMonths": "Best months",
+    "allYear": "All year",
+    "entry": "Entry",
+    "entryFees": "Entry fees",
+    "feeForeign": "Foreign visitors",
+    "feeSaarc": "SAARC visitors",
+    "feeNepali": "Nepali citizens",
+    "directions": "Directions"
   },
   "trek": {
     "overview": "Overview",
@@ -98,7 +119,13 @@
     "viewItinerary": "Day-by-day itinerary",
     "checkRisk": "Check my risk",
     "checkRiskHint": "A personal difficulty and risk rating, from your profile and the month you go.",
-    "packingList": "Packing list"
+    "packingList": "Packing list",
+    "duration": "Duration",
+    "highest": "Highest",
+    "riskTitle": "How risky is this trek for me?",
+    "itineraryTitle": "Itinerary & altitude",
+    "open": "Open",
+    "feeForeignNote": "Fees for foreign visitors; SAARC and Nepali fees are under each permit."
   },
   "difficulty": {
     "easy": "Easy",
@@ -119,7 +146,16 @@
     "short": "Up to 5 days",
     "medium": "6–9 days",
     "long": "10+ days",
-    "filteredTreks": "Treks matching the filters"
+    "filteredTreks": "Treks matching the filters",
+    "title": "Search",
+    "clear": "Clear search",
+    "closest": "Closest spelling match:",
+    "placesHint": "Type the name of a place, for example Boudhanath or Phewa.",
+    "allTreks": "All treks",
+    "placesFound_one": "{{value}} place found",
+    "placesFound_other": "{{value}} places found",
+    "treksFound_one": "{{value}} trek found",
+    "treksFound_other": "{{value}} treks found"
   },
   "map": {
     "attribution": "© OpenStreetMap contributors",
@@ -188,14 +224,18 @@
     "code_GAIN_OVER_500": "Sleeping altitude rises {{gain}} (more than 500 m)",
     "code_NEEDS_REST": "Over 1,000 m gained since the last rest day",
     "code_REST_DAY": "Rest day",
-    "rules": "Rule: above 3,000 m, sleep at most 500 m higher each day, and rest for every 1,000 m gained."
+    "rules": "Rule: above 3,000 m, sleep at most 500 m higher each day, and rest for every 1,000 m gained.",
+    "dayByDay": "Day by day"
   },
   "altitude": {
     "title": "Altitude profile",
     "start": "Start",
     "highPoint": "Highest point of the day",
     "tapHint": "Tap the chart to see each day.",
-    "a11y": "Altitude chart from {{from}} to a highest point of {{max}} over {{days}}"
+    "a11y": "Altitude chart from {{from}} to a highest point of {{max}} over {{days}}",
+    "highest": "highest point",
+    "legendOk": "Safe climb",
+    "legendCaution": "More than 500 m in a day"
   },
   "weather": {
     "title": "Weather at {{place}}",
@@ -208,15 +248,7 @@
     "day": "{{day}}: {{sky}}, high {{max}}, low {{min}}",
     "dayRain": "{{day}}: {{sky}}, high {{max}}, low {{min}}, {{rain}} rain",
     "source": "Forecast: Open-Meteo",
-    "weekdays": [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat"
-    ],
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     "code": {
       "0": "Clear sky",
       "1": "Mainly clear",
@@ -267,7 +299,16 @@
     "failed": "Could not check the risk.",
     "history": "My risk checks",
     "historyEmpty": "No risk checks yet. Open a trek and tap “Check my risk”.",
-    "inMonth": "{{trek}} · {{month}}"
+    "inMonth": "{{trek}} · {{month}}",
+    "screenTitle": "Risk check",
+    "forYou": "For you",
+    "gaugeLabel": "Risk meter: {{level}}",
+    "fitness": "{{level}} fitness",
+    "experience_none": "No multi-day treks",
+    "experience_beginner": "Some trekking",
+    "experience_experienced": "Experienced trekker",
+    "changeDetails": "Change my details",
+    "checkAgain": "Check again"
   },
   "alternatives": {
     "title": "Safer alternatives for you",
@@ -317,7 +358,12 @@
     "chooseTrip": "Add to which trip?",
     "createWithPlace": "New trip with this place",
     "defaultTitle": "My trip",
-    "added": "{{place}} added to “{{trip}}”."
+    "added": "{{place}} added to “{{trip}}”.",
+    "placesL": "Places",
+    "daysL": "Days",
+    "distanceL": "Distance",
+    "shorter": "{{km}} shorter",
+    "more": "More options"
   },
   "months": {
     "1": "Jan",
@@ -389,7 +435,8 @@
     "code_PERMIT": "Permit",
     "code_TRAILHEAD_TRANSPORT": "Travel to the trailhead and back",
     "basis": "For a {{level}} budget, {{nationality}} rates. Change these in your traveller profile.",
-    "estimateOnly": "Estimate only: real prices change with season, group size and bargaining."
+    "estimateOnly": "Estimate only: real prices change with season, group size and bargaining.",
+    "none": "Tap “Estimate budget” for food, stay, transport and entry fees."
   },
   "share": {
     "button": "Share trip",
@@ -444,5 +491,19 @@
       "PERMIT": "Required for this trek"
     },
     "failed": "Could not load the packing list."
+  },
+  "monthsShort": {
+    "1": "Jan",
+    "2": "Feb",
+    "3": "Mar",
+    "4": "Apr",
+    "5": "May",
+    "6": "Jun",
+    "7": "Jul",
+    "8": "Aug",
+    "9": "Sep",
+    "10": "Oct",
+    "11": "Nov",
+    "12": "Dec"
   }
 }

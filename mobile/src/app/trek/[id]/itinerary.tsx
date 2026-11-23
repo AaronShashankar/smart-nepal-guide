@@ -1,115 +1,115 @@
 'use no memo'; // reads the language through lib/format: see the note there (BUG-14)
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { AltitudeChart } from '@/components/AltitudeChart';
 import { AppText } from '@/components/AppText';
+import { PageHeader, StatTiles } from '@/components/Layout';
 import { AcclimatisationBox, signedMeters, StatusBadge } from '@/components/Risk';
 import { QueryState } from '@/components/StateViews';
 import { formatNumber, km, meters } from '@/lib/format';
-import { useAcclimatisation, useAltitudeProfile, useItinerary } from '@/lib/queries';
+import { useAcclimatisation, useAltitudeProfile, useItinerary, useTrek } from '@/lib/queries';
 import type { Acclimatisation, Itinerary, Stage } from '@/lib/types';
-import { colors, spacing, statusColors } from '@/theme';
+import { colors, GUTTER, spacing, statusTints } from '@/theme';
 
 type DayCheck = Acclimatisation['days'][number];
 
-function DayCard({ stage, check }: { stage: Stage; check?: DayCheck }) {
+/** One day in the timeline: number badge on a line, then where you sleep and what the day is. */
+function DayRow({
+  stage,
+  check,
+  highest,
+  last,
+}: {
+  stage: Stage;
+  check?: DayCheck;
+  highest: boolean;
+  last: boolean;
+}) {
   const { t } = useTranslation();
   const status = check?.status ?? 'ok';
   const warnings = (check?.codes ?? []).filter((c) => c !== 'REST_DAY');
+  const facts = stage.is_rest_day
+    ? [t('itinerary.rest')]
+    : [
+        `${stage.from_place.name} → ${stage.to_place.name}`,
+        signedMeters(stage.gain_m),
+        km(stage.distance_km),
+        t('itinerary.hours', { value: formatNumber(stage.walk_hours, 1) }),
+      ];
   return (
-    <View style={[styles.card, { borderLeftColor: statusColors[status] }]}>
-      <View style={styles.header}>
-        <AppText variant="label" style={{ color: colors.primary }}>
-          {t('itinerary.day', { day: formatNumber(stage.day) })}
-        </AppText>
-        <StatusBadge status={status} />
+    <View style={styles.dayRow}>
+      <View style={styles.rail}>
+        <View style={[styles.badge, highest && styles.badgeOn]}>
+          <AppText
+            variant="label"
+            weight="extrabold"
+            style={{ color: highest ? '#FFFFFF' : colors.text }}
+          >
+            {formatNumber(stage.day)}
+          </AppText>
+        </View>
+        {!last && <View style={styles.railLine} />}
       </View>
-
-      {stage.is_rest_day ? (
-        <>
-          <AppText variant="subheading">{stage.to_place.name}</AppText>
-          <AppText muted>
-            {t('itinerary.rest')} · {meters(stage.sleep_altitude_m)}
+      <View style={styles.dayBody}>
+        <View style={styles.between}>
+          <AppText variant="label" style={{ flex: 1, fontSize: 15 }}>
+            {stage.to_place.name}
           </AppText>
-        </>
-      ) : (
-        <>
-          <AppText variant="subheading">
-            {stage.from_place.name} → {stage.to_place.name}
+          <AppText variant="label">{meters(stage.sleep_altitude_m)}</AppText>
+        </View>
+        <View style={[styles.between, { alignItems: 'flex-start' }]}>
+          <AppText variant="caption" weight="regular" muted style={{ flex: 1 }}>
+            {facts.join(' · ')}
           </AppText>
-          <AppText>
-            {meters(stage.from_place.altitude_m)} → {meters(stage.sleep_altitude_m)} (
-            {signedMeters(stage.gain_m)})
-          </AppText>
-        </>
-      )}
-
-      <View style={styles.facts}>
-        <Fact icon="map-marker-distance" text={km(stage.distance_km)} />
-        <Fact
-          icon="clock-outline"
-          text={t('itinerary.hours', { value: formatNumber(stage.walk_hours, 1) })}
-        />
+          <StatusBadge status={status} rest={stage.is_rest_day && status === 'ok'} />
+        </View>
         {stage.highest_point_m != null && (
-          <Fact
-            icon="flag-triangle"
-            text={t('itinerary.highest', { altitude: meters(stage.highest_point_m) })}
-          />
+          <AppText variant="small" weight="regular" muted>
+            {t('itinerary.highest', { altitude: meters(stage.highest_point_m) })}
+          </AppText>
+        )}
+        {warnings.map((code) => (
+          <AppText
+            key={code}
+            variant="caption"
+            weight="semibold"
+            style={{ color: statusTints[status].fg }}
+          >
+            {t(`itinerary.code_${code}`, { gain: signedMeters(check?.gain_m ?? 0) })}
+          </AppText>
+        ))}
+        {stage.notes && (
+          <AppText variant="small" weight="regular" muted>
+            {stage.notes}
+          </AppText>
+        )}
+        {stage.teahouse_count > 0 && (
+          <Pressable
+            style={styles.teahouses}
+            accessibilityRole="button"
+            onPress={() =>
+              router.push({
+                pathname: '/teahouses/[placeId]',
+                params: { placeId: stage.to_place.id, name: stage.to_place.name },
+              })
+            }
+          >
+            <MaterialCommunityIcons name="home-city-outline" size={18} color={colors.primary} />
+            <AppText variant="caption" weight="bold" style={{ color: colors.primary, flex: 1 }}>
+              {t('teahouses.link', {
+                count: stage.teahouse_count,
+                value: formatNumber(stage.teahouse_count),
+              })}
+            </AppText>
+            <MaterialCommunityIcons name="chevron-right" size={18} color={colors.primary} />
+          </Pressable>
         )}
       </View>
-
-      {warnings.map((code) => (
-        <AppText key={code} variant="caption" style={{ color: statusColors[status] }}>
-          {t(`itinerary.code_${code}`, { gain: signedMeters(check?.gain_m ?? 0) })}
-        </AppText>
-      ))}
-      {stage.notes && (
-        <AppText variant="caption" muted>
-          {stage.notes}
-        </AppText>
-      )}
-      {stage.teahouse_count > 0 && (
-        <Pressable
-          style={styles.teahouses}
-          accessibilityRole="button"
-          onPress={() =>
-            router.push({
-              pathname: '/teahouses/[placeId]',
-              params: { placeId: stage.to_place.id, name: stage.to_place.name },
-            })
-          }
-        >
-          <MaterialCommunityIcons name="home-city-outline" size={18} color={colors.accent} />
-          <AppText variant="label" style={{ color: colors.accent, flex: 1 }}>
-            {t('teahouses.link', {
-              count: stage.teahouse_count,
-              value: formatNumber(stage.teahouse_count),
-            })}
-          </AppText>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={colors.accent} />
-        </Pressable>
-      )}
-    </View>
-  );
-}
-
-function Fact({
-  icon,
-  text,
-}: {
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  text: string;
-}) {
-  return (
-    <View style={styles.fact}>
-      <MaterialCommunityIcons name={icon} size={15} color={colors.textMuted} />
-      <AppText variant="caption" muted>
-        {text}
-      </AppText>
     </View>
   );
 }
@@ -117,92 +117,106 @@ function Fact({
 function Summary({ itinerary }: { itinerary: Itinerary }) {
   const { t } = useTranslation();
   const s = itinerary.summary;
-  const items = [
-    {
-      label: t('itinerary.maxGain'),
-      value: s.max_daily_gain_day
-        ? `${signedMeters(s.max_daily_gain_m)} · ${t('itinerary.day', { day: formatNumber(s.max_daily_gain_day) })}`
-        : '—',
-    },
-    { label: t('itinerary.sleepMax'), value: meters(s.max_sleep_altitude_m) },
-    { label: t('itinerary.restDays'), value: formatNumber(s.rest_days) },
-  ];
+  const highestNight = itinerary.stages.find(
+    (st) => st.sleep_altitude_m === s.max_sleep_altitude_m,
+  );
   return (
-    <View style={styles.summary}>
-      {items.map((i) => (
-        <View key={i.label} style={styles.summaryItem}>
-          <AppText variant="caption" muted>
-            {i.label}
-          </AppText>
-          <AppText variant="label">{i.value}</AppText>
-        </View>
-      ))}
-    </View>
+    <StatTiles
+      compact
+      tiles={[
+        {
+          label: t('itinerary.maxGain'),
+          value: s.max_daily_gain_day ? signedMeters(s.max_daily_gain_m) : '—',
+          sub: s.max_daily_gain_day
+            ? t('itinerary.day', { day: formatNumber(s.max_daily_gain_day) })
+            : undefined,
+          color: colors.warning,
+        },
+        {
+          label: t('itinerary.sleepMax'),
+          value: meters(s.max_sleep_altitude_m),
+          sub: highestNight?.to_place.name,
+        },
+        {
+          label: t('itinerary.restDays'),
+          value: formatNumber(s.rest_days),
+          color: colors.success,
+        },
+      ]}
+    />
   );
 }
 
 export default function ItineraryScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const trek = useTrek(id);
   const itinerary = useItinerary(id);
   const report = useAcclimatisation(id);
   const profile = useAltitudeProfile(id);
 
   return (
-    <>
-      <Stack.Screen options={{ title: t('itinerary.title') }} />
+    <SafeAreaView style={styles.fill} edges={['top']}>
       <QueryState query={itinerary}>
         {(it) => {
           const checks = new Map(report.data?.days.map((d) => [d.day, d]));
+          const top = Math.max(...it.stages.map((st) => st.sleep_altitude_m));
+          const topDay = it.stages.find((st) => st.sleep_altitude_m === top)?.day;
           return (
             <FlatList
-              style={{ backgroundColor: colors.background }}
+              style={styles.fill}
               contentContainerStyle={styles.list}
               data={it.stages}
               keyExtractor={(s) => String(s.day)}
               ListHeaderComponent={
-                <View style={{ gap: spacing(3) }}>
+                <View style={{ gap: 18, marginBottom: spacing(5) }}>
+                  <PageHeader title={t('itinerary.title')} subtitle={trek.data?.name} />
                   {profile.data && <AltitudeChart profile={profile.data} />}
                   <Summary itinerary={it} />
                   {report.data && <AcclimatisationBox report={report.data} />}
+                  <AppText variant="heading" accessibilityRole="header" style={{ marginTop: 6 }}>
+                    {t('itinerary.dayByDay')}
+                  </AppText>
                 </View>
               }
-              renderItem={({ item }) => <DayCard stage={item} check={checks.get(item.day)} />}
+              renderItem={({ item, index }) => (
+                <DayRow
+                  stage={item}
+                  check={checks.get(item.day)}
+                  highest={item.day === topDay}
+                  last={index === it.stages.length - 1}
+                />
+              )}
             />
           );
         }}
       </QueryState>
-    </>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1, backgroundColor: colors.background },
+  list: { paddingHorizontal: GUTTER, paddingTop: spacing(2), paddingBottom: spacing(10) },
+  dayRow: { flexDirection: 'row', gap: 14 },
+  rail: { width: 36, alignItems: 'center' },
+  badge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeOn: { backgroundColor: colors.primary },
+  railLine: { flex: 1, width: 2, minHeight: 12, backgroundColor: colors.border },
+  dayBody: { flex: 1, minWidth: 0, paddingTop: 6, paddingBottom: spacing(4), gap: 4 },
+  between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   teahouses: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing(2),
-    marginTop: spacing(1),
-    paddingVertical: spacing(2),
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-  list: { padding: spacing(4), gap: spacing(3), paddingBottom: spacing(10) },
-  card: {
-    padding: spacing(3.5),
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    borderLeftWidth: 4,
-    gap: spacing(1),
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  facts: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing(4), rowGap: spacing(1) },
-  fact: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  summary: { flexDirection: 'row', gap: spacing(2) },
-  summaryItem: {
-    flex: 1,
-    padding: spacing(3),
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    gap: 2,
+    marginTop: 2,
+    minHeight: 44,
   },
 });

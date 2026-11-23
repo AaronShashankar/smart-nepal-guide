@@ -30,7 +30,7 @@ export function Stars({ value, size = 16 }: { value: number; size?: number }) {
 }
 
 /** "★ 4.5 (12)", or nothing when the item has no reviews yet. */
-export function RatingBadge({ rating }: { rating?: Rating | null }) {
+export function RatingBadge({ rating, light }: { rating?: Rating | null; light?: boolean }) {
   const { t } = useTranslation();
   if (!rating || rating.count === 0) return null;
   return (
@@ -43,9 +43,9 @@ export function RatingBadge({ rating }: { rating?: Rating | null }) {
       })}
     >
       <MaterialCommunityIcons name="star" size={14} color={STAR_COLOR} />
-      <AppText variant="caption">
+      <AppText variant="caption" weight="bold" style={light && { color: '#FFFFFF' }}>
         {formatNumber(rating.score, 1)}{' '}
-        <AppText variant="caption" muted>
+        <AppText variant="caption" muted style={light && { color: 'rgba(255,255,255,0.8)' }}>
           ({formatNumber(rating.count)})
         </AppText>
       </AppText>

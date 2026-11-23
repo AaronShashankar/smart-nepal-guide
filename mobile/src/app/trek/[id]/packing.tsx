@@ -110,7 +110,7 @@ function Checklist({ list, trekName }: { list: PackingList; trekName: string }) 
           variant="secondary"
           onPress={reset}
           disabled={done === 0}
-          icon={<MaterialCommunityIcons name="restore" size={20} color={colors.primary} />}
+          icon="restore"
         />
       </View>
 
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   progressBox: {
     padding: spacing(4),
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: 20,
     gap: spacing(2),
   },
   progressText: {
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   bar: { height: 8, borderRadius: 4, backgroundColor: colors.background, overflow: 'hidden' },
   barFill: { height: 8, borderRadius: 4, backgroundColor: colors.success },
-  card: { backgroundColor: colors.surface, borderRadius: 14, paddingHorizontal: spacing(4) },
+  card: { backgroundColor: colors.surface, borderRadius: 20, paddingHorizontal: spacing(4) },
   row: {
     flexDirection: 'row',
     gap: spacing(3),

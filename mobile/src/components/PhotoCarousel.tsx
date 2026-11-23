@@ -10,14 +10,18 @@ import { colors, spacing } from '@/theme';
 import { AppText } from './AppText';
 import { CategoryIcon } from './Cards';
 
-const HEIGHT = 240;
-
+/**
+ * Swipe through a place's photos. It fills its parent (the HeroHeader), so the hero's scrim and
+ * text sit on top of it. With no photos: navy ground with the category icon.
+ */
 export function PhotoCarousel({
   photos,
   category,
+  height,
 }: {
   photos: { url: string }[];
   category: Category;
+  height: number;
 }) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -25,9 +29,9 @@ export function PhotoCarousel({
 
   if (photos.length === 0) {
     return (
-      <View style={[styles.placeholder, { width }]}>
-        <CategoryIcon category={category} size={48} />
-        <AppText muted variant="caption">
+      <View style={[styles.placeholder, { width, height }]}>
+        <CategoryIcon category={category} size={56} color="rgba(255,255,255,0.5)" />
+        <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.7)' }}>
           {t('place.noPhotos')}
         </AppText>
       </View>
@@ -35,7 +39,7 @@ export function PhotoCarousel({
   }
 
   return (
-    <View>
+    <View style={StyleSheet.absoluteFill}>
       <ScrollView
         horizontal
         pagingEnabled
@@ -46,14 +50,14 @@ export function PhotoCarousel({
           <Image
             key={p.url}
             source={{ uri: photoUrl(p.url) }}
-            style={{ width, height: HEIGHT }}
+            style={{ width, height }}
             contentFit="cover"
             transition={200}
           />
         ))}
       </ScrollView>
       {photos.length > 1 && (
-        <View style={styles.dots}>
+        <View style={styles.dots} pointerEvents="none">
           {photos.map((p, i) => (
             <View key={p.url} style={[styles.dot, i === index && styles.dotActive]} />
           ))}
@@ -65,19 +69,22 @@ export function PhotoCarousel({
 
 const styles = StyleSheet.create({
   placeholder: {
-    height: HEIGHT * 0.6,
-    backgroundColor: colors.chip,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: colors.navy,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing(2),
   },
+  // Above the content sheet, which overlaps the hero by 24 px.
   dots: {
     position: 'absolute',
-    bottom: spacing(2),
-    alignSelf: 'center',
+    bottom: 32,
+    right: 20,
     flexDirection: 'row',
     gap: spacing(1.5),
   },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#ffffff88' },
-  dotActive: { backgroundColor: '#fff' },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.5)' },
+  dotActive: { backgroundColor: '#fff', width: 18 },
 });
