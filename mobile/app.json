@@ -47,7 +47,9 @@
         {
           "locationWhenInUsePermission": "Bato uses your location only to list the places closest to you."
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
