@@ -8,6 +8,7 @@ Generated folders such as `node_modules/`, `.venv/`, `android/` and `dist/` are 
 ```
 smart-nepal-guide/
 ├── README.md            Project overview, status, setup for each part, algorithm list
+├── PROGRESS.md          What has been done so far (features, numbers, tests, bugs) and what is left
 ├── runlocal.md          How to run and check everything on this laptop, step by step
 ├── filestructure.md     This file
 ├── Makefile             Backend shortcuts: make dev / seed / train / test / verify / stop

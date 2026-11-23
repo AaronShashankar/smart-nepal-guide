@@ -19,7 +19,7 @@ Version 1 plan: [phase1](../version1/phase1.md) · [phase2](../version1/phase2.m
 | [Phase 3](phase3.md) | 15 | **Safety & offline**: help on the trail, even without internet | Emergency contacts · SOS by SMS · Symptom checker · Daily check-in *(stretch)* · Offline treks *(stretch)* | **Lake Louise score** · scheduled job (APScheduler) · timestamp-based delta sync |
 | [Optional](phase3.md#optional-only-if-time-remains) | 15+ | Only if time remains | AI-translated drafts · Retrain from the admin panel · Bikram Sambat dates | — |
 
-**Status (2026-11-09):** Phase 2 code is done (on the `v2` branch, phone demo still to run); Phase 1 and Phase 3 are not started.
+**Status (2026-11-23):** Phase 1 and Phase 2 code is done and merged into `main` (phone demos still to run); Phase 3 is not started. Summary: [PROGRESS.md](../../../PROGRESS.md).
 
 **Why this order:** Phase 1 builds on what Version 1 already has (stages, the risk model, Redis in
 docker-compose), so it is the cheapest way to add marks. Phase 2 needs new tables but no new device

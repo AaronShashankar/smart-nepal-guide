@@ -8,9 +8,13 @@ get a personal trek difficulty & risk rating with a "Why this rating?" explanati
 **Status:** Version 1 code is complete: Phase 1 (users, explore, search, map), Phase 2 (itinerary,
 acclimatisation checker, AI risk predictor) and Phase 3 (trip planner, admin panel). Still to do by
 hand: the manual test table ([docs/testing/testing.md](docs/testing/testing.md), run it with [docs/testing/testing-guide.md](docs/testing/testing-guide.md)), hosting, the APK and the demo video.
-**Version 2 Phase 2** (personalisation & community) code is done: reviews with a Bayesian rating,
-"Recommended for you" (cosine similarity), Near me, budget estimate, share a trip, teahouses
-([plan](docs/plans/version2/phase2.md)). V2 Phase 1 (smart trek features) is not built yet.
+**Version 2 Phase 1** (altitude chart, safer alternatives, weather, packing list,
+[plan](docs/plans/version2/phase1.md)) and **Phase 2** (reviews with a Bayesian rating,
+"Recommended for you" (cosine similarity), Near me, budget estimate, share a trip, teahouses,
+[plan](docs/plans/version2/phase2.md)) code is done. The app has the **new UI** from the "Bato App
+Redesign" canvas. V2 Phase 3 (safety & offline) is not started. All work happens on `main`.
+
+**What has been done so far, with numbers and what is left: [PROGRESS.md](PROGRESS.md).**
 
 | Folder | What | Stack |
 |---|---|---|
@@ -176,7 +180,7 @@ nationality on the profile · Budget card on the trek page and **Estimate budget
 **Share** (Android share sheet; `smartnepalguide://shared/{token}` opens a read-only trip) ·
 "Teahouses (n)" on itinerary days. **`expo-location` is native: rebuild the dev build once
 (`npx expo run:android`).** All text is in `src/i18n/locales/en.json` / `ne.json`;
-Noto Sans Devanagari is used everywhere.
+Plus Jakarta Sans is used for English text and Noto Sans Devanagari for Nepali.
 
 **Google sign-in setup** (only needed for that button): in Google Cloud Console create an OAuth
 *Web* client and an *Android* client (package `com.smartnepalguide.app` + the SHA-1 of your build's
