@@ -22,7 +22,11 @@ Two kinds of testing. **Step-by-step order, test counts and how to check each ca
    Phone 2 (2026-11-23): TC-47 Near me passes with real GPS, so it is no longer blocked. The layout cases
    pass, except the welcome screen in Nepali: "Google बाट अगाडि बढ्नुहोस्" and "खाता बनाउनुहोस्" lost their
    last word again (BUG-06). That was fixed again the same day and passes on the emulator; TC-01 is
-   **Fail** until it passes on Phone 2. Now: **57 Pass, 1 Fail (TC-01, re-test on Phone 2)**.
+   **Fail** until it passes on Phone 2.
+
+   Login and register forms (2026-11-23): TC-59 to TC-61 were added for the keyboard, the show-password
+   button and the placeholders (BUG-17). They pass on the emulator and on Phone 2.
+   Now: **60 Pass, 1 Fail (TC-01, re-test on Phone 2)**.
 
 The **Auto** column names the pytest test that checks the same behaviour through the API, where
 there is one. The manual case still checks the screen.
@@ -105,6 +109,17 @@ Run on 2026-11-19 on the same emulator (Phone 1), mostly in नेपाली. 
 | TC-57 | Packing list | EBC → Packing list → January; then Poon Hill → October | January / October | EBC: down jacket, microspikes, −10 °C sleeping bag, each with why; permits KPLRM + SNP. Poon Hill: a much shorter list without them | EBC January: 32 items in 4 groups ("४,००० मि. भन्दा माथि जाने भएकाले" next to the down jacket; KPLRM and SNP under documents). Poon Hill October: 20 items, no down jacket or microspikes (checked through the API). Same screen in English also checked: reasons "You go above 4,000 m", "Winter, above 3,500 m", "Trek of 5 days or more", "Required for this trek" (`V2P1-packing-ebc-en.png`) | Pass | `test_ebc_in_january_has_cold_weather_gear`, `test_poon_hill_in_october_is_a_much_shorter_list`, `test_permit_items_match_the_trek_permits` |
 | TC-58 | Packing list | Tick items → close the app fully → reopen the same trek and month; tap Clear ticks | — | Ticks are still there (saved on the phone, per trek and month); Clear ticks empties them | After a force-stop: January still "३२ मध्ये ४ तयार", November kept its own tick; Clear ticks → 0. First run: the Clear ticks label showed only "चिनो" (BUG-15); re-test: full label | Pass | (phone only: AsyncStorage) |
 
+### Login and register forms (V2-UI-02)
+
+Run on 2026-11-23 on the emulator (Phone 1, also resized to Phone 2's 720 × 1600 at 320 dpi), in नेपाली,
+then checked by hand on Phone 2. Added after BUG-17: on Android the keyboard covered the login form.
+
+| TC | Feature | Steps | Test data | Expected result | Actual result | Pass/Fail | Automated test |
+|---|---|---|---|---|---|---|---|
+| TC-59 | Login keyboard | Welcome → Log in → tap Email, type, press Next; type the password | test@example.com, any password | The login sheet moves above the keyboard: both fields and the Log in button stay visible; Next moves to Password | Sheet sits above the keyboard at both screen sizes; Next moves to Password; the sheet follows when the keyboard gets taller. Before the fix the keyboard covered the whole sheet (BUG-17). Phone 2: works | Pass | (phone only: keyboard) |
+| TC-60 | Show password | On the login sheet and on Create account, type a password, tap the eye, then tap it again | `secret123` | First tap shows the password and the icon changes to a crossed eye; second tap hides it; the keyboard stays open | Shows "secret123" with a crossed eye, button label "पासवर्ड लुकाउनुहोस्"; second tap hides it; keyboard stays open. Phone 2: works | Pass | (phone only) |
+| TC-61 | Register keyboard | Create account → tap Full name, type, Next, type the email, Next; scroll with the keyboard open | Test User, test@example.com | Every field shows a placeholder (EN and NE); Next moves Full name → Email → Password; with the keyboard open the page scrolls to the Create account button | Placeholders "जस्तै: पेम्बा शेर्पा", "you@example.com", "पासवर्ड बनाउनुहोस्"; Next moves through every field; at 720 × 1600 the page scrolls to the error text and the button above the keyboard. Phone 2: works | Pass | (phone only: keyboard) |
+
 ## Bugs found and fixed
 
 Write the bugs you find while running the table here (ID, what happened, fix). Examples from
@@ -134,3 +149,10 @@ The same bugs are in the tracker's **Bugs** tab, with severity, status and the f
 | BUG-13 | TC-31 | Offline message shows the server address; loaded lists are hidden; Try again misses Recommended | Error text appends the API URL; error state replaces cached data. **Fix:** address shown only in development builds; loaded data stays with a short note above it; Try again refreshes all of Explore | Low / fixed |
 | BUG-14 | TC-01 (found while fixing BUG-06) | After switching language in Settings, trek cards keep "8 days" / "4,130 m" in the old language until restart | The React Compiler caches `days()`, `km()` etc. by their arguments; `lib/format` reads the language from i18n, which the compiler cannot see. **Fix:** files that import `lib/format` opt out with `'use no memo'` | Medium / fixed |
 | BUG-15 | TC-58 | The Packing list's "चिनो हटाउनुहोस्" (Clear ticks) button showed only "चिनो" | The button appeared only after the first tick. On Android a Nepali button label that mounts after the screen has loaded loses its last word (the BUG-06 line-break issue), even at full width. **Fix:** the button is always there and only disabled while nothing is ticked | Low / fixed; passes on Phone 2 |
+
+### Found on the real phone and after the redesign (2026-11-23)
+
+| Bug | Case | What happened | Cause | Severity / status |
+|---|---|---|---|---|
+| BUG-16 | — (after the redesign) | The app opened on a red Render Error: "You are passing an array of styles to a child of `<Slot>`" | The redesign gave the `Pressable` inside `<Link asChild>` an array style or a `({ pressed })` style. Link's Slot throws on arrays in development and drops function styles. **Fix:** a new `PressableLink` (Pressable + `router.push`) replaces every `Link asChild` the redesign touched | High / fixed; passes on Phone 2 |
+| BUG-17 | TC-59, TC-61 | Reported by the user: tapping a field on the login sheet opened the keyboard over the whole form; on Create account the password field and button could end up under the keyboard | Android apps on Expo SDK 58 are edge-to-edge, so the window no longer shrinks for the keyboard. The login sheet's `KeyboardAvoidingView` had no `behavior` on Android, and the register screen had no keyboard handling. **Fix:** `behavior="padding"` on both platforms (Expo's keyboard-handling guide); new `Screen` prop `avoidKeyboard` used on Create account | High / fixed; passes on Phone 2 |

@@ -43,7 +43,7 @@ on the laptop's network), and **features that were planned but not built yet**
 | 5 | Altitude profile chart | **8.5** | Clear chart, fast climbs coloured, checked in both languages |
 | 6 | Reviews and ratings | **8.5** | Bayesian average, one review per user, moderation survives edits |
 | 7 | Share a trip | **8.5** | Secure token, works without login, a web page for people without the app |
-| 8 | Testing and quality checks | **8.5** | 209 backend tests, 58 manual cases, bug log; no automated tests for the app or admin |
+| 8 | Testing and quality checks | **8.5** | 209 backend tests, 61 manual cases, bug log; no automated tests for the app or admin |
 | 9 | AI risk predictor | **8** | Excellent from-scratch forest; but 95% of the training data comes from our own rule |
 | 10 | Explore, place and trek pages | **8** | Rich pages, 63 of 69 places have photos; treks have none |
 | 11 | Traveller profile | **8** | Simple, optional health questions, prompts when needed |
@@ -79,6 +79,9 @@ on the laptop's network), and **features that were planned but not built yet**
   ([api/deps.py](../backend/app/api/deps.py)).
 - On the phone, many requests that fail with 401 at the same time share **one** refresh call
   ([lib/api.ts](../mobile/src/lib/api.ts)).
+- *Update 2026-11-23:* the login and register forms now have placeholders and a show/hide
+  password button, and they stay above the keyboard on Android (BUG-17, TC-59 to TC-61). These
+  make the forms easier to use, but don't change the score: the gaps below are still open.
 
 **What holds it back**
 - No "Forgot password". A user who forgets it is locked out for good.
@@ -439,7 +442,7 @@ saving them.
 
 **What works well:** 209 backend tests (algorithms, ML, API, permissions), one script that runs
 lint, format, migration check, tests, typecheck and the admin build
-([scripts/verify.sh](../scripts/verify.sh)), 58 manual test cases with a guide, and 16 bugs
+([scripts/verify.sh](../scripts/verify.sh)), 61 manual test cases with a guide, and 17 bugs
 logged with their fixes. This is more than most student projects have.
 
 **What holds it back:** **no automated tests for the mobile app or the admin panel**, and no CI,

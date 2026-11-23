@@ -43,6 +43,10 @@ Run lint and typecheck before declaring any task done.
 - **Lists from the API:** wrap them in `QueryState` (`src/components/StateViews.tsx`); it keeps already loaded
   data when a refresh fails.
 - **Screens with a Modal sheet inside a `ScrollView`:** set `keyboardShouldPersistTaps="handled"` (BUG-11).
+- **Forms and the keyboard:** Android apps are edge-to-edge, so the window no longer shrinks for the keyboard.
+  Give every `KeyboardAvoidingView` `behavior="padding"` on **both** platforms (not `undefined` on Android),
+  and use `<Screen avoidKeyboard>` for a form screen without a header (BUG-17). A password `TextField`
+  (`secureTextEntry`) gets the show/hide eye button by itself.
 
 ## Building with EAS
 

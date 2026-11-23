@@ -156,6 +156,18 @@ Do it in नेपाली once and English once.
 | 5 | TC-57 | EBC → Packing list → January; Poon Hill → October | Cold-weather gear with reasons + permits; Poon Hill list much shorter. 📸 packing |
 | 6 | TC-58 | Tick a few → close the app fully → reopen | Ticks kept; Clear ticks works; label not cut off |
 
+## Session H — Login and register forms (3 cases, Phone 1 + Phone 2)
+
+Log out first. Use the on-screen keyboard: on the emulator, turn on *Show on-screen keyboard* (or
+`adb shell settings put secure show_ime_with_hard_keyboard 1`). Phone 2 matters most here, because its
+screen is shorter.
+
+| Order | TC | Do | Check |
+|---|---|---|---|
+| 1 | TC-59 | Welcome → Log in → tap Email, type, press Next, type a password | The sheet sits above the keyboard; both fields and the Log in button stay visible; Next goes to Password |
+| 2 | TC-60 | Tap the eye in the password field, then tap it again (login and Create account) | Password shown with a crossed eye, then hidden again; the keyboard stays open |
+| 3 | TC-61 | Create account → Full name, Next, Email, Next; scroll with the keyboard open | Placeholders in every field (EN and NE); Next moves through the fields; the page scrolls to the Create account button |
+
 ---
 
 ## What this closes in the tracker
