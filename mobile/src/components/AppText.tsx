@@ -41,11 +41,13 @@ export function fontFor(weight: Weight, text?: ReactNode): string {
  * Text in Plus Jakarta Sans for English and Noto Sans Devanagari for Nepali (Noto also has Latin
  * letters, so mixed text is fine). Devanagari lines get +4 px line height so matras are not clipped.
  *
- * Android fix (BUG-06): a label that is exactly as wide as its text ("मेरो नजिक" in a chip, a button
- * title, a badge) is drawn in a box a fraction of a pixel narrower than the measured width. Latin
- * text is laid out as a single "boring" line and never breaks, but Devanagari goes through the
- * line breaker, so its last word (or letter) moves to a second line that the one-line box hides.
- * A tiny no-break space at the end (about 2 px) gives the line breaker that missing pixel.
+ * Android fix (BUG-06): React Native measures a label's width, Yoga rounds the box to whole pixels,
+ * and Android then draws the text again in that box. For Devanagari the second pass can need a few
+ * pixels more than the first (seen when the language is switched on a screen, or a label mounts
+ * after the screen has loaded), so the line breaker moves the last word to a second line that the
+ * one-line box hides ("खाता बनाउनुहोस्" → "खाता"). Latin text is a single "boring" line and never
+ * breaks. A plain space at the end, in a smaller font, gives that slack: it counts in the measured
+ * width, but a trailing space may hang past the edge, so it can never be what wraps.
  */
 export function AppText({
   variant = 'body',
@@ -73,12 +75,13 @@ export function AppText({
       {...rest}
     >
       {children}
-      {pad && <Text style={styles.pad}>{'\u202F'}</Text>}
+      {pad && <Text style={styles.pad}> </Text>}
     </Text>
   );
 }
 
 const styles = StyleSheet.create({
-  // 5 sp narrow no-break space ≈ 2–3 px: invisible, but enough slack for the line breaker.
-  pad: { fontSize: 5 },
+  // A 12 sp space ≈ 3 sp of slack (8 px on a 2.6x screen). 5 sp was not enough after a language
+  // switch; no underline so links don't get a longer line.
+  pad: { fontSize: 12, textDecorationLine: 'none' },
 });

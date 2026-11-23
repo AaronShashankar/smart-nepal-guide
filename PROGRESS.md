@@ -15,14 +15,14 @@ Every task, bug, test case and decision is tracked in the
 
 | Part | Status |
 |---|---|
-| **Version 1:** users, explore, search, map, itinerary, acclimatisation, AI risk predictor, trip planner, admin panel | Code done. Demos on a real phone, the APK, the video and the `v1.0` tag are still to do |
-| **Version 2 Phase 1:** altitude chart, safer alternatives, weather, packing list | Code done, tested on the emulator (tracker: *Testing*) |
-| **Version 2 Phase 2:** recommendations, reviews, Near me, budget, share a trip, teahouses | Code done. *Near me* still needs a real phone (TC-47) |
-| **UI redesign:** "Bato App Redesign" canvas | Code done. Needs checking on a phone (V2-UI-01) |
+| **Version 1:** users, explore, search, map, itinerary, acclimatisation, AI risk predictor, trip planner, admin panel | Code done. Demos run on a real phone and the APK works (2026-11-23). The video and the `v1.0` tag are still to do |
+| **Version 2 Phase 1:** altitude chart, safer alternatives, weather, packing list | Done: tested on the emulator and a real phone |
+| **Version 2 Phase 2:** recommendations, reviews, Near me, budget, share a trip, teahouses | Done: *Near me* passes on a real phone (TC-47) |
+| **UI redesign:** "Bato App Redesign" canvas | Done: checked on a real phone in both languages (V2-UI-01) |
 | **Version 2 Phase 3:** safety & offline | Not started |
 | **Automated checks** | 209 backend tests; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
-| **Manual test cases** | 58 written; 57 pass on the emulator; 1 blocked (TC-47 Near me, emulator GPS) |
-| **Bugs** | 16 logged; 13 fixed; 3 waiting for a phone re-test (BUG-06, BUG-15, BUG-16) |
+| **Manual test cases** | 58 written; 57 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test |
+| **Bugs** | 16 logged; 15 fixed; BUG-06 fixed a second time and waiting for a phone re-test |
 
 **Size of the code** (Python and TypeScript only): backend ≈ 8,300 lines, mobile app ≈ 8,100 lines,
 admin panel ≈ 3,500 lines.
@@ -165,11 +165,13 @@ The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 P
   - mobile typecheck and lint
   - admin typecheck, build and lint
 - **Manual test cases:** 58 cases, TC-01 to TC-58, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
-  - All were run on the emulator, and 57 pass.
-  - TC-47 (Near me) is blocked because the emulator's fake GPS never reaches the app. The API itself returns the right answer.
-  - The second phone has not been tested yet.
+  - All were run on the emulator (Phone 1). The layout cases, TC-47 (Near me, real GPS) and TC-51 were run on a
+    real phone (Phone 2: Samsung Galaxy A07, 720 × 1600) on 2026-11-23.
+  - 57 pass. TC-01 failed on Phone 2: two Nepali buttons on the welcome screen were cut (BUG-06). It is fixed
+    again and passes on the emulator; it needs one more check on the phone.
 - **Bugs:** 16 logged in the tracker. The ones worth knowing:
-  - BUG-06: Nepali labels lost their last word on Android. A fix is in; it still needs a real phone.
+  - BUG-06: Nepali labels lost their last word on Android. The first fix did not hold on a real phone after a
+    language switch; the second fix (2026-11-23) gives the text a few pixels of slack. It needs a phone re-test.
   - BUG-14: numbers stayed in English after switching language, because of the React Compiler.
   - BUG-16: the redesign's cards crashed inside expo-router's `Link`.
 - **Screenshots:** 41 in [docs/screenshots/](docs/screenshots/), in English and Nepali. They were taken before the redesign, so the report will need new ones.
@@ -200,17 +202,16 @@ The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 P
 ## What is left
 
 **Finishing touches:** the current focus, all on `main`.
-- Check the redesign on a phone in both languages: the floating tab bar with gesture navigation, Nepali chips, and BUG-06, BUG-15 and BUG-16.
+- Re-check the welcome screen in नेपाली on the real phone (BUG-06, second fix): switch English → नेपाली and look at the Google and Create account buttons.
 - Polish the design, and add the parts of the canvas left out above.
 - Improve how things work wherever testing on a phone shows a problem.
 - Confirm that the welcome photo (Poon Hill sunrise, taken from the design canvas) may be used, or replace it.
 
 **Version 1 release** (see [docs/manual-tasks.md](docs/manual-tasks.md)):
-- Run the Phase 1, 2 and 3 demos on a real phone, and the test cases on a second phone (TC-47 included).
 - Collect survey answers, add them to the training data and retrain the model (V1-P1-18, V1-P2-14).
 - Write Nepali notes for every trek stage (V1-P3-19).
 - Take new screenshots for the report.
-- Build the APK with EAS, record the demo video, and tag `v1.0`.
+- Record the demo video, and tag `v1.0`.
 
 **Version 2:**
 - Phase 3 (safety & offline) is not started: emergency contacts, SOS by SMS, the symptom checker (Lake Louise score), a daily check-in, and offline treks.

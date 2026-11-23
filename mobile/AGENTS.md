@@ -32,7 +32,7 @@ Run lint and typecheck before declaring any task done.
 ## Project rules (Bato)
 
 - **Text:** use `AppText` (`src/components/AppText.tsx`), not `Text`, for anything that can show Nepali. On
-  Android it adds a tiny no-break space after Devanagari text; without it the last word of a label can
+  Android it adds a small trailing space after Devanagari text; without it the last word of a label can
   disappear (BUG-06 in `docs/testing/testing.md`).
 - **Formatting numbers, days, units, region and district names:** use `src/lib/format.ts`. It reads the
   current language from i18n, which the React Compiler cannot see, so **every file that imports
