@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, type TextInputInstance, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
@@ -22,6 +22,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const emailRef = useRef<TextInputInstance>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
 
   async function register() {
     if (!email || !password) return setError(t('auth.fillAll'));
@@ -45,7 +47,7 @@ export default function RegisterScreen() {
   }
 
   return (
-    <Screen>
+    <Screen avoidKeyboard>
       <PageHeader title={t('auth.register')} subtitle="Bato · बाटो" />
       <View style={styles.card}>
         <TextField
@@ -53,16 +55,27 @@ export default function RegisterScreen() {
           value={fullName}
           onChangeText={setFullName}
           autoComplete="name"
+          placeholder={t('auth.fullNamePlaceholder')}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => emailRef.current?.focus()}
         />
         <TextField
+          ref={emailRef}
           label={t('auth.email')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           autoComplete="email"
           keyboardType="email-address"
+          textContentType="emailAddress"
+          placeholder={t('auth.emailPlaceholder')}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
         />
         <TextField
+          ref={passwordRef}
           label={t('auth.password')}
           hint={t('auth.passwordHint')}
           value={password}
@@ -70,6 +83,9 @@ export default function RegisterScreen() {
           secureTextEntry
           autoComplete="new-password"
           textContentType="newPassword"
+          placeholder={t('auth.newPasswordPlaceholder')}
+          returnKeyType="go"
+          onSubmitEditing={register}
         />
         {error && <AppText style={{ color: colors.danger }}>{error}</AppText>}
         <Button title={t('auth.register')} onPress={register} loading={busy} />

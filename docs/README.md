@@ -16,4 +16,5 @@ For the whole repository layout see [../filestructure.md](../filestructure.md).
 | [ml/](ml/) | `comparison.md`, confusion matrices, feature importance, CV depth, data sources, `metrics.json` | ML chapter. **Generated**: `cd backend && uv run python -m app.ml.evaluate` (do not edit by hand) |
 | [route_gap.md](route_gap.md) | How far 2-opt is from the exact best route on random trips of 5–8 places | Algorithms chapter. **Generated**: `cd backend && uv run python -m app.algorithms.route_benchmark` |
 | [screenshots/](screenshots/) | App and admin screenshots in English and Nepali | Report. How to take them: [manual-tasks.md #8](manual-tasks.md#8-screenshots-for-the-report) |
+| [feature-ratings.md](feature-ratings.md) | Each feature scored out of 10 for how well it is built, with what holds it back and the top improvements (2026-11-23) | Deciding what to improve next; testing and conclusion chapters |
 | [manual-tasks.md](manual-tasks.md) | Everything left to do by hand (survey, data checks, phone tests, APK, release), with how to check each | Your to-do list |

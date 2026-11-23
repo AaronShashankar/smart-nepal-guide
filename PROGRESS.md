@@ -22,7 +22,7 @@ Every task, bug, test case and decision is tracked in the
 | **Version 2 Phase 3:** safety & offline | Not started |
 | **Automated checks** | 209 backend tests; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
 | **Manual test cases** | 58 written; 57 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test |
-| **Bugs** | 16 logged; 15 fixed; BUG-06 fixed a second time and waiting for a phone re-test |
+| **Bugs** | 17 logged; 15 fixed; BUG-06 (fixed a second time) and BUG-17 (keyboard covered the login form) are fixed and waiting for a phone re-test |
 
 **Size of the code** (Python and TypeScript only): backend ≈ 8,300 lines, mobile app ≈ 8,100 lines,
 admin panel ≈ 3,500 lines.
@@ -169,11 +169,13 @@ The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 P
     real phone (Phone 2: Samsung Galaxy A07, 720 × 1600) on 2026-11-23.
   - 57 pass. TC-01 failed on Phone 2: two Nepali buttons on the welcome screen were cut (BUG-06). It is fixed
     again and passes on the emulator; it needs one more check on the phone.
-- **Bugs:** 16 logged in the tracker. The ones worth knowing:
+- **Bugs:** 17 logged in the tracker. The ones worth knowing:
   - BUG-06: Nepali labels lost their last word on Android. The first fix did not hold on a real phone after a
     language switch; the second fix (2026-11-23) gives the text a few pixels of slack. It needs a phone re-test.
   - BUG-14: numbers stayed in English after switching language, because of the React Compiler.
   - BUG-16: the redesign's cards crashed inside expo-router's `Link`.
+  - BUG-17: the keyboard covered the login form, because Android apps are now edge-to-edge and the
+    window no longer shrinks for the keyboard. Fixed with `behavior="padding"`; needs a phone re-test.
 - **Screenshots:** 41 in [docs/screenshots/](docs/screenshots/), in English and Nepali. They were taken before the redesign, so the report will need new ones.
 
 ## Documents and report material
@@ -203,6 +205,7 @@ The database is PostgreSQL 16 with 5 migrations: Phase 1, Phase 2, Phase 3, V2 P
 
 **Finishing touches:** the current focus, all on `main`.
 - Re-check the welcome screen in नेपाली on the real phone (BUG-06, second fix): switch English → नेपाली and look at the Google and Create account buttons.
+- Check the login sheet and Create account on the real phone (BUG-17, V2-UI-02): the keyboard must not cover the field you type in, the eye button shows and hides the password, and every field shows its placeholder.
 - Polish the design, and add the parts of the canvas left out above.
 - Improve how things work wherever testing on a phone shows a problem.
 - Confirm that the welcome photo (Poon Hill sunrise, taken from the design canvas) may be used, or replace it.

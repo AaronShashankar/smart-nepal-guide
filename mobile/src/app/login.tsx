@@ -1,6 +1,13 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
+  StyleSheet,
+  type TextInputInstance,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -28,6 +35,7 @@ export default function LoginScreen() {
   const [busy, setBusy] = useState<'email' | 'google' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const passwordRef = useRef<TextInputInstance>(null);
 
   async function login() {
     if (!email || !password) return setError(t('auth.fillAll'));
@@ -138,7 +146,9 @@ export default function LoginScreen() {
           onPress={() => setFormOpen(false)}
           accessibilityLabel={t('common.cancel')}
         />
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {/* Android apps are edge-to-edge, so the window no longer shrinks for the keyboard: without
+            a behavior on both platforms the keyboard covered the whole form (V2-UI-02). */}
+        <KeyboardAvoidingView behavior="padding">
           <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing(5) }]}>
             <View style={styles.grabber} />
             <AppText variant="title">{t('auth.loginTitle')}</AppText>
@@ -150,9 +160,16 @@ export default function LoginScreen() {
               autoComplete="email"
               keyboardType="email-address"
               textContentType="emailAddress"
+              placeholder={t('auth.emailPlaceholder')}
+              returnKeyType="next"
+              submitBehavior="submit"
+              onSubmitEditing={() => passwordRef.current?.focus()}
             />
             <TextField
+              ref={passwordRef}
               label={t('auth.password')}
+              placeholder={t('auth.passwordPlaceholder')}
+              returnKeyType="go"
               value={password}
               onChangeText={setPassword}
               secureTextEntry

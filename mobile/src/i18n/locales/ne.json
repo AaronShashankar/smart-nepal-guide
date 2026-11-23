@@ -54,7 +54,13 @@
     "pitch": "ठाउँ खोज्नुहोस्, पदयात्राको जोखिम जाँच्नुहोस् र आफ्नो यात्रा योजना बनाउनुहोस्।",
     "createAccount": "खाता बनाउनुहोस्",
     "haveAccountQ": "पहिले नै खाता छ?",
-    "loginTitle": "इमेलबाट लगइन"
+    "loginTitle": "इमेलबाट लगइन",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "आफ्नो पासवर्ड लेख्नुहोस्",
+    "newPasswordPlaceholder": "पासवर्ड बनाउनुहोस्",
+    "fullNamePlaceholder": "जस्तै: पेम्बा शेर्पा",
+    "showPassword": "पासवर्ड देखाउनुहोस्",
+    "hidePassword": "पासवर्ड लुकाउनुहोस्"
   },
   "tabs": {
     "explore": "अन्वेषण",

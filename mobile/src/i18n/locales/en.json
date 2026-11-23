@@ -54,7 +54,13 @@
     "pitch": "Find places, check how risky a trek is for you, and plan your trip day by day.",
     "createAccount": "Create an account",
     "haveAccountQ": "Already have an account?",
-    "loginTitle": "Log in with email"
+    "loginTitle": "Log in with email",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "newPasswordPlaceholder": "Choose a password",
+    "fullNamePlaceholder": "e.g. Pemba Sherpa",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "tabs": {
     "explore": "Explore",
