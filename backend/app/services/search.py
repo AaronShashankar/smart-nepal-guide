@@ -7,12 +7,14 @@ Candidates come from:
     and every alias;
   - a place's district ("bhaktapur" lists the places in Bhaktapur district);
   - a place's category ("temple" lists temples);
+  - an area, i.e. a city or trek region ("pokhara" lists Phewa Lake, Sarangkot and the World
+    Peace Pagoda, which are in Kaski district; "khumbu" lists the Everest region and its treks);
   - for treks, the villages they pass through ("namche" finds the Everest Base Camp Trek).
 A query typed in Devanagari is also searched in Latin letters (to_latin), so "पोखरा" can match
 a name we only have in English.
 
 Step 2 (Python): rank the candidates with our own Levenshtein similarity. Matches on a district,
-a category or a village count a little less than a match on the item's own name, so
+an area, a category or a village count a little less than a match on the item's own name, so
 "Bhaktapur Durbar Square" comes before the other places in Bhaktapur district.
 """
 
@@ -27,6 +29,7 @@ from app.algorithms.levenshtein import normalise, similarity
 from app.algorithms.transliterate import is_devanagari, to_latin
 from app.core.i18n import pick_one
 from app.models import (
+    Area,
     Category,
     CategoryTranslation,
     Place,
@@ -50,6 +53,8 @@ SHORT_QUERY_LEN = 5
 SHORT_QUERY_MIN = 0.85
 # How much a match counts when it is not on the item's own name
 DISTRICT_WEIGHT = 0.9
+# Just under DISTRICT_WEIGHT, so "kathmandu" lists Kathmandu district first, then Patan
+AREA_WEIGHT = 0.88
 CATEGORY_WEIGHT = 0.85
 VIA_WEIGHT = 0.95
 MAX_INITIALS = 6  # a query this short may be a trek's initials
@@ -160,6 +165,19 @@ def place_name_matches(db: Session, forms: list[str]) -> dict[uuid.UUID, Match]:
     return out
 
 
+def area_matches(db: Session, forms: list[str]) -> dict[uuid.UUID, tuple[Area, Match]]:
+    """Areas (cities, trek regions) whose English or Nepali name or another name matches.
+    There are only a few areas, so they are compared in Python without a database step."""
+    out = {}
+    for area in db.scalars(select(Area)):
+        texts = [(area.name_en, area.name_en), (area.name_ne, area.name_en)]
+        texts += [(n, area.name_en) for n in area.other_names]
+        m = best_match(forms, texts)
+        if m:
+            out[area.id] = (area, Match(m.score * AREA_WEIGHT, m.shown))
+    return out
+
+
 def _category_match(forms: list[str], category: Category) -> Match | None:
     texts = [(t.name, t.name) for t in category.translations]
     texts.append((category.code.replace("_", " "), category.code))
@@ -189,7 +207,13 @@ def search_places(db: Session, q: str, lang: Lang, limit: int) -> list[SearchHit
             )
         )
     )
-    ids = set(by_name) | district_ids | category_ids
+    areas = area_matches(db, forms)
+    area_ids = (
+        set(db.scalars(select(Place.id).where(published_places(), Place.area_id.in_(areas))))
+        if areas
+        else set()
+    )
+    ids = set(by_name) | district_ids | category_ids | area_ids
     if not ids:
         return []
     places = db.scalars(select(Place).where(Place.id.in_(ids), published_places())).all()
@@ -203,6 +227,8 @@ def search_places(db: Session, q: str, lang: Lang, limit: int) -> list[SearchHit
             m = best_match(forms, [(place.district, place.district)])
             if m:
                 options.append((Match(m.score * DISTRICT_WEIGHT, m.shown), "district"))
+        if place.area_id in areas:
+            options.append((areas[place.area_id][1], "area"))
         if place.id in category_ids:
             m = _category_match(forms, place.category)
             if m:
@@ -223,6 +249,7 @@ def search_places(db: Session, q: str, lang: Lang, limit: int) -> list[SearchHit
                 match=kind,
                 category=category_out(place.category, lang),
                 district=place.district,
+                area=place.area.name(lang) if place.area else None,
             )
         )
     # Same score (e.g. every place in a district): main sights before trek villages
@@ -272,7 +299,17 @@ def search_treks(db: Session, q: str, lang: Lang, limit: int) -> list[SearchHit]
                 .distinct()
             )
         )
-    ids = by_name | by_village
+    # Treks in a matching trek region ("khumbu", "annapurna region"): area code = trek region
+    areas = {a.code: m for a, m in area_matches(db, forms).values()}
+    region_areas = {a.code: a for a in db.scalars(select(Area))} if areas else {}
+    by_region = (
+        set(
+            db.scalars(select(Trek.id).where(published_treks(), func.lower(Trek.region).in_(areas)))
+        )
+        if areas
+        else set()
+    )
+    ids = by_name | by_village | by_region
     if not ids:
         return []
     treks = db.scalars(
@@ -291,6 +328,9 @@ def search_treks(db: Session, q: str, lang: Lang, limit: int) -> list[SearchHit]
         name = best_match(forms, _name_texts(trek.translations, short))
         if name:
             options.append((name, "name", None))
+        region = trek.region.casefold()
+        if region in areas:
+            options.append((areas[region], "area", None))
         stops = {s.from_place_id: s.from_place for s in trek.stages}
         stops |= {s.to_place_id: s.to_place for s in trek.stages}
         for pid, village in stops.items():
@@ -314,6 +354,7 @@ def search_treks(db: Session, q: str, lang: Lang, limit: int) -> list[SearchHit]
                 region=trek.region,
                 total_days=trek.total_days,
                 via=pick_one(village.translations, lang) if village else None,
+                area=(region_areas[trek.region.casefold()].name(lang) if kind == "area" else None),
             )
         )
     hits.sort(key=lambda h: (-h.score, h.name))

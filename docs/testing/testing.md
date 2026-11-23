@@ -28,7 +28,10 @@ Two kinds of testing. **Step-by-step order, test counts and how to check each ca
    button and the placeholders (BUG-17). They pass on the emulator and on Phone 2.
    Search and recommendations (V2-SR, 2026-11-23): TC-62 to TC-66 were added. TC-62 to TC-65 pass on the
    emulator; TC-66 (admin tags, Nepali labels) is not run yet.
-   Now: **64 Pass, 1 Fail (TC-01, re-test on Phone 2), 1 Not run (TC-66)**.
+   Search by city and trek region (V2-SR-14, 2026-11-23): TC-67 was added and passes on the emulator.
+   Since then a place's search subtitle shows its city or region instead of its district
+   (TC-62 now shows "Temples & Stupas · Kathmandu Valley").
+   Now: **65 Pass, 1 Fail (TC-01, re-test on Phone 2), 1 Not run (TC-66)**.
 
 The **Auto** column names the pytest test that checks the same behaviour through the API, where
 there is one. The manual case still checks the screen.
@@ -134,6 +137,7 @@ and whose interests are culture + religious. Plan: [search-recommendation.md](..
 | TC-64 | Not interested + Undo | Explore → × on the first "Recommended for you" card → Undo | first card | The card goes at once; a bar "… hidden. We will show fewer places like it." with Undo; Undo brings it back; the bar goes after 6 s | Pashupatinath went and did not come back after a reload; Bhaktapur Durbar Square: bar shown, Undo brought it back first in the row | Pass | `test_not_interested_and_undo`, `test_hiding_temples_pushes_them_down` |
 | TC-65 | Variety and place tags | Explore → look at the first two cards → open Bhaktapur Durbar Square | culture + religious user | Not all temples at the top; the place page shows its tags with icons | Pashupatinath Temple (temple) then Bhaktapur Durbar Square (heritage); chips "UNESCO World Heritage", "Architecture", "Local culture", "Good for families" | Pass | `test_top_five_is_not_all_one_kind`, `test_place_tags_in_detail_and_admin` |
 | TC-66 | Admin tags; Nepali labels | Admin → Places → edit a place → Tags; app in नेपाली: Explore reasons, place tags, search "via" line | Phewa Lake | Tags can be added and removed and show in the app; every new label is in Nepali | | Not run | `test_place_tags_in_detail_and_admin` |
+| TC-67 | Search by city and trek region | Search → Places → `pokhara`, open Sarangkot; Places → `kathmandu valley`; Treks → `khumbu` | `pokhara`, `kathmandu valley`, `khumbu` | Pokhara: Phewa Lake, Sarangkot and World Peace Pagoda, each "… · Pokhara"; place page "Pokhara, Kaski, Gandaki"; Kathmandu Valley: all 8 valley sights, Patan and Bhaktapur included; Khumbu: Everest Base Camp Trek | "3 places found", "Lakes · Pokhara", "Viewpoints · Pokhara", "Temples & Stupas · Pokhara"; Sarangkot "Pokhara, Kaski, Gandaki"; "8 places found" from Bhaktapur Durbar Square to Swayambhunath Stupa, each "· Kathmandu Valley"; "1 trek found", Everest Base Camp Trek "Khumbu · 11 days" | Pass | `test_city_search_lists_every_place_in_it`, `test_trek_region_finds_its_treks`, `test_areas_lookup_filter_and_detail` |
 
 ## Bugs found and fixed
 
@@ -171,3 +175,4 @@ The same bugs are in the tracker's **Bugs** tab, with severity, status and the f
 |---|---|---|---|---|
 | BUG-16 | — (after the redesign) | The app opened on a red Render Error: "You are passing an array of styles to a child of `<Slot>`" | The redesign gave the `Pressable` inside `<Link asChild>` an array style or a `({ pressed })` style. Link's Slot throws on arrays in development and drops function styles. **Fix:** a new `PressableLink` (Pressable + `router.push`) replaces every `Link asChild` the redesign touched | High / fixed; passes on Phone 2 |
 | BUG-17 | TC-59, TC-61 | Reported by the user: tapping a field on the login sheet opened the keyboard over the whole form; on Create account the password field and button could end up under the keyboard | Android apps on Expo SDK 58 are edge-to-edge, so the window no longer shrinks for the keyboard. The login sheet's `KeyboardAvoidingView` had no `behavior` on Android, and the register screen had no keyboard handling. **Fix:** `behavior="padding"` on both platforms (Expo's keyboard-handling guide); new `Screen` prop `avoidKeyboard` used on Create account | High / fixed; passes on Phone 2 |
+| BUG-18 | TC-67 | Reported by the user: searching "Kathmandu" showed "0 treks found" and "Nothing found", although 8 places match | The Search screen opens on the Treks tab and showed only that tab; nothing said the Places tab had results. **Fix:** when new results come in and the open tab is empty but the other is not, switch to the other tab (once per result, so tapping the empty tab still works); while searching the tabs show counts ("Places · 8", "Treks · 0") | Medium / fixed; passes on the emulator |

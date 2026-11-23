@@ -87,6 +87,8 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 
 **category** — id (PK), code (unique), icon + **category_translation** (category_id, lang, name)
 
+**area** *(V2-SR-14, migration 0007)* — id (PK), code (unique: `pokhara`, `kathmandu_valley`, `khumbu`, …), name_en, name_ne, other_names (text[], default `{}`: "Lakeside", "पोखरा", …). A city or trek region travellers search for, which is not a district (Pokhara is in Kaski district). For a trek region the code equals `trek.region` in lower case, so a region search also finds its treks. Loaded from `data/areas.csv`; `GET /areas` lists them
+
 **place**
 | Column | Type | Notes |
 |---|---|---|
@@ -95,6 +97,7 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algo
 | latitude, longitude | numeric(9,6) | |
 | altitude_m | int | |
 | district, province | text | |
+| area_id | uuid | FK → area, `ON DELETE SET NULL`, indexed; null = not in a known city or region *(V2-SR-14, migration 0007)* |
 | entry_fee_npr | int | foreign rate; null = free |
 | entry_fee_saarc_npr | int | SAARC rate; null/0 = free *(V2 Phase 2)* |
 | entry_fee_nepali_npr | int | Nepali rate; null/0 = free *(V2 Phase 2)* |
@@ -213,6 +216,7 @@ erDiagram
     TRIP ||--o{ TRIP_STOP : contains
     PLACE ||--o{ TRIP_STOP : visited_in
     CATEGORY ||--o{ PLACE : groups
+    AREA |o--o{ PLACE : contains
     CATEGORY ||--|{ CATEGORY_TRANSLATION : translated_as
     PLACE ||--|{ PLACE_TRANSLATION : translated_as
     PLACE ||--o{ PLACE_ALIAS : known_as
@@ -254,6 +258,7 @@ erDiagram
 - `review` partial unique `(user_id, place_id)` / `(user_id, trek_id)` — one review per user and item
 - `teahouse (place_id)` — teahouses of a village
 - `place_alias` and `place_translation.name` — `pg_trgm` GIN index for fuzzy search
+- `place (area_id)` — all places in a city or trek region (search, `/places?area=`)
 - `trek_stage (trek_id, day_no)` unique
 - `updated_at` on every syncable table — offline delta sync
 - `risk_prediction (user_id, created_at)` — user history

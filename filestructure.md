@@ -30,7 +30,7 @@ backend/
 │   ├── main.py              Creates the FastAPI app, adds every router, loads the active risk model
 │   ├── seed.py              Loads data/ into the database (safe to re-run)
 │   ├── create_admin.py      Creates an admin account (make create-admin)
-│   ├── search_benchmark.py  Search test set (43 queries) → docs/search_quality.md; same cases in pytest
+│   ├── search_benchmark.py  Search test set (51 queries) → docs/search_quality.md; same cases in pytest
 │   ├── recommend_benchmark.py  MMR λ: relevance vs variety → docs/recommend_quality.md
 │   ├── api/                 HTTP endpoints, one file per area
 │   │   ├── auth.py              register, login, Google login, refresh
@@ -64,8 +64,8 @@ backend/
 │   ├── schemas/             Pydantic request/response shapes
 │   ├── core/                config (.env), database session, JWT/bcrypt security, language fallback
 │   └── templates/           shared_trip.html (the public page for a shared trip)
-├── alembic/versions/        Database migrations 0001–0006 (one per phase; 0006 = place tags, name_latin, dismissed_item)
-├── tests/                   pytest: 243 tests, one file per area
+├── alembic/versions/        Database migrations 0001–0007 (one per phase; 0006 = place tags, name_latin, dismissed_item; 0007 = area)
+├── tests/                   pytest: 249 tests, one file per area
 ├── docker/                  init-test-db.sql (creates the test database)
 ├── models/                  Trained .joblib model files (not in git, made by app.ml.train)
 ├── uploads/                 Photos uploaded in the admin panel (not in git)
@@ -126,6 +126,7 @@ data/
 ├── places.csv               69 places: coordinates, altitude, district, fees by nationality, EN/NE text
 ├── treks.json               8 treks with day-by-day stages, permits, EN/NE text
 ├── aliases.csv              Other spellings for search ("punhill", "अन्नपूर्ण")
+├── areas.csv                Cities and trek regions (Pokhara, Khumbu…) and their places, for search
 ├── place_tags.csv           Tags per place (sunrise, pilgrimage, unesco…) for recommendations and the place page
 ├── categories.csv, interests.csv, permits.csv
 ├── budget_rates.csv         Food, room, transport per budget level and region (sourced 2026-11-17)

@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from alembic import command
 from app.core.db import SessionLocal, engine
 from app.models import (
+    Area,
     BudgetRate,
     Category,
     CategoryTranslation,
@@ -176,8 +177,42 @@ def climate_rows(data: Path, places: list[dict[str, str]]) -> dict[str, list[Pla
     return out
 
 
-def seed_places(db: Session, data: Path, categories: dict[str, uuid.UUID]) -> dict[str, dict]:
+def seed_areas(db: Session, data: Path) -> dict[str, uuid.UUID]:
+    """Cities and trek regions (areas.csv). Returns place slug -> area id."""
+    file = data / "areas.csv"
+    place_area: dict[str, uuid.UUID] = {}
+    if not file.exists():
+        return place_area
+    for row in read_csv(file):
+        aid = sid("area", row["code"])
+        db.merge(
+            Area(
+                id=aid,
+                code=row["code"],
+                name_en=row["name_en"],
+                name_ne=row["name_ne"],
+                other_names=[n.strip() for n in row["other_names"].split("|") if n.strip()],
+            )
+        )
+        for slug in row["places"].split():
+            if slug in place_area:
+                raise ValueError(f"areas.csv: {slug} is in two areas")
+            place_area[slug] = aid
+    db.flush()
+    return place_area
+
+
+def seed_places(
+    db: Session,
+    data: Path,
+    categories: dict[str, uuid.UUID],
+    areas: dict[str, uuid.UUID] | None = None,
+) -> dict[str, dict]:
+    areas = areas or {}
     places = read_csv(data / "places.csv")
+    unknown_places = set(areas) - {r["slug"] for r in places}
+    if unknown_places:
+        raise ValueError(f"areas.csv: unknown places {sorted(unknown_places)}")
     aliases = read_csv(data / "aliases.csv")
     photos = read_csv(data / "photos.csv") if (data / "photos.csv").exists() else []
     tags_file = data / "place_tags.csv"
@@ -203,6 +238,7 @@ def seed_places(db: Session, data: Path, categories: dict[str, uuid.UUID]) -> di
                 altitude_m=opt_int(row["altitude_m"]),
                 district=row["district"] or None,
                 province=row["province"] or None,
+                area_id=areas.get(row["slug"]),
                 entry_fee_npr=opt_int(row["entry_fee_npr"]),
                 entry_fee_saarc_npr=opt_int(row.get("entry_fee_saarc_npr", "")),
                 entry_fee_nepali_npr=opt_int(row.get("entry_fee_nepali_npr", "")),
@@ -447,7 +483,8 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         categories = seed_categories(db, data)
         interests = seed_interests(db, data)
         permits = seed_permits(db, data)
-        places = seed_places(db, data, categories)
+        areas = seed_areas(db, data)
+        places = seed_places(db, data, categories, areas)
         treks = seed_treks(db, data, places, permits)
         samples = seed_training_samples(db, data)
         budget_rates = seed_budget_rates(db, data)
@@ -459,6 +496,7 @@ def run(data: Path, migrate: bool = True) -> dict[str, int]:
         "interests": interests,
         "permits": len(permits),
         "places": len(places),
+        "places_with_area": len(areas),
         "treks": treks,
         "training_samples": samples,
         "budget_rates": budget_rates,

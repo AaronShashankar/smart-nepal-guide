@@ -1,7 +1,7 @@
 # Search and recommendations: from college project to real product
 
-**Date:** 2026-11-23 · **Status:** Stage 1 core built (V2-SR-01 … V2-SR-10); 04, 07 and 09 wait for a last manual check; the rest is planned.
-**Tracker:** rows `V2-SR-00` … `V2-SR-13` and `V3-SR-01` … `V3-SR-12` in the
+**Date:** 2026-11-23 · **Status:** Stage 1 core built (V2-SR-01 … V2-SR-10, V2-SR-14); 04, 07 and 09 wait for a last manual check; the rest is planned.
+**Tracker:** rows `V2-SR-00` … `V2-SR-14` and `V3-SR-01` … `V3-SR-12` in the
 [Bato Project Tracker](https://docs.google.com/spreadsheets/d/1LWie4PGyiRj2xzo-zmTeK6Zd2-Rd_LAcVR2xOdkE33I/edit).
 **How the algorithms work:** [algorithm.md → V2-SR](../design/algorithm.md#v2-sr-better-search-and-recommendations).
 **Measured results:** [search_quality.md](../search_quality.md), [recommend_quality.md](../recommend_quality.md).
@@ -37,20 +37,21 @@ active users, and a search engine like Meilisearch is not needed for 69 places a
 | V2-SR-07 | **Place tags** | 12 tags (sunrise, mountain views, hiking, boating, wildlife, pilgrimage, UNESCO, architecture, local culture, family, high altitude, few crowds) in `data/place_tags.csv`, editable in the admin panel, shown as chips on the place page, part of the recommendation vectors. | Built; TC-66 (admin form, Nepali labels) left |
 | V2-SR-08 | **Roman ↔ Devanagari** | Our own Devanagari → Latin transliteration with schwa deletion; `name_latin` saved for every name; a Devanagari query is also searched in Latin letters. | Done |
 | V2-SR-09 | **Search more than names** | Villages find the treks through them ("namche" → EBC Trek, "Passes through Namche Bazaar"); districts list their places; category words (temple, lake) list that category; trek initials ("ebc", "abc"); word-by-word matching for extra words in Nepali names. | Built; Nepali subtitles check left (TC-66) |
-| V2-SR-10 | **Search test set** | 43 real queries with the expected answer; hit@1, hit@3, MRR. Runs in pytest; `python -m app.search_benchmark` writes the report. | Done |
+| V2-SR-10 | **Search test set** | 51 real queries with the expected answer (43 at first, 8 city/region cases added with V2-SR-14); hit@1, hit@3, MRR. Runs in pytest; `python -m app.search_benchmark` writes the report. | Done |
+| V2-SR-14 | **Search by city and trek region** | Asked for after "pokhara" found only Phewa Lake (Pokhara is a city in Kaski district) and "kathmandu" missed Patan and Bhaktapur. New `area` table from `data/areas.csv`: 6 areas (Kathmandu Valley, Pokhara, Everest/Khumbu, Annapurna, Langtang, Manaslu) with English, Nepali and other names; 63 of 69 places belong to one. A match on an area name (× 0.88) lists every place in it; a trek region also finds its treks ("khumbu" → EBC Trek). Shown in the app ("Viewpoints · Pokhara", place page "Pokhara, Kaski, Gandaki"), editable per place in the admin panel, `GET /areas`, `/places?area=`. Migration 0007. | Done (TC-67) |
 | V2-SR-11 | Search ranking boosts | Exact and starts-with matches, rating, distance from the user. | To do |
 | V2-SR-12 | Text + filters together | "temple" + district Kathmandu in one request; category chips on the Places tab. | To do |
 | V2-SR-13 | Simple phrases | "easy trek 5 days", "temples in Bhaktapur" → filters from known words. | To do |
 
 ### Results we measured
 
-**Search** (same 43 queries, [search_quality.md](../search_quality.md)):
+**Search** (same 51 queries, [search_quality.md](../search_quality.md); "before" = the old search code run on the same queries):
 
 | | Before V2-SR | After |
 |---|---|---|
-| Expected item first (hit@1) | 72% | **92%** |
-| Expected item in the top 3 (hit@3) | 72% | **100%** |
-| MRR | 0.725 | **0.958** |
+| Expected item first (hit@1) | 60% | **83%** |
+| Expected item in the top 3 (hit@3) | 60% | **100%** |
+| MRR | 0.604 | **0.906** |
 | Made-up words that return nothing | 67% | **100%** |
 
 **Recommendations** (6 typical new users, top 10, [recommend_quality.md](../recommend_quality.md)):
@@ -88,4 +89,6 @@ and costs only about 2% of relevance; λ = 0.6 costs over 6%.
 - The risk factor uses the same model as the risk screen: it is only as good as that model,
   which is still trained mostly on rule-labelled rows (see [ml/](../ml/)).
 - Nearby bonus without GPS uses the latest trip, which may be an old one.
-- The search test set has 43 queries written by us. Real search logs (V3-SR-01) should replace it.
+- hit@1 is lower than for the first 43 queries (92%) because a city query ("pokhara") has several right answers: only one of them can be first, so the city cases are judged on hit@3.
+- Places in one city or region are listed in name order; nothing yet says which is the most important (V2-SR-11 could use ratings).
+- The search test set has 51 queries written by us. Real search logs (V3-SR-01) should replace it.

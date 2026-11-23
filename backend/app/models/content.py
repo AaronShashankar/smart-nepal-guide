@@ -53,6 +53,27 @@ class CategoryTranslation(Base):
 
 
 # -------------------------------------------------------------------- places
+class Area(Base):
+    """A city or trekking region a traveller would search for (V2-SR-14): "Pokhara",
+    "Kathmandu Valley", "Everest region". Different from the district: Pokhara is in Kaski
+    district, but so are 13 trek villages far from the city. For a trek region the code is the
+    trek's `region` in lower case (khumbu, annapurna…), so searching it also finds those treks."""
+
+    __tablename__ = "area"
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    code: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    name_en: Mapped[str] = mapped_column(Text, nullable=False)
+    name_ne: Mapped[str] = mapped_column(Text, nullable=False)
+    # What people type: "Lakeside", "Khumbu", "पोखरा"
+    other_names: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, default=list, server_default="{}"
+    )
+
+    def name(self, lang: Lang) -> str:
+        return self.name_ne if lang == Lang.ne else self.name_en
+
+
 class Place(Base):
     __tablename__ = "place"
     __table_args__ = (Index("ix_place_lat_lng", "latitude", "longitude"),)
@@ -66,6 +87,9 @@ class Place(Base):
     altitude_m: Mapped[int | None] = mapped_column(Integer)
     district: Mapped[str | None] = mapped_column(Text)
     province: Mapped[str | None] = mapped_column(Text)
+    area_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("area.id", ondelete="SET NULL"), index=True
+    )
     # Entry fees like permits: foreign / SAARC / Nepali rate; null = free for that group.
     entry_fee_npr: Mapped[int | None] = mapped_column(Integer)  # foreign rate
     entry_fee_saarc_npr: Mapped[int | None] = mapped_column(Integer)
@@ -79,6 +103,7 @@ class Place(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     category: Mapped[Category] = relationship(lazy="joined")
+    area: Mapped[Area | None] = relationship(lazy="joined")
     translations: Mapped[list["PlaceTranslation"]] = relationship(
         cascade="all, delete-orphan", lazy="selectin"
     )

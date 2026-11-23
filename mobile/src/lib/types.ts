@@ -89,6 +89,8 @@ export interface PlaceDetail extends PlaceSummary {
   nearby: { id: string; name: string; category: Category; distance_km: number }[];
   /** Codes from PLACE_TAGS (backend enums.py), shown as chips */
   tags: string[];
+  /** City or trek region ("Pokhara", "Everest region"), in the app language */
+  area: string | null;
 }
 
 export interface PlaceRef {
@@ -135,12 +137,13 @@ export interface SearchHit {
   score: number;
   matched: string;
   /** What matched: the item's own name, its district, its category or a village on the trek */
-  match: 'name' | 'district' | 'category' | 'via';
+  match: 'name' | 'district' | 'area' | 'category' | 'via';
   category: Category | null; // places
   district: string | null; // places
   region: string | null; // treks
   total_days: number | null; // treks
   via: string | null; // treks found through a village they pass
+  area: string | null; // city or trek region (places; treks found through their region)
 }
 
 export interface SearchResult {

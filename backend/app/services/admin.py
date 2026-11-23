@@ -8,6 +8,7 @@ from sqlalchemy import delete, func, inspect, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
+    Area,
     Category,
     CategoryTranslation,
     Permit,
@@ -111,6 +112,7 @@ def place_out(p: Place) -> PlaceAdminOut:
         altitude_m=p.altitude_m,
         district=p.district,
         province=p.province,
+        area_code=p.area.code if p.area else None,
         entry_fee_npr=p.entry_fee_npr,
         entry_fee_saarc_npr=p.entry_fee_saarc_npr,
         entry_fee_nepali_npr=p.entry_fee_nepali_npr,
@@ -142,8 +144,14 @@ def save_place(db: Session, p: Place, body: PlaceAdminIn, admin: User) -> None:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT, "Climate needs exactly one row per month"
         )
+    area = None
+    if body.area_code:
+        area = db.scalar(select(Area).where(Area.code == body.area_code))
+        if area is None:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Unknown area")
     p.category_id = category.id
     p.category = category
+    p.area_id, p.area = (area.id if area else None), area
     p.latitude, p.longitude = Decimal(str(body.latitude)), Decimal(str(body.longitude))
     p.altitude_m, p.entry_fee_npr = body.altitude_m, body.entry_fee_npr
     p.entry_fee_saarc_npr, p.entry_fee_nepali_npr = (

@@ -26,7 +26,7 @@ OUT = Path(__file__).resolve().parents[2] / "docs" / "search_quality.md"
 LIMIT = 10
 # The same cases run once against the search code before V2 (plain Levenshtein on names only,
 # MIN_SCORE 0.6, no transliteration / district / category / village / initials), 2026-11-23.
-BEFORE_V2 = {"hit@1": 0.72, "hit@3": 0.72, "mrr": 0.725, "no_result_ok": 0.67}
+BEFORE_V2 = {"hit@1": 0.604, "hit@3": 0.604, "mrr": 0.604, "no_result_ok": 0.667}  # all 51 cases
 
 
 @dataclass(frozen=True)
@@ -85,6 +85,15 @@ CASES = [
     Case("Category", "viewpoint", "place", "Annapurna Base Camp"),  # ties: by name for now
     # Words that are not in the data: nothing should come back
     Case("No result", "zzqxw", "none"),
+    # Cities and trek regions (areas, V2-SR-14): a place in the city, a trek in the region
+    Case("City / area", "pokhara", "place", "Sarangkot"),
+    Case("City / area", "pokhara", "place", "World Peace Pagoda"),
+    Case("City / area", "पोखरा", "place", "Sarangkot"),
+    Case("City / area", "kathmandu valley", "place", "Changu Narayan Temple"),
+    Case("City / area", "khumbu", "trek", "Everest Base Camp Trek"),
+    Case("City / area", "everest region", "trek", "Everest Base Camp Trek"),
+    Case("City / area", "langtang region", "trek", "Langtang Valley Trek"),
+    Case("City / area", "manaslu region", "trek", "Manaslu Circuit Trek"),
     Case("No result", "thamel", "none"),
     Case("No result", "london", "none"),
 ]

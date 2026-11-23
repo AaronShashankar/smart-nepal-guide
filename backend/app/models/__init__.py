@@ -3,6 +3,7 @@
 from app.models.base import Base
 from app.models.community import BudgetRate, Teahouse, TeahouseTranslation
 from app.models.content import (
+    Area,
     Category,
     CategoryTranslation,
     Permit,
@@ -26,6 +27,7 @@ from app.models.user import Interest, InterestTranslation, TravellerProfile, Use
 __all__ = [
     "Base",
     "BudgetRate",
+    "Area",
     "Category",
     "CategoryTranslation",
     "DismissedItem",

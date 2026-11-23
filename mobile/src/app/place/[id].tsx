@@ -86,7 +86,12 @@ export default function PlaceDetailScreen() {
     );
   }
   const p = place.data;
-  const where = [p.district && districtName(p.district), p.province && provinceName(p.province)]
+  // "Pokhara, Kaski, Gandaki": the city or trek region first, it is what travellers know
+  const where = [
+    p.area,
+    p.district && districtName(p.district),
+    p.province && provinceName(p.province),
+  ]
     .filter(Boolean)
     .join(', ');
   const fees = [

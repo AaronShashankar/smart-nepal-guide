@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { api } from './api';
 import type {
+  Area,
   BudgetRate,
   Category,
   CategoryIn,
@@ -27,6 +29,16 @@ const get = async <T>(url: string, params?: object) => (await api.get<T>(url, { 
 
 export const useStats = () =>
   useQuery({ queryKey: ['stats'], queryFn: () => get<Stats>('/admin/stats') });
+
+/** Cities and trek regions for the place form (V2-SR-14) */
+export const useAreas = () => {
+  const { i18n } = useTranslation();
+  return useQuery({
+    queryKey: ['areas', i18n.language],
+    queryFn: () => get<Area[]>('/areas'),
+    staleTime: Infinity,
+  });
+};
 
 export const useCategories = () =>
   useQuery({ queryKey: ['categories'], queryFn: () => get<Category[]>('/admin/categories') });

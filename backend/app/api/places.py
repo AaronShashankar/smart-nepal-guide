@@ -10,7 +10,7 @@ from app.algorithms.geo_box import bounding_box
 from app.algorithms.haversine import haversine_km, nearest
 from app.core.db import get_db
 from app.core.i18n import get_lang, pick, pick_one
-from app.models import Category, Place, PlaceAlias, PlaceTranslation, Review, Teahouse
+from app.models import Area, Category, Place, PlaceAlias, PlaceTranslation, Review, Teahouse
 from app.models.enums import Lang
 from app.schemas.community import NearPlaceOut, TeahouseOut
 from app.schemas.content import NearbyPlace, Page, PhotoOut, PlaceDetail, PlaceSummary
@@ -36,6 +36,7 @@ def list_places(
     category: str | None = Query(None, description="category code, e.g. temple"),
     district: str | None = None,
     province: str | None = None,
+    area: str | None = Query(None, description="area code, e.g. pokhara, kathmandu_valley"),
     q: str | None = Query(None, min_length=1, max_length=100, description="name contains"),
     min_lat: float | None = Query(None, ge=-90, le=90),
     min_lng: float | None = Query(None, ge=-180, le=180),
@@ -58,6 +59,8 @@ def list_places(
         stmt = stmt.where(func.lower(Place.district) == district.lower())
     if province:
         stmt = stmt.where(func.lower(Place.province) == province.lower())
+    if area:
+        stmt = stmt.where(Place.area_id.in_(select(Area.id).where(Area.code == area)))
     if q:
         pattern = f"%{q.replace('%', r'\%').replace('_', r'\_')}%"
         name_hit = select(PlaceTranslation.place_id).where(PlaceTranslation.name.ilike(pattern))
@@ -212,6 +215,7 @@ def get_place(
         entry_fee_saarc_npr=place.entry_fee_saarc_npr,
         entry_fee_nepali_npr=place.entry_fee_nepali_npr,
         tags=list(place.tags or []),
+        area=place.area.name(lang) if place.area else None,
         description=text["description"],
         how_to_reach=text["how_to_reach"],
         photos=[PhotoOut(url=p.url, sort_order=p.sort_order) for p in place.photos],

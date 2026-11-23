@@ -168,7 +168,7 @@ screen is shorter.
 | 2 | TC-60 | Tap the eye in the password field, then tap it again (login and Create account) | Password shown with a crossed eye, then hidden again; the keyboard stays open |
 | 3 | TC-61 | Create account → Full name, Next, Email, Next; scroll with the keyboard open | Placeholders in every field (EN and NE); Next moves through the fields; the page scrolls to the Create account button |
 
-## Session I — Search and recommendations (5 cases, Phone 1 + laptop browser)
+## Session I — Search and recommendations (6 cases, Phone 1 + laptop browser)
 
 Use an account with a complete profile and interests culture + religious. For TC-66 also start the admin
 panel (`cd admin && npm run dev`) and log in as admin.
@@ -180,6 +180,7 @@ panel (`cd admin && npm run dev`) and log in as admin.
 | 3 | TC-64 | Explore → × on the first recommended card → Undo | Card goes at once; Undo bar; Undo brings it back |
 | 4 | TC-65 | Explore → first two cards; open Bhaktapur Durbar Square | Two kinds of place at the top; tag chips with icons |
 | 5 | TC-66 | Admin → edit Phewa Lake → add a tag → save; app in नेपाली → Explore, place page, search `namche` | Tag shows in the app; reasons, tags and "हुँदै जान्छ" in Nepali |
+| 6 | TC-67 | Places → `pokhara`, open Sarangkot; Places → `kathmandu valley`; Treks → `khumbu`. In the admin, edit Sarangkot: "City or trek region" shows Pokhara | 3 Pokhara places, "· Pokhara"; place page "Pokhara, Kaski, Gandaki"; 8 valley places; EBC Trek |
 
 ---
 

@@ -72,12 +72,12 @@ uv run ruff check . && uv run ruff format --check .
 | POST | `/auth/refresh` | new token pair |
 | GET / PATCH | `/me` | name, phone, preferred language |
 | GET / PUT | `/me/profile` | traveller profile + interests |
-| GET | `/categories`, `/interests` | localised names |
+| GET | `/categories`, `/interests`, `/areas` | localised names (`/areas`: cities and trek regions, V2-SR-14) |
 | GET | `/places` | `category`, `district`, `province`, `q`, map bounding box (`min_lat`, `min_lng`, `max_lat`, `max_lng`), `page`, `page_size` |
 | GET | `/places/{id}` | photos, best months (weighted scoring), 5 nearest places (Haversine) |
 | GET | `/treks`, `/treks/regions` | `region`, `min_days`, `max_days`, `difficulty` |
 | GET | `/treks/{id}` | overview, permits, start/end place derived from first/last stage |
-| GET | `/search?q=&limit=` | pg_trgm candidates (names, Latin spelling of Nepali names, aliases, districts, categories, villages on treks, trek initials) ranked by our own Levenshtein. Each hit says how it matched (`match`: name / district / category / via) |
+| GET | `/search?q=&limit=` | pg_trgm candidates (names, Latin spelling of Nepali names, aliases, districts, cities and trek regions, categories, villages on treks, trek initials) ranked by our own Levenshtein. Each hit says how it matched (`match`: name / district / area / category / via) and its `area` ("Pokhara") |
 | GET | `/treks/{id}/stages` | **Phase 2.** Day-by-day itinerary (sleeping altitude, gain, km, hours, highest point, rest days) + summary computed from it (max daily gain…) |
 | GET | `/treks/{id}/acclimatisation` | **Phase 2.** Per-day `ok` / `caution` / `danger`, reason codes, suggested rest days |
 | POST | `/predict-risk` | **Phase 2.** `{trek_id, month}` → `{level, confidence, reasons[], acclimatisation, input}`; needs a profile with date of birth, fitness and experience (else 409 `PROFILE_INCOMPLETE`); saved to history |
@@ -107,7 +107,7 @@ use the matching `*_translation` row, and fall back to English for a missing row
 - Haversine + nearest places: [backend/app/algorithms/haversine.py](backend/app/algorithms/haversine.py)
 - Levenshtein edit distance: [backend/app/algorithms/levenshtein.py](backend/app/algorithms/levenshtein.py)
 - Best time to visit (weighted scoring): [backend/app/algorithms/best_time.py](backend/app/algorithms/best_time.py)
-- Fuzzy search (trigram candidates → Levenshtein ranking, districts, categories, villages, initials): [backend/app/services/search.py](backend/app/services/search.py); test set: [search_benchmark.py](backend/app/search_benchmark.py) → [docs/search_quality.md](docs/search_quality.md)
+- Fuzzy search (trigram candidates → Levenshtein ranking, districts, cities and trek regions, categories, villages, initials): [backend/app/services/search.py](backend/app/services/search.py); test set: [search_benchmark.py](backend/app/search_benchmark.py) → [docs/search_quality.md](docs/search_quality.md)
 - Devanagari → Latin transliteration: [backend/app/algorithms/transliterate.py](backend/app/algorithms/transliterate.py)
 - Recommendations (cosine, learning from feedback, risk-aware, nearby, MMR): [backend/app/services/recommend.py](backend/app/services/recommend.py); λ benchmark: [recommend_benchmark.py](backend/app/recommend_benchmark.py) → [docs/recommend_quality.md](docs/recommend_quality.md)
 - Acclimatisation checker (rule-based): [backend/app/algorithms/acclimatisation.py](backend/app/algorithms/acclimatisation.py)

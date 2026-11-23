@@ -56,6 +56,7 @@ class PlaceAdminIn(BaseModel):
     altitude_m: int | None = Field(default=None, ge=0, le=8849)
     district: str | None = None
     province: str | None = None
+    area_code: str | None = Field(default=None, description="city or trek region (GET /areas)")
     entry_fee_npr: int | None = Field(default=None, ge=0, description="foreign rate")
     entry_fee_saarc_npr: int | None = Field(default=None, ge=0)
     entry_fee_nepali_npr: int | None = Field(default=None, ge=0)

@@ -51,7 +51,7 @@ Drafted 2026-11-05. See [feature.md](feature.md) for the feature list (all featu
 | Recommended for you | **Content-based filtering**: turn the user's preferences and each trek into vectors, compare them with **cosine similarity** `cos θ = (A·B)/(‖A‖‖B‖)`, and rank the results. V2-SR adds learning from feedback, the risk model, a nearby bonus and **MMR** for variety ([below](#v2-sr-better-search-and-recommendations)) |
 | Safer alternative | **KNN**: find the K treks most similar to the one chosen, keep only those predicted as a lower risk, and show the closest |
 | Best time to visit | **Weighted scoring** of each month from average rainfall, temperature and visibility |
-| Search with typos ("Anapurna") | **Levenshtein edit distance** for fuzzy matching; V2-SR adds **Devanagari → Latin transliteration**, word-by-word matching and search by village, district and category ([below](#v2-sr-better-search-and-recommendations)) |
+| Search with typos ("Anapurna") | **Levenshtein edit distance** for fuzzy matching; V2-SR adds **Devanagari → Latin transliteration**, word-by-word matching and search by village, district, city or trek region, and category ([below](#v2-sr-better-search-and-recommendations)) |
 | Near me | **Haversine** distance + sorting (a bounding box first, to make it fast) |
 | Review ranking | **Bayesian average**, so a trek with one 5★ review doesn't beat one with a hundred 4.5★ reviews |
 | Packing checklist | **Rule-based expert system** (e.g. altitude above 4,000 m or winter → down jacket) |
@@ -135,10 +135,21 @@ Word similarity matches each query word with its best word in the name and avera
 length (here 1.0). Score = max(plain, 0.95 × word similarity) → 0.95.
 
 **3. Search over more than names** ([search.py](../../backend/app/services/search.py)).
-Candidates also come from districts (score × 0.9), categories (× 0.85), villages on a trek (× 0.95,
-shown as "Passes through …") and trek initials ("ebc"). Rules from the test set: anything below 0.7 is
-dropped, and a query shorter than 5 letters needs 0.85 ("lake" must not find "Larke"). Result on 43
-queries: hit@1 72% → **92%**, hit@3 72% → **100%**, MRR 0.725 → **0.958**.
+Candidates also come from districts (score × 0.9), cities and trek regions (× 0.88, below), categories
+(× 0.85), villages on a trek (× 0.95, shown as "Passes through …") and trek initials ("ebc"). Rules from
+the test set: anything below 0.7 is dropped, and a query shorter than 5 letters needs 0.85 ("lake" must
+not find "Larke"). Result on 51 queries: hit@1 60% → **83%**, hit@3 60% → **100%**, MRR 0.604 →
+**0.906** ("before" = the old code run on the same 51 queries).
+
+*Cities and trek regions (V2-SR-14).* A district is not what a traveller types: Pokhara is a city in
+Kaski district, Patan is in Lalitpur, not Kathmandu. So the `area` table ([data/areas.csv](../../data/areas.csv))
+lists 6 areas, each with an English name, a Nepali name and other names (Pokhara, Lakeside, पोखरा …),
+and each place may belong to one area. The query is compared with every area name by the same
+Levenshtein score (there are few areas, so this is done in Python); a match × 0.88 is given to every
+place in that area. A trek region ("Khumbu", "Langtang") uses the trek's `region` as its code, so the
+same match also finds the treks there. 0.88 is just below the district weight, so "kathmandu" lists
+the Kathmandu district places first, then Patan and Bhaktapur. The app shows the area under each hit
+("Viewpoints · Pokhara").
 
 **4. Recommendations, step by step** ([recommend.py](../../backend/app/services/recommend.py)).
 

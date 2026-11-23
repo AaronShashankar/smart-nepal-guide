@@ -26,11 +26,14 @@ const DURATIONS: Record<Duration, Pick<TrekFilters, 'min_days' | 'max_days'>> = 
 };
 const LEVELS: RiskLevel[] = ['easy', 'moderate', 'hard', 'risky'];
 
-/** "Temple · Kathmandu" for places, "Khumbu · 12 days" for treks, from the structured fields. */
+/**
+ * "Viewpoints · Pokhara" for places (the city or trek region, else the district),
+ * "Khumbu · 12 days" for treks, from the structured fields.
+ */
 function hitSubtitle(hit: SearchHit): string | null {
   const parts =
     hit.type === 'place'
-      ? [hit.category?.name, hit.district && districtName(hit.district)]
+      ? [hit.category?.name, hit.area ?? (hit.district && districtName(hit.district))]
       : [hit.region && regionName(hit.region), hit.total_days != null && days(hit.total_days)];
   return parts.filter(Boolean).join(' · ') || hit.subtitle;
 }
@@ -102,6 +105,20 @@ export default function SearchScreen() {
 
   const q = query.trim();
   const searching = q.length >= 2;
+
+  // "kathmandu" on the Treks tab found nothing while 8 places were one tap away: when new
+  // results come in and the open tab is empty but the other is not, switch to the other.
+  const [seen, setSeen] = useState<object | null>(null);
+  if (searching && search.data && !search.isPlaceholderData && search.data !== seen) {
+    setSeen(search.data);
+    const other: Tab = tab === 'places' ? 'treks' : 'places';
+    if (search.data[tab].length === 0 && search.data[other].length > 0) setTab(other);
+  }
+  // While searching, each tab shows how many it found: "Places · 8", "Treks · 0".
+  const tabLabel = (which: Tab) =>
+    searching && search.data
+      ? `${t(`search.${which}`)} · ${formatNumber(search.data[which].length)}`
+      : t(`search.${which}`);
   const hits = search.data ? (tab === 'places' ? search.data.places : search.data.treks) : [];
   // The fuzzy search may match a different spelling ("punhill" -> "Poon Hill"): say which.
   const top = hits[0];
@@ -158,8 +175,8 @@ export default function SearchScreen() {
         value={tab}
         onChange={setTab}
         options={[
-          { value: 'places', label: t('search.places') },
-          { value: 'treks', label: t('search.treks') },
+          { value: 'places', label: tabLabel('places') },
+          { value: 'treks', label: tabLabel('treks') },
         ]}
       />
 

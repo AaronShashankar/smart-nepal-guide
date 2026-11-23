@@ -1,30 +1,35 @@
 // Mirrors backend/app/schemas/admin.py
 
-export type RiskLevel = "easy" | "moderate" | "hard" | "risky";
-export const RISK_LEVELS: RiskLevel[] = ["easy", "moderate", "hard", "risky"];
+export type RiskLevel = 'easy' | 'moderate' | 'hard' | 'risky';
+export const RISK_LEVELS: RiskLevel[] = ['easy', 'moderate', 'hard', 'risky'];
 /** Same list and order as PLACE_TAGS in backend/app/models/enums.py */
 export const PLACE_TAGS = [
-  "sunrise",
-  "mountain_views",
-  "hiking",
-  "boating",
-  "wildlife",
-  "pilgrimage",
-  "unesco",
-  "architecture",
-  "local_culture",
-  "family",
-  "high_altitude",
-  "few_crowds",
+  'sunrise',
+  'mountain_views',
+  'hiking',
+  'boating',
+  'wildlife',
+  'pilgrimage',
+  'unesco',
+  'architecture',
+  'local_culture',
+  'family',
+  'high_altitude',
+  'few_crowds',
 ] as const;
+/** A city or trek region (GET /areas), V2-SR-14 */
+export interface Area {
+  code: string;
+  name: string;
+}
 // Same colours as the mobile app's difficulty badges.
 export const LEVEL_COLORS: Record<RiskLevel, string> = {
-  easy: "#2E7D32",
-  moderate: "#9A7B00",
-  hard: "#D9480F",
-  risky: "#B3261E",
+  easy: '#2E7D32',
+  moderate: '#9A7B00',
+  hard: '#D9480F',
+  risky: '#B3261E',
 };
-export type ReviewStatus = "visible" | "hidden";
+export type ReviewStatus = 'visible' | 'hidden';
 
 export interface Page<T> {
   items: T[];
@@ -79,6 +84,7 @@ export interface PlaceIn {
   ne: PlaceText;
   aliases: string[];
   tags: string[];
+  area_code: string | null;
   climate: ClimateRow[];
 }
 export interface Photo {
@@ -165,7 +171,7 @@ export interface UserRow {
   id: string;
   email: string;
   full_name: string | null;
-  role: "traveller" | "admin";
+  role: 'traveller' | 'admin';
   auth_provider: string;
   is_blocked: boolean;
   created_at: string;
@@ -176,18 +182,18 @@ export interface UserRow {
 export interface ReviewRow {
   id: string;
   user_email: string;
-  target_type: "place" | "trek";
+  target_type: 'place' | 'trek';
   target_name: string;
   rating: number;
   comment: string | null;
-  lang: "en" | "ne";
+  lang: 'en' | 'ne';
   status: ReviewStatus;
   created_at: string;
 }
 
 // ------------------------------------------------------------- V2 Phase 2
 
-export type BudgetLevel = "low" | "medium" | "high";
+export type BudgetLevel = 'low' | 'medium' | 'high';
 
 export interface BudgetRate {
   budget_level: BudgetLevel;

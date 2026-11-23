@@ -36,14 +36,14 @@ on the laptop's network), and **features that were planned but not built yet**
 
 | # | Feature | Score | In one line |
 |---|---|---|---|
-| 1 | Search | **9.5** | Trigram + our own Levenshtein, transliteration, word-by-word, villages → treks, districts, categories, initials; measured: hit@1 92%, MRR 0.958 |
+| 1 | Search | **9.5** | Trigram + our own Levenshtein, transliteration, word-by-word, villages → treks, districts, categories, initials; cities and trek regions ("pokhara" lists all 3 sights); measured on 51 queries: hit@1 83%, hit@3 100%, MRR 0.906 |
 | 2 | Weather forecast | **9** | Cache-aside with a stale copy kept as a backup; keeps working when Redis or Open-Meteo is down |
 | 3 | "Why this rating?" reasons | **9** | Every reason shown is true for this user and comes from the model's own decision paths |
 | 4 | Itinerary + acclimatisation checker | **8.5** | Rules from WMS / CDC guidance, rest-day suggestions, well tested |
 | 5 | Altitude profile chart | **8.5** | Clear chart, fast climbs coloured, checked in both languages |
 | 6 | Reviews and ratings | **8.5** | Bayesian average, one review per user, moderation survives edits |
 | 7 | Share a trip | **8.5** | Secure token, works without login, a web page for people without the app |
-| 8 | Testing and quality checks | **8.5** | 243 backend tests, 66 manual cases, search test set, bug log; no automated tests for the app or admin |
+| 8 | Testing and quality checks | **8.5** | 249 backend tests, 67 manual cases, search test set, bug log; no automated tests for the app or admin |
 | 9 | Recommendations | **8.5** | Cosine with tags; learns from reviews, trips and Not interested; risk-aware; nearby bonus; MMR variety (measured); weights still hand-set, no real users yet |
 | 10 | AI risk predictor | **8** | Excellent from-scratch forest; but 95% of the training data comes from our own rule |
 | 11 | Explore, place and trek pages | **8** | Rich pages, 63 of 69 places have photos; treks have none |
@@ -125,8 +125,11 @@ model feature (this needs new training data).
 - *Update 2026-11-23 (V2-SR-08 … 10, score 9 → 9.5):* our own Devanagari → Latin transliteration
   (every name gets a saved `name_latin`), word-by-word matching, villages find the treks through
   them, districts and categories list their places, trek initials ("ebc"). A 43-query test set
-  runs in pytest: right answer first 72% → 92%, MRR 0.725 → 0.958
-  ([search_quality.md](search_quality.md)).
+  runs in pytest ([search_quality.md](search_quality.md)).
+- *Update 2026-11-23 (V2-SR-14):* search by city and trek region. "pokhara" found only Phewa Lake
+  (Pokhara is a city in Kaski district, not a district); now it lists all 3 Pokhara sights,
+  "kathmandu valley" all 8 valley sights, "khumbu" the EBC Trek. With 8 city cases the test set is
+  51 queries: right answer first 60% → 83%, in the top 3 60% → 100%, MRR 0.604 → 0.906.
 
 **What holds it back:** the test set is written by us, not taken from real searches; text and
 filters can't be combined in one request; a fuzzy alias can still sneak in ("bhaktapur" also
