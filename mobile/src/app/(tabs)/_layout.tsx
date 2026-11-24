@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { FloatingTabBar } from '@/components/Layout';
 import { markProfilePromptShown, profilePromptShown } from '@/lib/profilePrompt';
 import { useMe } from '@/lib/queries';
+import { useSafetySync } from '@/lib/useSafetySync';
 import { colors } from '@/theme';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
   const me = useMe();
+  useSafetySync(); // contacts kept on the phone for SOS; queued safety records sent when online
 
   // New users (e.g. first Google sign-in) are asked to fill in their profile once.
   useEffect(() => {

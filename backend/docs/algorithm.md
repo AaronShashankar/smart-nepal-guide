@@ -40,9 +40,67 @@ Drafted 2026-11-05. See [feature.md](../../docs/design/feature.md) for the featu
 - Output per day: ✅ ok / ⚠️ caution / ❌ add a rest day. An itinerary passes when no day is ❌ (a standard EBC itinerary passes with cautions).
 
 ### 5. Altitude Sickness Symptom Checker: Lake Louise Score
-- Standard scoring for acute mountain sickness: headache, nausea, fatigue and dizziness each scored 0–3.
-- A total of 3 or more that includes a headache means acute mountain sickness is likely. Severe symptoms → "Descend now".
-- Show a disclaimer: "Not medical advice."
+*Built in V2 Phase 3 (`V2-P3-03`): `backend/app/algorithms/lake_louise.py` and the same function in
+`mobile/src/lib/lakeLouise.ts`, so the check works with no internet.*
+Source: Roach RC et al., *"The 2018 Lake Louise Acute Mountain Sickness Score"*, High Altitude Medicine
+& Biology 19(1), 2018.
+
+**Input.** Four symptoms, each scored 0–3 with the official wording (0 none, 1 mild, 2 moderate,
+3 severe): headache, gastrointestinal (nausea / vomiting), fatigue / weakness, dizziness /
+light-headedness. Plus three **red flags**, ticked separately: confusion or unsteady walking (signs of
+HACE), breathless at rest or a wet cough (signs of HAPE), and symptoms getting worse after a rest day.
+
+**Step 1: score.** Total = headache + gi + fatigue + dizziness (0–12).
+
+**Step 2: severity (the 2018 definition).** AMS is likely when the **headache is at least 1 and the
+total is at least 3**. Then: 3–5 **mild**, 6–9 **moderate**, 10–12 **severe**. Otherwise the severity
+is `none`.
+
+**Step 3: advice** (`symptom_result` enum), checked in this order:
+
+| Result | When | Reason codes |
+|---|---|---|
+| `descend` | any red flag | `RED_FLAG_CONFUSION`, `RED_FLAG_BREATHLESS`, `RED_FLAG_WORSE_AFTER_REST` |
+| `descend` | moderate or severe AMS (total ≥ 6 with a headache) | `AMS_MODERATE`, `AMS_SEVERE` |
+| `rest` | mild AMS (3–5 with a headache) | `AMS_MILD` |
+| `rest` | total ≥ 3 but **no headache** | `NO_HEADACHE` |
+| `ok` | total < 3 | `LOW_SCORE` |
+
+The reasons list starts with the red flags (once each, in a fixed order) and then one score reason,
+so the app can explain the result ("Confusion is a sign of HACE…", "Mild altitude sickness…").
+
+**Our change to the published rule.** A total of 3 or more without a headache is not AMS by the 2018
+definition, so a direct reading would say `ok`. Bato says `rest` instead (severity stays `none`):
+vomiting, weakness and dizziness at 4,400 m are still a reason not to climb higher, and the app must
+never tell someone with clear symptoms that they are fine to go up. This is in the Decisions tab.
+
+**Worked examples** (all in the shared test table):
+
+| Headache | GI | Fatigue | Dizziness | Red flag | Total | Severity | Result |
+|---|---|---|---|---|---|---|---|
+| 1 | 1 | 0 | 0 | – | 2 | none | `ok` |
+| 2 | 1 | 1 | 0 | – | 4 | mild | `rest` |
+| 2 | 2 | 1 | 1 | – | 6 | moderate | `descend` |
+| 3 | 2 | 3 | 2 | – | 10 | severe | `descend` |
+| 0 | 2 | 2 | 2 | – | 6 | none | `rest` (no headache) |
+| 0 | 0 | 0 | 0 | confusion | 0 | none | `descend` |
+
+**Same answer on the phone and the server.** The phone scores the answers so the advice shows offline.
+When the check reaches the server (maybe hours later, from the offline queue), the server scores the
+raw answers again and saves its own result. Both copies are tested against one table of 17 cases,
+`backend/tests/data/lake_louise_cases.json`: pytest reads it for the Python copy, and
+`scripts/check-lake-louise.mjs` (run by `verify.sh`) reads it for the TypeScript copy. The cases cover
+the boundaries 2/3, 5/6 and 9/10, the no-headache rule and every red flag.
+
+**Disclaimer** on every safety screen, in both languages: *"Bato is not a rescue service and not
+medical advice. In an emergency, call the numbers below."*
+
+**SOS (V2-P3-02) is not an algorithm but has one rule worth explaining:** the phone gets its position
+from GPS (high accuracy, 10 s at most, else the last known position with its time), writes the SMS
+and opens the SMS app; the user presses Send. The record for the server goes into an **offline queue**
+with an id made on the phone; the queue is sent in order when there is internet, each item is removed
+only after the server accepts it, and the server saves each id once. So nothing is lost when the
+connection drops, and nothing is saved twice.
 
 ## Smart features
 

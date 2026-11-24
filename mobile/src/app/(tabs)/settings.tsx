@@ -10,6 +10,7 @@ import { ListCard, PageHeader } from '@/components/Layout';
 import { Screen } from '@/components/Screen';
 import { API_URL } from '@/lib/api';
 import { googleSignOut } from '@/lib/google';
+import { clearSafetyData } from '@/lib/safety';
 import { useMe, useUpdateMe } from '@/lib/queries';
 import type { Lang } from '@/lib/types';
 import { useAuth } from '@/store/auth';
@@ -25,7 +26,13 @@ function LinkRow({
   label,
   last,
 }: {
-  href: '/profile' | '/predictions';
+  href:
+    | '/profile'
+    | '/predictions'
+    | '/safety'
+    | '/emergency-contacts'
+    | '/symptoms'
+    | '/symptoms/history';
   icon: IconName;
   label: string;
   last?: boolean;
@@ -101,6 +108,24 @@ export default function SettingsScreen() {
         </ListCard>
       </Section>
 
+      <Section title={t('settings.safety')}>
+        <ListCard>
+          <LinkRow href="/safety" icon="alarm-light-outline" label={t('safety.openSafety')} />
+          <LinkRow
+            href="/emergency-contacts"
+            icon="account-heart-outline"
+            label={t('settings.contacts')}
+          />
+          <LinkRow href="/symptoms" icon="heart-pulse" label={t('settings.symptoms')} />
+          <LinkRow
+            href="/symptoms/history"
+            icon="history"
+            label={t('settings.symptomHistory')}
+            last
+          />
+        </ListCard>
+      </Section>
+
       <Section title={t('settings.language')}>
         <Segmented<Lang>
           value={language}
@@ -118,6 +143,7 @@ export default function SettingsScreen() {
         icon="logout"
         onPress={async () => {
           await googleSignOut();
+          await clearSafetyData(); // the next person on this phone must not get these contacts
           await logout();
         }}
       />

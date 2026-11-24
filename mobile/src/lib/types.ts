@@ -1,3 +1,5 @@
+import type { RedFlag, Severity, SymptomResult } from './lakeLouise';
+
 // Mirrors the backend Pydantic schemas (backend/app/schemas).
 
 export type Lang = 'en' | 'ne';
@@ -453,4 +455,38 @@ export interface PackingList {
       value: number | null; // metres (ALTITUDE, WINTER) or days (LONG_TREK)
     }[];
   }[];
+}
+
+// ------------------------------------------------- V2 Phase 3: safety (Core)
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string; // E.164, e.g. +9779812345678
+  email: string | null;
+  relation: string | null;
+  sort_order: number;
+}
+
+export interface EmergencyContactInput {
+  name: string;
+  phone: string;
+  email: string | null;
+  relation: string | null;
+}
+
+export interface SymptomCheckOut {
+  id: string;
+  trek_id: string | null;
+  trek_name: string | null;
+  altitude_m: number | null;
+  headache: number;
+  gi: number;
+  fatigue: number;
+  dizziness: number;
+  red_flags: RedFlag[];
+  total: number;
+  severity: Severity;
+  result: SymptomResult;
+  reasons: string[];
+  checked_at: string;
 }

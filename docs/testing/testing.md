@@ -2,7 +2,8 @@
 
 Two kinds of testing. **Step-by-step order, test counts and how to check each case:** [testing-guide.md](testing-guide.md).
 
-1. **Automated tests**: 209 backend pytest tests (`cd backend && uv run pytest`), plus the TypeScript
+1. **Automated tests**: 302 backend pytest tests (`cd backend && uv run pytest`), the Lake Louise
+   check of the app's copy of the score (`scripts/check-lake-louise.mjs`), plus the TypeScript
    typecheck and lint for the mobile app and the admin panel. All of them run with
    `./scripts/verify.sh`.
 2. **Manual test cases**: the table below. Run each case on a real phone (and the admin panel in a
@@ -31,7 +32,9 @@ Two kinds of testing. **Step-by-step order, test counts and how to check each ca
    Search by city and trek region (V2-SR-14, 2026-11-23): TC-67 was added and passes on the emulator.
    Since then a place's search subtitle shows its city or region instead of its district
    (TC-62 now shows "Temples & Stupas · Kathmandu Valley").
-   Now: **65 Pass, 1 Fail (TC-01, re-test on Phone 2), 1 Not run (TC-66)**.
+   Safety (V2 Phase 3 Core, 2026-11-24): TC-68 to TC-76 were added. They need a real phone (SMS app,
+   GPS, mobile data off), so they are not run yet.
+   Now: **65 Pass, 1 Fail (TC-01, re-test on Phone 2), 10 Not run (TC-66, TC-68 to TC-76)**.
 
 The **Auto** column names the pytest test that checks the same behaviour through the API, where
 there is one. The manual case still checks the screen.
@@ -138,6 +141,31 @@ and whose interests are culture + religious. Plan: [search-recommendation.md](..
 | TC-65 | Variety and place tags | Explore → look at the first two cards → open Bhaktapur Durbar Square | culture + religious user | Not all temples at the top; the place page shows its tags with icons | Pashupatinath Temple (temple) then Bhaktapur Durbar Square (heritage); chips "UNESCO World Heritage", "Architecture", "Local culture", "Good for families" | Pass | `test_top_five_is_not_all_one_kind`, `test_place_tags_in_detail_and_admin` |
 | TC-66 | Admin tags; Nepali labels | Admin → Places → edit a place → Tags; app in नेपाली: Explore reasons, place tags, search "via" line | Phewa Lake | Tags can be added and removed and show in the app; every new label is in Nepali | | Not run | `test_place_tags_in_detail_and_admin` |
 | TC-67 | Search by city and trek region | Search → Places → `pokhara`, open Sarangkot; Places → `kathmandu valley`; Treks → `khumbu` | `pokhara`, `kathmandu valley`, `khumbu` | Pokhara: Phewa Lake, Sarangkot and World Peace Pagoda, each "… · Pokhara"; place page "Pokhara, Kaski, Gandaki"; Kathmandu Valley: all 8 valley sights, Patan and Bhaktapur included; Khumbu: Everest Base Camp Trek | "3 places found", "Lakes · Pokhara", "Viewpoints · Pokhara", "Temples & Stupas · Pokhara"; Sarangkot "Pokhara, Kaski, Gandaki"; "8 places found" from Bhaktapur Durbar Square to Swayambhunath Stupa, each "· Kathmandu Valley"; "1 trek found", Everest Base Camp Trek "Khumbu · 11 days" | Pass | `test_city_search_lists_every_place_in_it`, `test_trek_region_finds_its_treks`, `test_areas_lookup_filter_and_detail` |
+
+### Safety: emergency contacts, SOS, symptom checker (V2 Phase 3 Core)
+
+Added on 2026-11-24, **not run yet**. Run them on a real phone with a SIM card (the emulator has no SMS
+app or real GPS). Plan: [phase3.md](../plans/version2/phase3.md).
+
+**Use test mode.** Put two phones you own in `mobile/.env` as
+`EXPO_PUBLIC_SAFETY_TEST_NUMBERS=98XXXXXXXX,98XXXXXXXX` and restart Metro (`npx expo start -c`). The
+safety screens then show a yellow **TEST MODE** banner, and Police, Tourist Police, Ambulance, Fire and
+the SOS fallback call those numbers instead of the real services. Save the same two phones as your
+emergency contacts. Never test SOS with the real 100 / 1144 / 102 / 101. A development build made
+before 2026-11-24 has no `expo-sms`: the SMS app still opens (through an `sms:` link), but rebuild with
+`npx expo run:android` to test the real path.
+
+| TC | Feature | Steps | Test data | Expected result | Actual result | Pass/Fail | Automated test |
+|---|---|---|---|---|---|---|---|
+| TC-68 | Emergency contacts: add, edit, delete | Settings → Safety → Emergency contacts → add a contact; tap it, change the relation, save; add a second one; delete it with the bin icon → Delete | "Test phone 1", test number 1 typed as `98XXXXXXXX`, relation "Friend" | The contact shows with `+97798XXXXXXXX`; the edit is saved; the second one goes after the confirm; the list is the same after closing and reopening the app | | Not run | `test_contact_crud_and_phone_normalised`, `test_a_user_only_sees_their_own_contacts` |
+| TC-69 | Emergency contacts: wrong input | Save with an empty phone; save with phone `12ab`; add contacts until there are 5 | `12ab` | "Enter a name and a phone number."; "Enter a phone number like 98XXXXXXXX or +977…"; with 5 contacts the form is replaced by "You can save up to 5 contacts." | | Not run | `test_bad_phone_is_422_with_a_message`, `test_sixth_contact_is_refused` |
+| TC-70 | Fixed emergency numbers (test mode) | Emergency contacts → scroll to Emergency numbers → tap Tourist Police | test mode on | Yellow TEST MODE banner; Police, Tourist Police, Ambulance, Fire listed with their names; the dialler opens on a **test number**, not 1144 | | Not run | `test_app_copy_of_emergency_numbers_matches_the_csv` |
+| TC-71 | SOS: hold for 2 seconds | Settings → SOS & emergency numbers → tap SOS quickly; then hold it for 2 s | 1 contact, outdoors, location on | A quick tap does nothing; while holding, the ring fills and the phone vibrates; after 2 s the SMS app opens to the contact with "SOS from <name> (Bato app): I need help. My location: 27.7…, 85.3… (accuracy … m) https://maps.google.com/?q=… · <date time>"; press Send → the test phone gets it and the link opens the map | | Not run | `test_sos_is_saved_once_with_the_user` |
+| TC-72 | SOS with mobile data off | Turn off mobile data and Wi-Fi → hold SOS → send the SMS; turn the internet back on and open the app; admin → Dashboard | 1 contact | The SMS app still opens with the location and the SMS is delivered (over the phone network); after going online the admin dashboard's **SOS events** count is 1 higher | | Not run | `test_sos_is_saved_once_with_the_user`, `test_admin_stats_count_sos_and_symptom_checks` |
+| TC-73 | SOS with no contacts | Delete all contacts → SOS screen → hold SOS | no contacts, test mode on | The dialler opens on test number 1 (test mode gives Tourist Police and Ambulance the first number, Police and Fire the second); the screen says Bato opened a call to the Tourist Police with that number | | Not run | – |
+| TC-74 | Symptom checker: the three demo results | Trek → EBC → Itinerary → How do you feel? → answer → See my result; Check again for each row; on the result "Descend now", tap SOS | (a) 2,1,1,0 at Namche; (b) 3,2,3,2; (c) all 0 + "Confusion or unsteady walking" | (a) **Rest: don't go higher today**, score 4, mild; (b) **Descend now and get help**, score 10, severe, with an SOS button; (c) Descend now, with the confusion reason. Leaving a question out shows "Answer all four questions first." | | Not run | `test_lake_louise_shared_cases`, `test_symptom_check_is_scored_by_the_server` |
+| TC-75 | Symptom check offline + history | Mobile data and Wi-Fi off → do a check → Settings → My symptom checks; back online → pull down to refresh; admin → Dashboard | 2,1,1,0, altitude from a stop | Offline: the result shows at once, "Saved on this phone. It will be sent when you are online."; the history says "1 check is waiting to be sent."; online: the check is in the history with the trek, the altitude and its real time; the dashboard's **Symptom checks** count is 1 higher | | Not run | `test_symptom_history_is_own_and_newest_first`, `test_admin_stats_count_sos_and_symptom_checks` |
+| TC-76 | Safety screens in Nepali | Settings → भाषा: नेपाली → open the safety screens; hold SOS | – | Every safety screen has the disclaimer in Nepali; the questions and results are in Nepali with no cut-off words; the SMS is in Nepali, but the coordinates, link and time use Latin digits so the link works | | Not run | – |
 
 ## Bugs found and fixed
 

@@ -19,7 +19,7 @@ Version 1 plan: [phase1](../version1/phase1.md) · [phase2](../version1/phase2.m
 | [Phase 3](phase3.md) | 15 | **Safety & offline**: help on the trail, even without internet | Emergency contacts · SOS by SMS · Symptom checker · Daily check-in *(stretch)* · Offline treks *(stretch)* | **Lake Louise score** · scheduled job (APScheduler) · timestamp-based delta sync |
 | [Optional](phase3.md#optional-only-if-time-remains) | 15+ | Only if time remains | AI-translated drafts · Retrain from the admin panel · Bikram Sambat dates | — |
 
-**Status (2026-11-23):** Phase 1 and Phase 2 code is done and merged into `main` (phone demos still to run); Phase 3 is not started. Summary: [PROGRESS.md](../../../PROGRESS.md).
+**Status (2026-11-24):** Phase 1 and Phase 2 code is done and merged into `main` (phone demos still to run). Phase 3 **Core** (emergency contacts, SOS by SMS, the Lake Louise symptom checker) is built and passes every automated check; it still needs a run on a real phone (TC-68 to TC-76). The Phase 3 Stretch (daily check-in, offline treks) is not started. Summary: [PROGRESS.md](../../../PROGRESS.md).
 
 **Extra work on search and recommendations (V2-SR, 2026-11-23):** Stage 1 of [search-recommendation.md](../../product/search-recommendation.md) is built (V2-SR-01 … 10: transliteration, search by village/district/category, a search test set; recommendations that learn from feedback, use the risk model, a nearby bonus, MMR variety, "Not interested", place tags). V2-SR-14 (search by city and trek region: "pokhara", "kathmandu valley", "khumbu") was added the same day. V2-SR-11 … 13 are still to do.
 
@@ -63,7 +63,7 @@ Version 2 work then happens on a branch (`git switch -c v2`), so `v1.0` always s
 
 | Decision | Recommendation | Decide by |
 |---|---|---|
-| Include the safety features in Version 2? | **Yes, but only the cheap ones as Core:** emergency contacts, SOS by SMS and the symptom checker. They work offline, need no server cost and make the best demo moment. The daily check-in and offline treks are *Stretch*. | Start of week 15 |
+| Include the safety features in Version 2? | **Decided 2026-11-24: yes, Core only for now.** Emergency contacts, SOS by SMS and the symptom checker are built. They work offline, need no server cost and make the best demo moment. The daily check-in and offline treks stay *Stretch*. | Done |
 | Missed check-in alert: SMS gateway or email? | **Email (SMTP).** It is free and needs no business registration. Say in the report that a Nepali SMS gateway (Sparrow, Aakash) is the production choice. | Start of week 15 |
 | Check-in reminder: FCM push or a local notification? | **Local notification** (`expo-notifications`, scheduled on the phone). It works offline and needs no Firebase project. FCM becomes future scope. | Start of week 15 |
 

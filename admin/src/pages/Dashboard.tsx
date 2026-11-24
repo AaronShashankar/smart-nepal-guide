@@ -37,7 +37,7 @@ export default function Dashboard() {
           const max = Math.max(1, ...RISK_LEVELS.map((l) => s.predictions_by_level[l] ?? 0));
           return (
             <Stack>
-              <SimpleGrid cols={{ base: 2, sm: 3, lg: 6 }}>
+              <SimpleGrid cols={{ base: 2, sm: 4 }}>
                 <StatCard
                   label={t('dashboard.users')}
                   value={s.users}
@@ -48,6 +48,12 @@ export default function Dashboard() {
                 <StatCard label={t('dashboard.trips')} value={s.trips} />
                 <StatCard label={t('dashboard.reviews')} value={s.reviews} />
                 <StatCard label={t('dashboard.predictions')} value={s.risk_predictions} />
+                <StatCard
+                  label={t('dashboard.sosEvents')}
+                  value={s.sos_events}
+                  note={t('dashboard.sosNote')}
+                />
+                <StatCard label={t('dashboard.symptomChecks')} value={s.symptom_checks} />
               </SimpleGrid>
 
               <Paper withBorder p="md" maw={640}>

@@ -7,7 +7,7 @@ the report). Everything runs on this laptop: PostgreSQL, the API, the admin pane
 
 | Kind | How many | How you run it | Time |
 |---|---|---|---|
-| Automated | **1 command** (209 backend tests + mobile/admin typecheck and lint) | `./scripts/verify.sh` | ~2 min |
+| Automated | **1 command** (302 backend tests + the Lake Louise check + mobile/admin typecheck and lint) | `./scripts/verify.sh` | ~2 min |
 | Manual, Phone 1 | **40 cases** (TC-01 … TC-40), in 6 sessions below | by hand, phone + browser | ~2½ h |
 | Manual, Phone 2 | **8 cases** (layout check on a different screen size) | by hand | ~20 min |
 | Phone demos | 2 (mid-term demo, final demo) — **no extra work**: sessions C and D are the demos | — | — |
@@ -30,7 +30,7 @@ results into `testing.md` for the report.
 ## Before you start
 
 1. Laptop and phone on the **same Wi-Fi** (or the laptop on the phone's hotspot).
-2. Run the automated tests: `./scripts/verify.sh` → everything green. Write "209 passed" in the
+2. Run the automated tests: `./scripts/verify.sh` → everything green. Write "302 passed" in the
    tracker (task V1-P3-08 notes).
 3. Start everything: `./scripts/start-demo.sh` (add `--seed` once for fresh seed data).
 4. **Phone 1:** uninstall Bato, then install the development build again, so TC-01 sees a real
@@ -184,6 +184,30 @@ panel (`cd admin && npm run dev`) and log in as admin.
 
 ---
 
+## Session J — Safety: contacts, SOS, symptom checker (9 cases, real phone with a SIM)
+
+Not the emulator: it has no SMS app and no real GPS. First set **test mode** (see the Safety section in
+[testing.md](testing.md)): two of your own numbers in `mobile/.env`, then `npx expo start -c`. Check the
+yellow TEST MODE banner is on the Safety screen before holding SOS. Do the SOS cases **outdoors**, so
+the GPS gets a fix. Have the admin dashboard open on the laptop to see the counts go up.
+
+| Order | TC | Do | Check |
+|---|---|---|---|
+| 1 | TC-68 | Settings → Emergency contacts → add test phone 1 (`98…`), edit it, add and delete a second | Saved as `+977…`; edit saved; delete asks first |
+| 2 | TC-69 | Empty phone; phone `12ab`; fill up to 5 contacts | A message each time; no 6th form |
+| 3 | TC-70 | Tap Tourist Police in the fixed list | TEST MODE banner; dialler shows a test number |
+| 4 | TC-71 | SOS screen → quick tap, then hold 2 s → Send | Quick tap does nothing; SMS app with location + map link; test phone gets it |
+| 5 | TC-72 | Data and Wi-Fi off → hold SOS → Send; then online, open the app | SMS still goes; admin "SOS events" +1 |
+| 6 | TC-73 | Delete all contacts → hold SOS | Dialler on test number 1 (Tourist Police's slot) |
+| 7 | TC-74 | EBC → Itinerary → How do you feel? → the 3 demo answer sets | Rest (4) / Descend (10) / Descend (confusion) |
+| 8 | TC-75 | Offline check → My symptom checks → online → pull to refresh | "waiting to be sent", then in the history; admin "Symptom checks" +1 |
+| 9 | TC-76 | Switch to नेपाली → the safety screens and SOS | Disclaimer and texts in Nepali; link in the SMS works |
+
+After the run: **remove `EXPO_PUBLIC_SAFETY_TEST_NUMBERS` from `mobile/.env`** and restart Metro, so the
+real numbers are back.
+
+---
+
 ## What this closes in the tracker
 
 | Task | Closed when |
@@ -193,5 +217,6 @@ panel (`cd admin && npm run dev`) and log in as admin.
 | V1-P3-08 Manual test table | All 40 rows have Actual result + Pass/Fail |
 | V1-P1-20 Screenshots for the report | The 📸 screenshots are saved in `docs/screenshots/` |
 | V1-P3-09 Bug fixes | Every BUG row is Fixed and its TC re-run as Pass |
+| V2-P3-01 / 02 / 03 / 07 (safety Core) | Session J passes; then the rows go from Testing to Done |
 
 Suggested schedule: day 1 sessions A–C, day 2 sessions D–F + Phone 2, day 3 fix bugs and re-run.

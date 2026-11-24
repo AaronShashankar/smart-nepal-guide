@@ -38,6 +38,7 @@ backend/
 │   │   ├── risk.py              /predict-risk and prediction history
 │   │   ├── trips.py, shared.py  trip planner, optimise, share link
 │   │   ├── reviews.py, recommendations.py
+│   │   ├── safety.py            emergency contacts, SOS events, symptom checks (V2 Phase 3)
 │   │   ├── lookups.py           categories, interests, permits
 │   │   ├── admin.py, admin_community.py   admin-only endpoints
 │   │   └── deps.py              shared dependencies (current user, admin guard, language)
@@ -49,6 +50,7 @@ backend/
 │   │   ├── acclimatisation.py            rule-based altitude checker
 │   │   ├── route.py, route_benchmark.py  nearest neighbour + 2-opt, brute force, day split
 │   │   ├── rating.py                     Bayesian average rating
+│   │   ├── lake_louise.py                Lake Louise AMS score (symptom checker; same code in mobile/src/lib/lakeLouise.ts)
 │   │   └── similarity.py                 cosine similarity (recommendations; MMR is in services/recommend.py)
 │   ├── ml/                  Risk model, written from scratch
 │   │   ├── tree.py, forest.py            CART decision tree, random forest
@@ -58,12 +60,12 @@ backend/
 │   │   ├── metrics.py                    accuracy, F1, confusion matrix, k-fold
 │   │   └── registry.py                   loads the active model for the API
 │   ├── services/            Business logic used by api/ (budget, itinerary, recommend, risk, search…)
-│   ├── models/              SQLAlchemy tables (user, content, trip, community, ml)
+│   ├── models/              SQLAlchemy tables (user, content, trip, community, ml, safety)
 │   ├── schemas/             Pydantic request/response shapes
 │   ├── core/                config (.env), database session, JWT/bcrypt security, language fallback
 │   └── templates/           shared_trip.html (the public page for a shared trip)
-├── alembic/versions/        Database migrations 0001–0007 (one per phase; 0006 = place tags, name_latin, dismissed_item; 0007 = area)
-├── tests/                   pytest: 249 tests, one file per area
+├── alembic/versions/        Database migrations 0001–0008 (one per phase; 0006 = place tags, name_latin, dismissed_item; 0007 = area; 0008 = safety tables)
+├── tests/                   pytest: 302 tests, one file per area; data/lake_louise_cases.json is shared with the app's check
 ├── docker/                  init-test-db.sql (creates the test database)
 ├── models/                  Trained .joblib model files (not in git, made by app.ml.train)
 ├── uploads/                 Photos uploaded in the admin panel (not in git)
@@ -86,10 +88,15 @@ mobile/
 │   │   ├── trek/[id]/           trek overview (index), itinerary, risk check
 │   │   ├── trip/[id].tsx        one trip: map, optimise, budget, share
 │   │   ├── shared/[token].tsx   a trip someone shared
-│   │   └── teahouses/[placeId].tsx
-│   ├── components/          Reusable UI: cards, buttons, risk badge, stars, reviews, budget table…
+│   │   ├── teahouses/[placeId].tsx
+│   │   ├── safety.tsx           SOS button, your contacts and the emergency numbers (V2 Phase 3)
+│   │   ├── emergency-contacts.tsx   add, edit, delete up to 5 contacts
+│   │   └── symptoms/            index (How do you feel? Lake Louise check), history (My symptom checks)
+│   ├── components/          Reusable UI: cards, buttons, risk badge, stars, reviews, budget table, Safety (SOS button, disclaimer)…
 │   ├── lib/                 api.ts (API address + axios), queries.ts (TanStack Query hooks), types.ts,
-│   │                        storage, Google sign-in, location, map style, formatting
+│   │                        storage, Google sign-in, location, map style, formatting,
+│   │                        lakeLouise.ts (symptom score), safety.ts (GPS, SOS message, offline queue, test mode)
+│   ├── data/                emergencyNumbers.json (copy of data/emergency_numbers.csv, so it works offline)
 │   ├── store/               Zustand stores: auth (tokens), settings (language)
 │   └── i18n/                i18next setup + locales/en.json, locales/ne.json (all app text)
 ├── assets/
@@ -98,7 +105,7 @@ mobile/
 ├── app.json                 Expo config (name, package com.smartnepalguide.app, plugins)
 ├── eas.json                 EAS build profiles (development, preview APK, production)
 ├── package.json             Install packages with: npx expo install <name>
-└── .env.example             Copy to .env (Google client ID; do NOT put the laptop IP here, see BUG-05)
+└── .env.example             Copy to .env (Google client ID, safety test numbers; do NOT put the laptop IP here, see BUG-05)
 ```
 
 ## admin/
@@ -130,6 +137,7 @@ data/
 ├── categories.csv, interests.csv, permits.csv
 ├── budget_rates.csv         Food, room, transport per budget level and region (sourced 2026-11-17)
 ├── teahouses.csv            Real lodges only, each with its source
+├── emergency_numbers.csv    Police, Tourist Police, Ambulance, Fire, each with its source (V2 Phase 3)
 ├── photos.csv               Wikimedia Commons photos with author and licence
 ├── climate_baseline.csv, climate_regions.csv   Inputs to the approximate climate model
 ├── training_samples.csv     Risk-model training rows. Generated by app.ml.dataset: do not edit
@@ -175,7 +183,8 @@ ml/
 └── README.md                What each file in backend/app/ml/ does
 scripts/
 ├── start-demo.sh            Starts PostgreSQL, Redis, API, admin panel and Metro; prints the phone address
-└── verify.sh                Backend tests + lint, mobile typecheck + lint, admin typecheck + build + lint
+├── check-lake-louise.mjs    Checks the app's Lake Louise score against the backend's test cases (run by verify.sh)
+└── verify.sh                Backend tests + lint, Lake Louise check, mobile typecheck + lint, admin typecheck + build + lint
 ```
 
 ## Where do I find…?

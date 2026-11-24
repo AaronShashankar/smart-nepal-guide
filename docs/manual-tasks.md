@@ -2,7 +2,7 @@
 
 This file covers the work that only you can do: it needs your phone, your accounts, your judgement or
 your presence. Each task says **how to do it on this laptop**, **how to check it worked**, and
-**where to record it**. The code work that remains (V2 Phase 1 and Phase 3) is not listed here.
+**where to record it**. The code work that remains (the V2 Phase 3 Stretch) is not listed here.
 
 Run every command from the repository root (`smart-nepal-guide/`) unless a step says otherwise.
 Starting the servers is covered in [../runlocal.md](runlocal.md), and the 40 test cases in
@@ -36,8 +36,9 @@ Starting the servers is covered in [../runlocal.md](runlocal.md), and the 40 tes
 | 17 | [Push to GitHub](#17-push-to-github) | DevOps | — | Must-have | Now, then often |
 | 18 | [Tag v1.0](#18-tag-v10) | DevOps | V1-P3-14 | Must-have | Last |
 | 19 | [Set the defense dates](#19-set-the-defense-dates) | Planning | Milestones | Good | When announced |
-| 20 | [Decide the open V2 questions](#20-decide-the-open-v2-questions) | Decisions | V2-P3-02/05 | Medium | Before V2 Phase 3 |
+| 20 | [Decide the open V2 questions](#20-decide-the-open-v2-questions) | Decisions | V2-P3-04/05 | Medium | Only for the Stretch (safety Core: decided) |
 | 21 | [Final report and defenses](#21-final-report-and-defenses) | Report | Milestones | Must-have | Weeks 13–16 |
+| 22 | [Safety features on a real phone](#22-safety-features-on-a-real-phone-tc-68-to-tc-76) | Testing | V2-P3-01/02/03/07 | Must-have | Now (before the final demo) |
 
 ---
 
@@ -397,6 +398,10 @@ The automatic API address only works in **development** builds. A release APK mu
    ```
 4. Download the APK from the link it prints.
 
+**Before building:** `mobile/.env` must **not** have `EXPO_PUBLIC_SAFETY_TEST_NUMBERS` (task #22). EAS
+builds in the cloud from the committed files, so the gitignored `.env` isn't uploaded, but a local
+`npx expo run:android --variant release` would use it.
+
 **Check:**
 - Install it on a phone that has **never had Bato**: `adb install path/to/app.apk`, or open the link on the phone.
 - It opens without Metro running. **Settings → API server** shows the URL from step 2.
@@ -479,7 +484,7 @@ These are scope decisions for V2 Phase 3. Claude can build either option once yo
 
 | Question | Options | Plan's suggestion |
 |---|---|---|
-| Include the safety features (SOS, check-in)? | Yes / only SOS / no | Yes, as a strong "wow" for the defense |
+| Include the safety features (SOS, check-in)? | Yes / only SOS / no | **Decided 2026-11-24: yes, the Core** (contacts, SOS, symptom checker) is built. The check-in is Stretch |
 | Missed check-in alert by… | SMS gateway (paid, e.g. Sparrow SMS) / email (free, SMTP) | Email |
 | Daily reminder by… | FCM push (needs Firebase) / local notification (`expo-notifications`) | Local notification |
 
@@ -494,7 +499,7 @@ These are scope decisions for V2 Phase 3. Claude can build either option once yo
 | Chapter | Material |
 |---|---|
 | System design | ER, use case, DFD and class diagrams (`docs/diagrams/`) |
-| Algorithms | Levenshtein search, Haversine, CART and random forest, nearest neighbour + 2-opt, cosine similarity, Bayesian average |
+| Algorithms | Levenshtein search, Haversine, CART and random forest, nearest neighbour + 2-opt, cosine similarity, Bayesian average, the Lake Louise score (cite Roach et al., High Altitude Medicine & Biology 19(1), 2018) |
 | ML results | `backend/docs/ml/comparison.md` and the figures (after #12) |
 | Route results | `backend/docs/benchmarks/route_gap.md` |
 | Testing | `docs/testing/testing.md` with results (#10) and the Bugs tab |
@@ -507,3 +512,41 @@ These are scope decisions for V2 Phase 3. Claude can build either option once yo
 - You can explain each algorithm on a whiteboard without notes.
 
 **Record:** Milestones tab → Mid-term defense / Final report / Final defense → **Done**.
+
+---
+
+## 22. Safety features on a real phone (TC-68 to TC-76)
+
+The emergency contacts, SOS and the symptom checker (V2 Phase 3 Core) pass every automated check, but
+SOS opens the SMS app and reads the GPS, which the emulator can't do properly. Use a real phone with a
+SIM card.
+
+**Do:**
+1. **Rebuild the development build once**, because `expo-sms` is a new native module:
+   ```bash
+   cd mobile
+   npx expo run:android            # phone connected by USB, USB debugging on
+   ```
+   (An older build still works: it opens the SMS app through an `sms:` link instead.)
+2. **Turn on test mode**, so SOS and the call buttons never reach the real police. In `mobile/.env`:
+   ```
+   EXPO_PUBLIC_SAFETY_TEST_NUMBERS=98XXXXXXXX,98XXXXXXXX
+   ```
+   Use two numbers you own (already set on this laptop). Then restart Metro so it reads the line:
+   `npx expo start -c`. Open Settings → Safety → SOS & emergency numbers: a yellow **TEST MODE**
+   banner must show. If it doesn't, stop: the real numbers are still in use.
+3. Run **Session J** in [testing-guide.md](testing/testing-guide.md) (9 cases). Do the SOS cases
+   outdoors, and TC-72 / TC-75 with mobile data **and** Wi-Fi off.
+4. **Turn test mode off** afterwards: delete the line from `mobile/.env` and run `npx expo start -c`.
+   The banner must be gone and Tourist Police must show 1144.
+5. *(Optional)* Confirm the **Himalayan Rescue Association** number. Its website lists two different
+   office numbers (01-4440292 and 01-4540292); call or email HRA, or find it on a government travel
+   page. Then tell Claude to add it to `data/emergency_numbers.csv` with the source. Until then it stays
+   out (a wrong rescue number is worse than none).
+
+**Check:** each case's Actual result matches; the SMS arrives on the test phone and its map link opens
+the right place; the admin dashboard's SOS events and Symptom checks counts go up after you come back
+online.
+
+**Record:** fill in TC-68 to TC-76 in the **Test cases** tab and in `docs/testing/testing.md`; log any
+bug in the **Bugs** tab. When all pass, move V2-P3-01, 02, 03 and 07 from *Testing* to **Done**.

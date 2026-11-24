@@ -108,6 +108,9 @@ const SERVER_MESSAGES: Record<string, string> = {
   'Trek not found': 'errors.notFound',
   'Trip not found': 'errors.notFound',
   'Review not found': 'errors.notFound',
+  'Contact not found': 'errors.notFound',
+  'You can save at most 5 emergency contacts': 'errors.tooManyContacts',
+  'Invalid phone number': 'errors.badPhone',
 };
 
 /** A readable message from an API error (FastAPI puts it in `detail`). */

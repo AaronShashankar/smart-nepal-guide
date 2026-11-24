@@ -12,7 +12,10 @@ hand: the manual test table ([docs/testing/testing.md](docs/testing/testing.md),
 [plan](docs/plans/version2/phase1.md)) and **Phase 2** (reviews with a Bayesian rating,
 "Recommended for you" (cosine similarity), Near me, budget estimate, share a trip, teahouses,
 [plan](docs/plans/version2/phase2.md)) code is done. The app has the **new UI** from the "Bato App
-Redesign" canvas. V2 Phase 3 (safety & offline) is not started. All work happens on `main`.
+Redesign" canvas. **V2 Phase 3 Core** (emergency contacts, SOS by SMS with GPS and an offline queue,
+the Lake Louise symptom checker, [plan](docs/plans/version2/phase3.md)) is built and tested on the
+backend; it still needs a run on a real phone (TC-68 to TC-76). The Stretch (daily check-in, offline
+treks) is not started. All work happens on `main`.
 
 **What has been done so far, with numbers and what is left: [PROGRESS.md](PROGRESS.md).**
 
@@ -98,7 +101,12 @@ uv run ruff check . && uv run ruff format --check .
 | POST | `/trips/{id}/budget` | **V2 P2.** Trip estimate (needs an optimised trip, else 409 `NOT_OPTIMISED`); saves `estimated_budget_npr` |
 | POST / DELETE | `/trips/{id}/share` | **V2 P2.** Make a read-only link `{token, url, app_url}` (owner only; same link if already shared) / stop sharing |
 | GET | `/shared/trips/{token}`, `/s/{token}` | **V2 P2, no login.** Read-only trip as JSON / as a small HTML page; no user data; wrong or stopped token → 404 |
-| * | `/admin/...` | **Phase 3, admins only (403 otherwise).** `stats`; CRUD for `categories`, `places` (+ `photos` upload), `permits`, `treks` (whole stage list); `users` (search, `PUT /users/{id}/block`); `reviews` (`PUT /reviews/{id}/status`); **V2 P2:** `budget-rates` (GET, PUT), `teahouses` (CRUD). Full list in Swagger |
+| GET / POST | `/me/emergency-contacts` | **V2 P3, login.** Your contacts in order / add one `{name, phone, email?, relation?}`. `98…` is saved as `+97798…`; a bad number or the 6th contact → 422 |
+| PATCH / DELETE | `/me/emergency-contacts/{id}` | **V2 P3.** Edit / delete (soft) your own contact (someone else's → 404) |
+| POST | `/sos-events` | **V2 P3, login.** `{id, latitude?, longitude?, accuracy_m?, message, sent_at}`. The `id` is made by the phone, so sending it again from the offline queue saves nothing new (201 both times; another user's id → 409) |
+| POST | `/symptom-checks` | **V2 P3, login.** `{id, trek_id?, altitude_m?, headache, gi, fatigue, dizziness (0–3), red_flags[], checked_at}`. The server scores it again (Lake Louise) and returns `{total, severity, result, reasons}` |
+| GET | `/me/symptom-checks` | **V2 P3.** The user's symptom checks, newest first, with the trek name |
+| * | `/admin/...` | **Phase 3, admins only (403 otherwise).** `stats` (V2 P3 adds `sos_events`, `symptom_checks`); CRUD for `categories`, `places` (+ `photos` upload), `permits`, `treks` (whole stage list); `users` (search, `PUT /users/{id}/block`); `reviews` (`PUT /reviews/{id}/status`); **V2 P2:** `budget-rates` (GET, PUT), `teahouses` (CRUD). Full list in Swagger |
 
 **Localisation rule** ([app/core/i18n.py](backend/app/core/i18n.py)): read `Accept-Language` (`en`/`ne`),
 use the matching `*_translation` row, and fall back to English for a missing row *or* a missing field.
@@ -120,6 +128,8 @@ use the matching `*_translation` row, and fall back to English for a missing row
 - **V2 P2 · Cosine similarity (hand-written) + content-based recommender:** [algorithms/similarity.py](backend/app/algorithms/similarity.py), [services/recommend.py](backend/app/services/recommend.py) (the category → interest weight table is at the top)
 - **V2 P2 · Bounding box for Near me:** [algorithms/geo_box.py](backend/app/algorithms/geo_box.py), used in [api/places.py](backend/app/api/places.py)
 - **V2 P2 · Budget formula:** [services/budget.py](backend/app/services/budget.py)
+- **V2 P3 · Lake Louise AMS score (2018):** [algorithms/lake_louise.py](backend/app/algorithms/lake_louise.py), the app's copy [mobile/src/lib/lakeLouise.ts](mobile/src/lib/lakeLouise.ts); both checked against [tests/data/lake_louise_cases.json](backend/tests/data/lake_louise_cases.json)
+- **V2 P3 · Offline queue for SOS events and symptom checks:** [mobile/src/lib/safety.ts](mobile/src/lib/safety.ts), saved once by [services/safety.py](backend/app/services/safety.py)
 
 ### Risk model (Phase 2)
 
@@ -185,6 +195,15 @@ nationality on the profile · Budget card on the trek page and **Estimate budget
 (`npx expo run:android`).** All text is in `src/i18n/locales/en.json` / `ne.json`;
 Plus Jakarta Sans is used for English text and Noto Sans Devanagari for Nepali.
 
+**V2 Phase 3 (safety):** Settings → Safety → **SOS & emergency numbers** (hold the red SOS button for 2 s
+→ the SMS app opens to your contacts with your GPS location and a map link; no contacts → a call to the
+Tourist Police), **Emergency contacts** (up to 5, kept on the phone too) and **My symptom checks** · a
+red Safety card on the trek and trip pages · **How do you feel?** on the itinerary (Lake Louise check →
+OK / Rest / Descend now, works offline). SOS records and checks made offline wait in a queue and are
+sent when the phone is online. **`expo-sms` is native: rebuild the dev build (`npx expo run:android`);
+an older build falls back to an `sms:` link.** To try SOS without calling the police, set
+`EXPO_PUBLIC_SAFETY_TEST_NUMBERS` in `mobile/.env` (see [runlocal.md](docs/runlocal.md)).
+
 **Google sign-in setup** (only needed for that button): in Google Cloud Console create an OAuth
 *Web* client and an *Android* client (package `com.smartnepalguide.app` + the SHA-1 of your build's
 signing key). Put the web client ID in `mobile/.env` (`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`) and in
@@ -236,6 +255,17 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
    nationality's rate (profile → Nationality).
 5. Valley → **Share trip** → share sheet → open the link in a browser that is not logged in → read-only page.
 6. EBC → itinerary → day 4 → **Teahouses (4)** → Teahouses in Tengboche.
+
+## Demo script (Version 2 Phase 3 Core: safety)
+Use test mode (two of your own numbers in `EXPO_PUBLIC_SAFETY_TEST_NUMBERS`, then `npx expo start -c`).
+1. Settings → **Emergency contacts** → add "Dad", `98…` → saved as `+977…`. The fixed numbers (Police,
+   Tourist Police, Ambulance, Fire) are underneath; tap one → the dialler opens.
+2. **Turn off mobile data and Wi-Fi.** Settings → SOS & emergency numbers → hold **SOS** for 2 s → the SMS
+   app opens to Dad with "SOS from … I need help. My location: … https://maps.google.com/?q=…". Send it.
+   Turn the internet back on → admin dashboard → **SOS events** goes up by one.
+3. EBC → Itinerary → **How do you feel?** → headache 2, nausea 1, fatigue 1, dizziness 0 → **Rest: don't
+   go higher today** (score 4). Check again: 3, 2, 3, 2 → **Descend now** (10). Tick only "Confusion" →
+   **Descend now**, whatever the score. Settings → My symptom checks shows them.
 
 ## Demo script (Phase 2, mid-term defense)
 1. Open **Everest Base Camp Trek** → **Day-by-day itinerary** → days 1–11 with altitude, gain, km and

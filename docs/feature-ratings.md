@@ -1,6 +1,6 @@
 # Bato: feature ratings
 
-*Review of the code on `main`, 2026-11-23. Tracker task V2-DOC-02.*
+*Review of the code on `main`, 2026-11-23. Tracker task V2-DOC-02. Safety and testing updated on 2026-11-24, after the V2 Phase 3 Core.*
 
 This report scores each feature of Bato out of 10 for **how well it is implemented**. For each
 feature it lists what works, what keeps the score down, and what would raise it. The scores
@@ -28,11 +28,13 @@ Each score weighs four things:
 
 ## Summary
 
-**Overall: 7.7 / 10** (the average of the 24 built features below; 7.6 before the search and recommendation work of 2026-11-23).
+**Overall: 7.6 / 10** (the average of the 25 built features below). It was 7.7 for 24 features before the
+safety Core of 2026-11-24: safety was then "not built" and left out of the average, and it now counts
+with a score of 6 until it passes on a real phone.
 The code quality is high almost everywhere. The scores are pulled down mainly by
 **data** (teahouses, Nepali content, real training data), **hosting** (the app only works
 on the laptop's network), and **features that were planned but not built yet**
-(safety and offline).
+(offline treks and the daily check-in).
 
 | # | Feature | Score | In one line |
 |---|---|---|---|
@@ -43,7 +45,7 @@ on the laptop's network), and **features that were planned but not built yet**
 | 5 | Altitude profile chart | **8.5** | Clear chart, fast climbs coloured, checked in both languages |
 | 6 | Reviews and ratings | **8.5** | Bayesian average, one review per user, moderation survives edits |
 | 7 | Share a trip | **8.5** | Secure token, works without login, a web page for people without the app |
-| 8 | Testing and quality checks | **8.5** | 249 backend tests, 67 manual cases, search test set, bug log; no automated tests for the app or admin |
+| 8 | Testing and quality checks | **8.5** | 302 backend tests, 76 manual cases, search test set, a shared Lake Louise table checked in Python and TypeScript, bug log; few automated tests for the app or admin |
 | 9 | Recommendations | **8.5** | Cosine with tags; learns from reviews, trips and Not interested; risk-aware; nearby bonus; MMR variety (measured); weights still hand-set, no real users yet |
 | 10 | AI risk predictor | **8** | Excellent from-scratch forest; but 95% of the training data comes from our own rule |
 | 11 | Explore, place and trek pages | **8** | Rich pages, 63 of 69 places have photos; treks have none |
@@ -58,9 +60,10 @@ on the laptop's network), and **features that were planned but not built yet**
 | 20 | Safer alternatives (KNN) | **7** | Correct and honest; only 8 treks to choose from |
 | 21 | Budget estimate | **7** | Sourced rates and nationality fees; no guide fees, which most foreign treks now need |
 | 22 | Map | **6.5** | Works, but basic: no route lines, no "you are here", online only |
-| 23 | Teahouses | **4** | Built end to end, but only 4 lodges in one village |
-| 24 | Hosting and release | **4** | Runs from the laptop; the APK needs the laptop's IP |
-| — | Safety and offline (V2 Phase 3) | **0** | Not started: SOS, emergency contacts, symptom checker, offline treks |
+| 23 | Safety: contacts, SOS, symptom checker | **6** | Built end to end and well tested on the backend; SOS works with no data; not yet run on a real phone |
+| 24 | Teahouses | **4** | Built end to end, but only 4 lodges in one village |
+| 25 | Hosting and release | **4** | Runs from the laptop; the APK needs the laptop's IP |
+| — | Offline treks and daily check-in (V2 Phase 3 Stretch) | **0** | Not started |
 
 ---
 
@@ -321,16 +324,27 @@ draft. Ticks are not shared between devices.
 
 **To raise the score:** the admin page for packing items, and a Nepali review of the text.
 
-### Safety and offline (V2 Phase 3): 0 / 10, not started
+### Safety: contacts, SOS, symptom checker (V2 Phase 3 Core): 6 / 10
 
-Emergency contacts, SOS by SMS, the Lake Louise symptom checker, daily check-in and offline
-treks are all still to do. The app has **no offline mode at all**: the query cache is not saved
-to the phone, so the itinerary cannot be opened without the internet. For an app whose tagline
-is *"trek safely"*, this is the biggest gap.
+**What works well:** the parts that matter most on a trail need no internet. Hold SOS for 2 s and
+the phone gets its GPS position (or the last known one, with its time), writes the message with a
+map link and opens the SMS app to the user's contacts; with no contacts it calls the Tourist Police
+([components/Safety.tsx](../mobile/src/components/Safety.tsx), [lib/safety.ts](../mobile/src/lib/safety.ts)).
+The record and any symptom check wait in an offline queue with ids made on the phone, so nothing is lost
+and nothing is saved twice. The Lake Louise score follows the 2018 paper, is the same code on the phone
+and the server, and both are checked against one table of 17 cases
+([algorithms/lake_louise.py](../backend/app/algorithms/lake_louise.py)). The emergency numbers are each
+checked against two government travel pages. 53 backend tests, a disclaimer on every safety screen, and
+a test mode so SOS can be tried without calling the police.
 
-**To raise the score:** the cheapest high-value steps are (1) emergency numbers and SOS by SMS,
-which work without data, and (2) saving the TanStack Query cache to the phone so treks already
-opened still show offline.
+**What holds it back:** **not yet run on a real phone** (TC-68 to TC-76), and the emulator can't test
+SMS. The user must press Send (Android doesn't let store apps send SMS by themselves). No Himalayan
+Rescue Association or embassy numbers: HRA's own site lists two different office numbers. The other half of
+the phase is not built: **no daily check-in and no offline treks**, so the itinerary still can't be
+opened without the internet.
+
+**To raise the score:** run the safety cases on a real phone with mobile data off (→ 7.5), then save
+the TanStack Query cache to the phone so treks already opened still show offline (→ 8.5).
 
 ---
 
@@ -466,12 +480,14 @@ saving them.
 
 ### Testing and quality checks: 8.5 / 10
 
-**What works well:** 209 backend tests (algorithms, ML, API, permissions), one script that runs
+**What works well:** 302 backend tests (algorithms, ML, API, permissions, safety), one script that runs
 lint, format, migration check, tests, typecheck and the admin build
-([scripts/verify.sh](../scripts/verify.sh)), 61 manual test cases with a guide, and 17 bugs
-logged with their fixes. This is more than most student projects have.
+([scripts/verify.sh](../scripts/verify.sh)), 76 manual test cases with a guide, and 18 bugs
+logged with their fixes. The app's copy of the Lake Louise score is checked against the same case
+table as the backend's. This is more than most student projects have.
 
-**What holds it back:** **no automated tests for the mobile app or the admin panel**, and no CI,
+**What holds it back:** **almost no automated tests for the mobile app or the admin panel** (only the
+Lake Louise check), and no CI,
 so `verify.sh` only runs when someone remembers to run it.
 
 **To raise the score:** a few Jest tests for the app's pure functions (`format.ts`,
@@ -501,7 +517,7 @@ These give the most points for the least work, with the defense in mind.
 |---|---|---|---|
 | 1 | Add survey answers and report accuracy on real rows separately | Risk predictor (8 → 9), and protects you in the viva | Medium (needs survey answers) |
 | 2 | Send the phone's location as the trip start, and allow a visit time per stop | Trip planner (7.5 → 8.5) | Small |
-| 3 | Emergency numbers + SOS by SMS, and save the query cache to the phone for offline | Safety (0 → 4 or more) | Medium |
+| 3 | Run the safety cases (TC-68 to TC-76) on a real phone, then save the query cache to the phone for offline | Safety (6 → 8.5) | Small, then medium |
 | 4 | Nepali descriptions for places and stage notes | Bilingual (7 → 8.5) | Medium (writing) |
 | 5 | Guide-fee line in the budget, and a budget-level switch | Budget (7 → 8) | Small |
 | 6 | Show the user's location and the trek routes on the map | Map (6.5 → 8) | Small–medium |

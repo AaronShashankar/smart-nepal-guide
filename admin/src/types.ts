@@ -45,6 +45,8 @@ export interface Stats {
   reviews: number;
   risk_predictions: number;
   predictions_by_level: Partial<Record<RiskLevel, number>>;
+  sos_events: number; // V2 Phase 3: a count only (live tracking is future scope)
+  symptom_checks: number;
 }
 
 export interface CategoryIn {

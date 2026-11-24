@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { AltitudeChart } from '@/components/AltitudeChart';
 import { AppText } from '@/components/AppText';
 import { PageHeader, StatTiles } from '@/components/Layout';
+import { Button } from '@/components/Button';
 import { AcclimatisationBox, signedMeters, StatusBadge } from '@/components/Risk';
 import { QueryState } from '@/components/StateViews';
 import { formatNumber, km, meters } from '@/lib/format';
@@ -174,6 +175,12 @@ export default function ItineraryScreen() {
                   {profile.data && <AltitudeChart profile={profile.data} />}
                   <Summary itinerary={it} />
                   {report.data && <AcclimatisationBox report={report.data} />}
+                  <Button
+                    title={t('safety.feel')}
+                    variant="secondary"
+                    icon="heart-pulse"
+                    onPress={() => router.push({ pathname: '/symptoms', params: { trekId: id } })}
+                  />
                   <AppText variant="heading" accessibilityRole="header" style={{ marginTop: 6 }}>
                     {t('itinerary.dayByDay')}
                   </AppText>

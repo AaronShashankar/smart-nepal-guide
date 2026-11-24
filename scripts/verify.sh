@@ -16,6 +16,9 @@ uv run alembic check
 step "Backend: tests (rebuilds snguide_test from migrations + seed data)"
 uv run pytest
 
+step "Mobile: Lake Louise score matches the backend (shared case table)"
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON "$ROOT/scripts/check-lake-louise.mjs"
+
 step "Mobile: typecheck + lint"
 cd "$ROOT/mobile"
 npx tsc --noEmit

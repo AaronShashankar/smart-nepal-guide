@@ -21,6 +21,7 @@ from app.models.content import (
 )
 from app.models.ml import MlModel, RiskPrediction, TrainingSample
 from app.models.packing import PackingItem, PackingItemTranslation
+from app.models.safety import EmergencyContact, SosEvent, SymptomCheck
 from app.models.trip import DismissedItem, Review, Trip, TripStop
 from app.models.user import Interest, InterestTranslation, TravellerProfile, User, UserInterest
 
@@ -31,6 +32,7 @@ __all__ = [
     "Category",
     "CategoryTranslation",
     "DismissedItem",
+    "EmergencyContact",
     "Interest",
     "InterestTranslation",
     "MlModel",
@@ -45,7 +47,9 @@ __all__ = [
     "PlaceTranslation",
     "Review",
     "RiskPrediction",
+    "SosEvent",
     "StageTranslation",
+    "SymptomCheck",
     "Teahouse",
     "TeahouseTranslation",
     "TrainingSample",

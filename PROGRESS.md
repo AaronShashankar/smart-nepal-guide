@@ -1,6 +1,6 @@
 # Bato: progress so far
 
-*Status on 2026-11-23. Everything below is on the `main` branch, and all new work happens there.*
+*Status on 2026-11-24. Everything below is on the `main` branch, and all new work happens there.*
 
 Bato (बाटो) is a bilingual (English / नेपाली) app for travelling in Nepal. You can discover places,
 plan a trip, and check how hard and risky a trek is **for you**, with the reasons shown.
@@ -20,13 +20,13 @@ Every task, bug, test case and decision is tracked in the
 | **Version 2 Phase 2:** recommendations, reviews, Near me, budget, share a trip, teahouses | Done: *Near me* passes on a real phone (TC-47) |
 | **UI redesign:** "Bato App Redesign" canvas | Done: checked on a real phone in both languages (V2-UI-01) |
 | **Search & recommendations (V2-SR):** college → real product | Stage 1 core built (V2-SR-01 … 10, plus 14: search by city and trek region): smarter search and recommendations, measured; tested on the emulator in English. Left: TC-66 (admin tags, Nepali labels) and NEAR_YOU on a real phone. Stage 1 extras (V2-SR-11 … 13) and Stages 2–3 planned in [search-recommendation.md](docs/product/search-recommendation.md) |
-| **Version 2 Phase 3:** safety & offline | Not started |
-| **Automated checks** | 249 backend tests; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
-| **Manual test cases** | 67 written; 65 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66 not run yet |
+| **Version 2 Phase 3:** safety & offline | Core built (2026-11-24): emergency contacts, SOS by SMS with GPS and an offline queue, the Lake Louise symptom checker, 53 new tests. The backend is tested; the app screens still need a real-phone run with mobile data off (TC-68 to TC-76). Stretch (daily check-in, offline treks) not started |
+| **Automated checks** | 302 backend tests; the app's Lake Louise copy passes the same 17 cases; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
+| **Manual test cases** | 76 written; 65 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66 and the 9 safety cases (TC-68 to TC-76) not run yet |
 | **Bugs** | 18 logged; 17 fixed; BUG-06 fixed a second time and waiting for a phone re-test |
 
-**Size of the code** (Python and TypeScript only): backend ≈ 8,300 lines, mobile app ≈ 8,100 lines,
-admin panel ≈ 3,500 lines.
+**Size of the code** (Python and TypeScript only, 2026-11-24): backend ≈ 10,300 lines, mobile app ≈ 10,300 lines,
+admin panel ≈ 3,600 lines.
 
 ## Timeline
 
@@ -43,6 +43,7 @@ admin panel ≈ 3,500 lines.
 | 2026-11-23 | Search and recommendations, Stage 1 (V2-SR-01 … 10): transliteration, search by village/district/category/initials, a 43-query search test set; recommendations learn from feedback, use the risk model, nearby bonus, MMR variety, "Not interested" with Undo, place tags. Migration 0006 | `ea72cef` |
 | 2026-11-23 | Search by city and trek region (V2-SR-14): `area` table and `data/areas.csv`, "pokhara" lists all 3 Pokhara sights, "kathmandu valley" all 8, "khumbu" the EBC Trek; area shown in the app and editable in the admin panel; 8 new search test cases (51 in all). Migration 0007. Search opens the tab that has results and shows counts ("Places · 8", BUG-18) | not committed yet |
 | 2026-11-24 | Docs reorganised (V2-DOC-03): backend-only docs (algorithm, database, ML results, survey, benchmark reports) moved to `backend/docs/`; `runlocal.md` and `filestructure.md` moved into `docs/`; every link and every script output path updated | not committed yet |
+| 2026-11-24 | V2 Phase 3 Core (V2-P3-01, 02, 03, 07): emergency contacts, SOS by SMS with GPS and an offline queue, the Lake Louise symptom checker with history, sourced emergency numbers, safety test mode, admin counts. Migration 0008, 53 new tests (302 in all), TC-68 to TC-76 written | not committed yet |
 
 ---
 
@@ -95,6 +96,15 @@ admin panel ≈ 3,500 lines.
 - **Recommendations learn:** from your reviews, trips and the new **×  Not interested** (with Undo). Treks that are risky for you this month go down; places near you (if location is already allowed) or near your latest trip go up; the list is varied (MMR); new reasons such as "Suits your fitness this month" and "Near you".
 - **Place tags** (sunrise, mountain views, pilgrimage, UNESCO…) on the place page, editable in the admin panel.
 
+### Version 2 Phase 3 Core: safety on the trail
+Built on 2026-11-24; the screens still need a run on a real phone with mobile data off.
+- **Emergency contacts:** up to 5 people (Settings → Safety). `98…` is saved as `+977…`. A copy stays on the phone, so SOS works with no internet. The fixed numbers (Police 100, Tourist Police 1144, Ambulance 102, Fire 101) come with the app, each checked against two government travel pages.
+- **SOS:** hold the red button for 2 seconds (a ring fills, the phone vibrates). Bato gets the GPS position (or the last known one, with its time), writes the message with a map link and opens the SMS app to your contacts; you press Send. With no contacts, it calls the Tourist Police. This needs no mobile data. The record waits in an offline queue and reaches the server when you are online, saved once even if it is sent twice.
+- **Altitude sickness check:** "How do you feel?" on the itinerary and the trek page. The four Lake Louise questions plus three danger signs give **OK**, **Rest: don't go higher today** or **Descend now**, with the reasons. It works offline; the server scores it again and keeps a history (Settings → My symptom checks).
+- **Disclaimer** on every safety screen: Bato is not a rescue service and not medical advice.
+- **Test mode:** test numbers in `mobile/.env` replace the emergency numbers, with a yellow banner, so SOS can be tried without calling the police.
+- **Admin dashboard:** counts of SOS events and symptom checks.
+
 ### UI redesign (from the Claude Design canvas)
 - **New look:**
   - Nepal-crimson actions and navy panels
@@ -122,6 +132,8 @@ All of these are written by hand. scikit-learn is used only to compare the risk 
 | Levenshtein edit distance (after pg_trgm finds candidates) | Fuzzy search | [levenshtein.py](backend/app/algorithms/levenshtein.py), [search.py](backend/app/services/search.py) |
 | Weighted scoring | Best time to visit | [best_time.py](backend/app/algorithms/best_time.py) |
 | Rule-based checker | Acclimatisation (more than 500 m gained in a day above 3,000 m; rest days) | [acclimatisation.py](backend/app/algorithms/acclimatisation.py) |
+| **Lake Louise AMS score (2018)**, the same code on the phone and the server | Altitude sickness check | [lake_louise.py](backend/app/algorithms/lake_louise.py), [lakeLouise.ts](mobile/src/lib/lakeLouise.ts) |
+| Offline queue with ids made on the phone (sent once, in order) | SOS events and symptom checks made without internet | [safety.ts](mobile/src/lib/safety.ts), [services/safety.py](backend/app/services/safety.py) |
 | **CART decision tree (Gini)** | Risk model | [tree.py](backend/app/ml/tree.py) |
 | **Random forest** (bootstrap, √n features, vote) | Risk model, the one in use | [forest.py](backend/app/ml/forest.py) |
 | Decision-path tracing | "Why this rating?" | [reasons.py](backend/app/ml/reasons.py) |
@@ -170,23 +182,26 @@ All seed data is in [data/](data/), with a source and date for each item in [dat
 | `budget_rates.csv` | 18 sourced budget rates |
 | `teahouses.csv` | 4 teahouses |
 | `climate_baseline.csv` and `climate_regions.csv` | Kathmandu's monthly weather plus a rain factor for each district, used for the best-time scores |
+| `emergency_numbers.csv` | Police 100, Tourist Police 1144, Ambulance 102, Fire 101, each with its source; the app ships a copy so they show offline |
 
-The database is PostgreSQL 16 with 7 migrations: Phase 1, Phase 2, Phase 3, V2 Phase 2, V2 Phase 1, V2-SR (place tags, `name_latin`, `dismissed_item`), then V2-SR-14 (`area`, `place.area_id`).
+The database is PostgreSQL 16 with 8 migrations: Phase 1, Phase 2, Phase 3, V2 Phase 2, V2 Phase 1, V2-SR (place tags, `name_latin`, `dismissed_item`), V2-SR-14 (`area`, `place.area_id`), then V2 Phase 3 (`emergency_contact`, `sos_event`, `symptom_check`).
 
 ## Testing and quality
 
 - **Automated:** [`./scripts/verify.sh`](scripts/verify.sh) runs all of these:
   - backend ruff lint and format check
   - a check that the migrations match the models
-  - 249 pytest tests
+  - 302 pytest tests
+  - the app's copy of the Lake Louise score against the same 17 cases as the backend
   - mobile typecheck and lint
   - admin typecheck, build and lint
-- **Manual test cases:** 67 cases, TC-01 to TC-67, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
+- **Manual test cases:** 76 cases, TC-01 to TC-76, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
   - All were run on the emulator (Phone 1). The layout cases, TC-47 (Near me, real GPS) and TC-51 were run on a
     real phone (Phone 2: Samsung Galaxy A07, 720 × 1600) on 2026-11-23.
   - TC-59 to TC-61 (login and register forms) were added on 2026-11-23 and pass on both phones.
   - TC-62 to TC-66 (search and recommendations) were added on 2026-11-23; TC-62 to TC-65 pass on the emulator, TC-66 (admin tags, Nepali labels) is not run yet.
   - TC-67 (search by city and trek region) was added on 2026-11-23 and passes on the emulator.
+  - TC-68 to TC-76 (safety: contacts, SOS, symptom checker) were added on 2026-11-24. They need a real phone with a SIM and are not run yet.
   - 64 pass. TC-01 failed on Phone 2: two Nepali buttons on the welcome screen were cut (BUG-06). It is fixed
     again and passes on the emulator; it needs one more check on the phone.
 - **Bugs:** 18 logged in the tracker. The ones worth knowing:
@@ -242,6 +257,7 @@ The database is PostgreSQL 16 with 7 migrations: Phase 1, Phase 2, Phase 3, V2 P
 - Stage 2 (with real users) and Stage 3 (at scale) are Version 3 work (V3-SR-01 … 12).
 
 **Version 2:**
-- Phase 3 (safety & offline) is not started: emergency contacts, SOS by SMS, the symptom checker (Lake Louise score), a daily check-in, and offline treks.
+- Phase 3 Core (safety): run TC-68 to TC-76 on a real phone with test mode on and mobile data off (rebuild the development build first, for `expo-sms`), then mark V2-P3-01/02/03/07 done. Remove the test numbers from `mobile/.env` before any release build. Cite Roach et al. 2018 in the report.
+- Phase 3 Stretch, only if there is time: the daily check-in and offline treks. Otherwise they go to future scope with a Decisions row.
 - Optional extras: AI-translated drafts, retraining the model from the admin panel, and Bikram Sambat dates.
 - The admin page for packing items (an Extra task from V2 Phase 1).

@@ -225,6 +225,8 @@ class StatsOut(BaseModel):
     reviews: int
     risk_predictions: int
     predictions_by_level: dict[RiskLevel, int]
+    sos_events: int  # V2 Phase 3: counts only, no live tracking (future scope)
+    symptom_checks: int
 
 
 # -------------------------------------------------------------- budget rates

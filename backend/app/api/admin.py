@@ -19,6 +19,8 @@ from app.models import (
     PlaceTranslation,
     Review,
     RiskPrediction,
+    SosEvent,
+    SymptomCheck,
     Trek,
     TrekPermit,
     TrekTranslation,
@@ -79,6 +81,8 @@ def stats(db: Session = Depends(get_db)) -> StatsOut:
         reviews=count(Review),
         risk_predictions=count(RiskPrediction),
         predictions_by_level={level: by_level.get(level, 0) for level in RiskLevel},
+        sos_events=count(SosEvent),
+        symptom_checks=count(SymptomCheck),
     )
 
 

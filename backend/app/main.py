@@ -15,6 +15,7 @@ from app.api import (
     recommendations,
     reviews,
     risk,
+    safety,
     search,
     shared,
     treks,
@@ -64,8 +65,8 @@ def health() -> dict[str, str]:
 
 
 for module in (
-    auth, me, lookups, places, treks, search, risk, trips, reviews, recommendations, shared, admin,
-    admin_community,
+    auth, me, lookups, places, treks, search, risk, trips, reviews, recommendations, shared, safety,
+    admin, admin_community,
 ):  # fmt: skip
     app.include_router(module.router)
 

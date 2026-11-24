@@ -5,11 +5,14 @@ import { useAuth } from '@/store/auth';
 import { useSettings } from '@/store/settings';
 
 import { api } from './api';
+import { cacheContacts } from './safety';
 import type {
   Acclimatisation,
   AltitudeProfile,
   Budget,
   Category,
+  EmergencyContact,
+  EmergencyContactInput,
   Interest,
   Itinerary,
   Me,
@@ -30,6 +33,7 @@ import type {
   SearchResult,
   SharedTrip,
   ShareLinks,
+  SymptomCheckOut,
   Teahouse,
   TrekDetail,
   TrekSummary,
@@ -484,4 +488,47 @@ export function useRefreshDetail(type: ReviewTarget['type'], id: string | undefi
     setRefreshing(false);
   }, [client, type, id]);
   return { refreshing, onRefresh };
+}
+
+// ------------------------------------------------- V2 Phase 3: safety (Core)
+
+/** The user's emergency contacts. Every load is also kept on the phone, so SOS works offline. */
+export function useEmergencyContacts() {
+  const token = useAuth((s) => s.accessToken);
+  return useQuery({
+    queryKey: ['emergency-contacts'],
+    queryFn: async () => {
+      const contacts = await get<EmergencyContact[]>('/me/emergency-contacts');
+      await cacheContacts(contacts);
+      return contacts;
+    },
+    enabled: !!token,
+  });
+}
+
+export function useSaveContact() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, body }: { id?: string; body: EmergencyContactInput }) =>
+      id
+        ? (await api.patch<EmergencyContact>(`/me/emergency-contacts/${id}`, body)).data
+        : (await api.post<EmergencyContact>('/me/emergency-contacts', body)).data,
+    onSuccess: () => client.invalidateQueries({ queryKey: ['emergency-contacts'] }),
+  });
+}
+
+export function useDeleteContact() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => api.delete(`/me/emergency-contacts/${id}`),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['emergency-contacts'] }),
+  });
+}
+
+export function useSymptomHistory() {
+  const lang = useLang();
+  return useQuery({
+    queryKey: ['symptom-checks', lang],
+    queryFn: () => get<SymptomCheckOut[]>('/me/symptom-checks'),
+  });
 }

@@ -45,7 +45,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Bato uses your location only to list the places closest to you."
+          "locationWhenInUsePermission": "Bato uses your location to list the places closest to you, and to put it in your SOS message and altitude check."
         }
       ],
       "expo-status-bar",

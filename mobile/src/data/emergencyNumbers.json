@@ -1,0 +1,34 @@
+[
+  {
+    "code": "tourist_police",
+    "phone": "1144",
+    "name_en": "Tourist Police",
+    "name_ne": "पर्यटक प्रहरी",
+    "note_en": "Hotline, English spoken",
+    "note_ne": "हटलाइन, अंग्रेजी बोलिन्छ"
+  },
+  {
+    "code": "police",
+    "phone": "100",
+    "name_en": "Police",
+    "name_ne": "प्रहरी",
+    "note_en": "Nepal Police emergency line",
+    "note_ne": "नेपाल प्रहरीको आपतकालीन नम्बर"
+  },
+  {
+    "code": "ambulance",
+    "phone": "102",
+    "name_en": "Ambulance",
+    "name_ne": "एम्बुलेन्स",
+    "note_en": "Medical emergency",
+    "note_ne": "स्वास्थ्य आपतकाल"
+  },
+  {
+    "code": "fire",
+    "phone": "101",
+    "name_en": "Fire brigade",
+    "name_ne": "दमकल",
+    "note_en": "Fire and rescue",
+    "note_ne": "आगलागी र उद्धार"
+  }
+]

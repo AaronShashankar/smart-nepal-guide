@@ -16,6 +16,7 @@ derived from the slugs/codes, so updates happen in place).
 | `packing_items.csv` | 34 | **V2 Phase 1.** Packing checklist rules: code, group (clothing / gear / health / documents), sort order, and the conditions `always`, `min_altitude_m`, `months` (`;`-separated, e.g. `12;1;2`; only winter or monsoon months) and `min_days`, with English + Nepali name and tip. Nepali text is an AI draft to review. Permits are not listed here: they come from each trek's permits |
 | `place_tags.csv` | 24 | **V2-SR-07.** What each non-village place offers beyond its category, space-separated: `sunrise`, `mountain_views`, `hiking`, `boating`, `wildlife`, `pilgrimage`, `unesco`, `architecture`, `local_culture`, `family`, `high_altitude` (only above 4,000 m), `few_crowds`. Used by recommendations and shown on the place page. The list of allowed tags is `PLACE_TAGS` in `backend/app/models/enums.py`. Tagged from general knowledge of each place (UNESCO = the Kathmandu Valley, Chitwan and Lumbini listings); edit them in the admin panel |
 | `areas.csv` | 6 | **V2-SR-14.** Cities and trek regions that search understands even though they are not districts: Kathmandu Valley, Pokhara, Everest region (Khumbu), Annapurna, Langtang, Manaslu. Columns: `code`, `name_en`, `name_ne`, `other_names` (`\|`-separated, e.g. `Pokhara\|Lakeside\|पोखरा`), `places` (space-separated place slugs). A place can be in only one area; 63 of 69 places have one. For a trek region the code equals the trek's `region` (lower case), so "khumbu" also finds the EBC Trek |
+| `emergency_numbers.csv` | 4 | **V2 Phase 3.** Police 100, Tourist Police 1144, Ambulance 102, Fire brigade 101: `code`, `phone`, English + Nepali name and note, and the **source** of each. Shown on the safety screens; the app ships a copy (`mobile/src/data/emergencyNumbers.json`, a test checks it matches) so the numbers show offline. See "Emergency numbers" below |
 | `photos.csv` | 63 | Wikimedia Commons photos with **author, licence and source page** (for the report) |
 | `climate_baseline.csv`, `climate_regions.csv` | | inputs to the approximate climate model below |
 | `training_samples.csv` | 592 | risk-model training rows (Phase 2): 32 `agency` + 560 `rule` (+ `survey` rows when added). **Generated** by `cd backend && uv run python -m app.ml.dataset [--survey form.csv]`, don't edit by hand; the labelling rules are in `backend/app/ml/dataset.py` |
@@ -126,6 +127,28 @@ Wi-Fi, hot shower, price and phone are left **empty (= not known)** because no s
 Add more from agency itineraries, ACAP lists or your own survey, always with the source. Never invent
 a lodge or a phone number. Dropped: "Hotel Himalaya" (listed in a Tengboche-area guide, but it was not
 clear that it is in Tengboche itself).
+
+## Emergency numbers (V2 Phase 3, checked 2026-11-24)
+Every number is in **two government travel pages**, which agree:
+
+| Number | Service | Sources |
+|---|---|---|
+| 1144 | Tourist Police (hotline, English spoken) | UK government, gov.uk "Nepal travel advice", *Getting help*; Government of Canada, travel.gc.ca "Nepal", *Emergency services* (page modified 2026-03-18) |
+| 100 | Police | same two pages |
+| 102 | Ambulance | same two pages |
+| 101 | Fire brigade | same two pages |
+
+**Left out on purpose:** the Himalayan Rescue Association (HRA) and embassy numbers. HRA's own website
+lists two different office numbers (01-4440292 and 01-4540292), and Kathmandu landlines are being
+renumbered, so we can't tell which one is right; a wrong rescue number is worse than none. Add it only
+once it is confirmed, with its source (manual task #22). We also don't say the numbers are toll-free: no source says so.
+
+If you change a number, change it in **both** `data/emergency_numbers.csv` and
+`mobile/src/data/emergencyNumbers.json` (the same rows without the `source` column);
+`test_app_copy_of_emergency_numbers_matches_the_csv` fails until they match.
+
+**Testing:** never test SOS with these real numbers. `EXPO_PUBLIC_SAFETY_TEST_NUMBERS` in `mobile/.env`
+swaps them for test numbers in the app (see `docs/runlocal.md`); this file is not changed.
 
 ## Climate model (approximate)
 `place_climate` (used for "best time to visit") is **estimated**, not measured:

@@ -1,0 +1,90 @@
+{
+  "about": "Shared test table for the Lake Louise AMS score (2018). Read by backend/tests/test_safety.py (app/algorithms/lake_louise.py) and scripts/check-lake-louise.mjs (mobile/src/lib/lakeLouise.ts), so the two copies cannot drift apart. Fields: headache, gi, fatigue, dizziness (0-3), red_flags (codes); expected total, severity (none/mild/moderate/severe), result (ok/rest/descend) and reasons.",
+  "cases": [
+    {
+      "name": "no symptoms",
+      "answers": { "headache": 0, "gi": 0, "fatigue": 0, "dizziness": 0, "red_flags": [] },
+      "expect": { "total": 0, "severity": "none", "result": "ok", "reasons": ["LOW_SCORE"] }
+    },
+    {
+      "name": "total 2 with a headache: below the AMS line",
+      "answers": { "headache": 1, "gi": 1, "fatigue": 0, "dizziness": 0, "red_flags": [] },
+      "expect": { "total": 2, "severity": "none", "result": "ok", "reasons": ["LOW_SCORE"] }
+    },
+    {
+      "name": "total 3 with a headache: mild AMS",
+      "answers": { "headache": 1, "gi": 1, "fatigue": 1, "dizziness": 0, "red_flags": [] },
+      "expect": { "total": 3, "severity": "mild", "result": "rest", "reasons": ["AMS_MILD"] }
+    },
+    {
+      "name": "headache alone scores 3: mild AMS",
+      "answers": { "headache": 3, "gi": 0, "fatigue": 0, "dizziness": 0, "red_flags": [] },
+      "expect": { "total": 3, "severity": "mild", "result": "rest", "reasons": ["AMS_MILD"] }
+    },
+    {
+      "name": "plan demo: 2 + 1 + 1 + 0 = 4, rest",
+      "answers": { "headache": 2, "gi": 1, "fatigue": 1, "dizziness": 0, "red_flags": [] },
+      "expect": { "total": 4, "severity": "mild", "result": "rest", "reasons": ["AMS_MILD"] }
+    },
+    {
+      "name": "total 5: still mild",
+      "answers": { "headache": 2, "gi": 1, "fatigue": 1, "dizziness": 1, "red_flags": [] },
+      "expect": { "total": 5, "severity": "mild", "result": "rest", "reasons": ["AMS_MILD"] }
+    },
+    {
+      "name": "total 6: moderate, descend",
+      "answers": { "headache": 2, "gi": 2, "fatigue": 1, "dizziness": 1, "red_flags": [] },
+      "expect": { "total": 6, "severity": "moderate", "result": "descend", "reasons": ["AMS_MODERATE"] }
+    },
+    {
+      "name": "total 9: still moderate",
+      "answers": { "headache": 3, "gi": 2, "fatigue": 2, "dizziness": 2, "red_flags": [] },
+      "expect": { "total": 9, "severity": "moderate", "result": "descend", "reasons": ["AMS_MODERATE"] }
+    },
+    {
+      "name": "plan demo: 3 + 2 + 3 + 2 = 10, severe",
+      "answers": { "headache": 3, "gi": 2, "fatigue": 3, "dizziness": 2, "red_flags": [] },
+      "expect": { "total": 10, "severity": "severe", "result": "descend", "reasons": ["AMS_SEVERE"] }
+    },
+    {
+      "name": "highest score 12",
+      "answers": { "headache": 3, "gi": 3, "fatigue": 3, "dizziness": 3, "red_flags": [] },
+      "expect": { "total": 12, "severity": "severe", "result": "descend", "reasons": ["AMS_SEVERE"] }
+    },
+    {
+      "name": "no headache, total 2: ok",
+      "answers": { "headache": 0, "gi": 1, "fatigue": 1, "dizziness": 0, "red_flags": [] },
+      "expect": { "total": 2, "severity": "none", "result": "ok", "reasons": ["LOW_SCORE"] }
+    },
+    {
+      "name": "no headache, total 3: not AMS, but rest",
+      "answers": { "headache": 0, "gi": 1, "fatigue": 1, "dizziness": 1, "red_flags": [] },
+      "expect": { "total": 3, "severity": "none", "result": "rest", "reasons": ["NO_HEADACHE"] }
+    },
+    {
+      "name": "no headache, total 6: not AMS (no moderate), but rest",
+      "answers": { "headache": 0, "gi": 2, "fatigue": 2, "dizziness": 2, "red_flags": [] },
+      "expect": { "total": 6, "severity": "none", "result": "rest", "reasons": ["NO_HEADACHE"] }
+    },
+    {
+      "name": "plan demo: a red flag with total 0 still means descend",
+      "answers": { "headache": 0, "gi": 0, "fatigue": 0, "dizziness": 0, "red_flags": ["confusion"] },
+      "expect": { "total": 0, "severity": "none", "result": "descend", "reasons": ["RED_FLAG_CONFUSION", "LOW_SCORE"] }
+    },
+    {
+      "name": "breathless at rest with mild AMS: descend",
+      "answers": { "headache": 1, "gi": 1, "fatigue": 1, "dizziness": 0, "red_flags": ["breathless"] },
+      "expect": { "total": 3, "severity": "mild", "result": "descend", "reasons": ["RED_FLAG_BREATHLESS", "AMS_MILD"] }
+    },
+    {
+      "name": "worse after a rest day: descend",
+      "answers": { "headache": 1, "gi": 0, "fatigue": 1, "dizziness": 0, "red_flags": ["worse_after_rest"] },
+      "expect": { "total": 2, "severity": "none", "result": "descend", "reasons": ["RED_FLAG_WORSE_AFTER_REST", "LOW_SCORE"] }
+    },
+    {
+      "name": "red flags are listed once, in a fixed order",
+      "answers": { "headache": 0, "gi": 0, "fatigue": 2, "dizziness": 2, "red_flags": ["worse_after_rest", "confusion", "breathless", "confusion"] },
+      "expect": { "total": 4, "severity": "none", "result": "descend", "reasons": ["RED_FLAG_BREATHLESS", "RED_FLAG_CONFUSION", "RED_FLAG_WORSE_AFTER_REST", "NO_HEADACHE"] }
+    }
+  ]
+}

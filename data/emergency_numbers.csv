@@ -1,0 +1,5 @@
+code,phone,name_en,name_ne,note_en,note_ne,source
+tourist_police,1144,Tourist Police,पर्यटक प्रहरी,"Hotline, English spoken","हटलाइन, अंग्रेजी बोलिन्छ","gov.uk Nepal travel advice (Getting help); travel.gc.ca Nepal (modified 2026-03-18)"
+police,100,Police,प्रहरी,Nepal Police emergency line,नेपाल प्रहरीको आपतकालीन नम्बर,"gov.uk Nepal travel advice (Getting help); travel.gc.ca Nepal (modified 2026-03-18)"
+ambulance,102,Ambulance,एम्बुलेन्स,Medical emergency,स्वास्थ्य आपतकाल,"gov.uk Nepal travel advice (Getting help); travel.gc.ca Nepal (modified 2026-03-18)"
+fire,101,Fire brigade,दमकल,Fire and rescue,आगलागी र उद्धार,"gov.uk Nepal travel advice (Getting help); travel.gc.ca Nepal (modified 2026-03-18)"

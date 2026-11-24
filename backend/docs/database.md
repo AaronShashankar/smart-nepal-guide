@@ -10,7 +10,7 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](../../docs/design/te
 
 | Decision | Choice | Reason |
 |---|---|---|
-| Primary keys | **UUID** | The app creates records offline (trips, check-ins) before syncing; UUIDs avoid ID clashes |
+| Primary keys | **UUID** | The app creates records offline (SOS events, symptom checks) before syncing; UUIDs avoid ID clashes, and sending the same record twice saves it once |
 | Translations | **One translation table per entity** (`place_translation`, `trek_translation`, …) | Real foreign keys, clean ER diagram, a new language needs no schema change |
 | Location | Plain `latitude` / `longitude` (numeric) | Haversine is implemented in our own code; PostGIS not needed |
 | Places vs treks | Separate tables; a trek is a sequence of **stages**, each stage goes **from one place to another** | Altitude is stored once (on the place); sleeping altitude = destination place's altitude |
@@ -79,7 +79,7 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](../../docs/design/te
 
 **user_interest** — user_id (FK), interest_id (FK); PK (user_id, interest_id)
 
-**emergency_contact** — id (PK), user_id (FK), name, phone, relation
+**emergency_contact** *(V2 Phase 3, migration 0008)* — id (PK), user_id (FK, cascade), name, phone (E.164, e.g. `+9779812345678`), email (nullable), relation (nullable), sort_order, updated_at, deleted_at (soft delete). At most **5** active contacts per user (checked by the API, `MAX_EMERGENCY_CONTACTS`). Index `(user_id, sort_order)`. The phone keeps a copy so SOS works offline.
 
 **device_token** — id (PK), user_id (FK), fcm_token (unique), platform (android/ios), created_at
 
@@ -181,11 +181,11 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](../../docs/design/te
 
 ### E. Safety
 
-**sos_event** — id (PK), user_id (FK), latitude, longitude, message, sent_at
+**sos_event** *(V2 Phase 3, migration 0008)* — id (PK, **made by the phone**), user_id (FK, cascade), latitude, longitude (both nullable: null when the phone had no position), accuracy_m (nullable), message (the SMS text), sent_at (the phone's time), created_at (when the server got it). The SMS itself goes from the phone; this row only records that an SOS was sent. It may arrive hours later, from the phone's offline queue; a second copy of the same id is ignored (`ON CONFLICT DO NOTHING`).
 
-**check_in** — id (PK), trip_id (FK), user_id (FK), due_at, checked_in_at, status (check_in_status), latitude, longitude
+**check_in** *(V2 Phase 3 Stretch, not built yet)* — id (PK), trip_id (FK), user_id (FK), due_at, checked_in_at, status (check_in_status), latitude, longitude
 
-**symptom_check** — id (PK), user_id (FK), trek_id (FK, nullable), altitude_m, headache, gi_symptoms, fatigue, dizziness (each 0–3), total_score, result (symptom_result), created_at
+**symptom_check** *(V2 Phase 3, migration 0008)* — id (PK, **made by the phone**), user_id (FK, cascade), trek_id (FK, nullable, set null), altitude_m (nullable), headache, gi_symptoms, fatigue, dizziness (each 0–3, CHECK `scores_0_to_3`), red_flags (text[]: `confusion`, `breathless`, `worse_after_rest`), total_score, result (symptom_result), checked_at (the phone's time), created_at. The server works out total_score and result again with the Lake Louise score ([algorithm.md](algorithm.md)); it never stores the phone's. Like `sos_event`, it can arrive later from the offline queue.
 
 ### F. Community
 
@@ -262,4 +262,7 @@ erDiagram
 - `trek_stage (trek_id, day_no)` unique
 - `updated_at` on every syncable table — offline delta sync
 - `risk_prediction (user_id, created_at)` — user history
-- `check_in (status, due_at)` — missed check-in job
+- `check_in (status, due_at)` — missed check-in job *(Stretch, not built yet)*
+- `emergency_contact (user_id, sort_order)` — a user's contacts in order
+- `sos_event (user_id)` — a user's SOS events
+- `symptom_check (user_id, created_at)` — "My symptom checks", newest first

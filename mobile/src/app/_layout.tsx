@@ -103,6 +103,11 @@ export default function RootLayout() {
           <Stack.Screen name="profile" options={{ title: t('profile.title') }} />
           <Stack.Screen name="predictions" options={{ title: t('risk.history') }} />
           <Stack.Screen name="teahouses/[placeId]" options={{ title: '' }} />
+          {/* V2 Phase 3 safety: these draw their own page header */}
+          <Stack.Screen name="safety" options={{ headerShown: false }} />
+          <Stack.Screen name="emergency-contacts" options={{ headerShown: false }} />
+          <Stack.Screen name="symptoms/index" options={{ headerShown: false }} />
+          <Stack.Screen name="symptoms/history" options={{ headerShown: false }} />
         </Stack.Protected>
         {/* A shared trip link works logged in or not (only the language must be chosen) */}
         <Stack.Protected guard={!!language}>

@@ -25,6 +25,7 @@ import {
   StatTiles,
 } from '@/components/Layout';
 import { ReviewsSection } from '@/components/Reviews';
+import { SafetyCard } from '@/components/Safety';
 import { RatingBadge } from '@/components/Stars';
 import { QueryState } from '@/components/StateViews';
 import { days, km, meters, npr, regionName } from '@/lib/format';
@@ -203,6 +204,8 @@ export default function TrekDetailScreen() {
           )}
 
           <ItineraryCard trek={tr} />
+
+          <SafetyCard trekId={tr.id} />
 
           {tr.start_place && tr.end_place && (
             <Section title={t('trek.route')}>

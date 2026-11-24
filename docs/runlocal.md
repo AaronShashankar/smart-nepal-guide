@@ -41,8 +41,8 @@ cp backend/.env.example backend/.env    # then put a random value in JWT_SECRET
 ```
 
 This runs:
-- **backend:** ruff lint and format check, a check that the migrations match the models, and the 209 pytest tests;
-- **mobile:** the TypeScript typecheck and ESLint;
+- **backend:** ruff lint and format check, a check that the migrations match the models, and the 302 pytest tests;
+- **mobile:** the app's copy of the Lake Louise score against the backend's 17 test cases, the TypeScript typecheck and ESLint;
 - **admin:** the build and lint.
 
 The run is good if it ends with **"All checks passed."**
@@ -53,7 +53,9 @@ distance from Kathmandu to Pokhara, and (Phase 2) the acclimatisation rules on t
 neighbour, 2-opt against brute force, the day split, the trips API, every admin route, photo upload,
 and blocking; (V2 Phase 2) the Bayesian average (4.17 vs 4.48), one review per user, hidden reviews,
 cosine similarity and the recommendations, Near me from Thamel, the Valley budget by hand, permits by
-nationality, share links (and that they stop working), and teahouses. The manual test cases for the report are in [docs/testing/testing.md](testing/testing.md); the order to run them
+nationality, share links (and that they stop working), and teahouses; (V2 Phase 3) the Lake Louise
+score, emergency contacts (`98…` → `+977…`, at most 5, only your own), SOS events and symptom checks
+saved once even when sent twice, and the admin counts. The manual test cases for the report are in [docs/testing/testing.md](testing/testing.md); the order to run them
 in and how to check each one is in [docs/testing/testing-guide.md](testing/testing-guide.md).
 
 ---
@@ -187,6 +189,31 @@ rebuild the development build once (`cd mobile && npx expo run:android`), run `u
 - [ ] EBC → **Packing list** → January → down jacket, microspikes, −10 °C sleeping bag, each with its reason; KPLRM + SNP under documents. Poon Hill → October → a much shorter list
 - [ ] Tick a few items → close the app fully → reopen → ticks still there; **Clear ticks** empties them
 - [ ] Switch to नेपाली → chart labels, forecast, reasons and the packing list in Nepali with Devanagari digits
+
+### Check the V2 Phase 3 Core demo (safety)
+First time only: `expo-sms` is a native package, so rebuild the development build once
+(`cd mobile && npx expo run:android`), and run `cd backend && uv run alembic upgrade head` (migration 0008).
+Use a **real phone with a SIM**: the emulator has no SMS app.
+
+**Test mode (always use it when testing SOS).** Put two phone numbers you own in `mobile/.env`:
+
+```
+EXPO_PUBLIC_SAFETY_TEST_NUMBERS=98XXXXXXXX,98XXXXXXXX
+```
+
+then restart Metro with `npx expo start -c` (Expo reads `EXPO_PUBLIC_*` values when it bundles the app,
+so a running Metro won't see the change). Every emergency number (Police, Tourist Police, Ambulance,
+Fire) and the number SOS calls when you have no contacts become those test numbers, in turn, and a
+yellow **TEST MODE** banner shows on the safety screens. `.env` is gitignored, so the numbers never
+reach GitHub. **Delete the line and restart Metro to get the real numbers back** (always before a
+release build).
+
+- [ ] Settings → **Emergency contacts** → add one of the test numbers as `98…` → saved as `+977…`; the fixed numbers below it open the dialler
+- [ ] Settings → **SOS & emergency numbers** → a quick tap does nothing; hold SOS 2 s → ring + vibration → the SMS app opens to the contact with your location and a map link → Send → it arrives
+- [ ] Mobile data and Wi-Fi off → hold SOS → the SMS still goes; back online → admin dashboard **SOS events** +1
+- [ ] EBC → Itinerary → **How do you feel?** → 2,1,1,0 → **Rest** (4); 3,2,3,2 → **Descend now** (10); only "Confusion" ticked → **Descend now**
+- [ ] A check made offline → "Saved on this phone…" → **My symptom checks** says 1 waiting → online, pull to refresh → it is in the list
+- [ ] Switch to नेपाली → the disclaimer and the safety screens are in Nepali; the SMS link still works
 
 ---
 

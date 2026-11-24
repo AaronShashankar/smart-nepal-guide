@@ -9,6 +9,7 @@ import { AppText } from '@/components/AppText';
 import { Button, IconButton } from '@/components/Button';
 import { CategoryIcon, Section } from '@/components/Cards';
 import { ListCard, ListRow, PageHeader, StatTiles } from '@/components/Layout';
+import { SafetyCard } from '@/components/Safety';
 import { Screen } from '@/components/Screen';
 import { QueryState } from '@/components/StateViews';
 import { dayColor, TripMap } from '@/components/TripMap';
@@ -363,6 +364,7 @@ export default function TripScreen() {
               )}
               {tr.is_optimised && <TripBudget trip={tr} />}
               {tr.stops.length > 0 && <ShareButtons trip={tr} />}
+              {tr.stops.length > 0 && <SafetyCard />}
               {tr.stops.length === 0 && (
                 <Button
                   title={t('trips.addPlaces')}
