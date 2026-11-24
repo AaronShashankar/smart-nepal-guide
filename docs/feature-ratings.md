@@ -125,7 +125,7 @@ model feature (this needs new training data).
 - *Update 2026-11-23 (V2-SR-08 … 10, score 9 → 9.5):* our own Devanagari → Latin transliteration
   (every name gets a saved `name_latin`), word-by-word matching, villages find the treks through
   them, districts and categories list their places, trek initials ("ebc"). A 43-query test set
-  runs in pytest ([search_quality.md](search_quality.md)).
+  runs in pytest ([search_quality.md](../backend/docs/benchmarks/search_quality.md)).
 - *Update 2026-11-23 (V2-SR-14):* search by city and trek region. "pokhara" found only Phewa Lake
   (Pokhara is a city in Kaski district, not a district); now it lists all 3 Pokhara sights,
   "kathmandu valley" all 8 valley sights, "khumbu" the EBC Trek. With 8 city cases the test set is
@@ -210,7 +210,7 @@ each recommendation says why ("Because you like culture")
 trips and the new "Not interested" (× with Undo) change the user's vector; items must share an
 interest or tag (12 place tags) with the user, others only fill the list as "Something different to
 explore"; treks risky for you this month go down; places near you or your latest trip go up; MMR
-makes the list varied (λ chosen by measuring: [recommend_quality.md](recommend_quality.md)).
+makes the list varied (λ chosen by measuring: [recommend_quality.md](../backend/docs/benchmarks/recommend_quality.md)).
 What still holds it back: the weights are still set by hand, and nobody outside the project has
 used it, so we can't measure whether people like the suggestions.
 
@@ -341,7 +341,7 @@ opened still show offline.
 **What works well:** distance matrix, nearest neighbour, then 2-opt with an O(1) check per swap,
 then a greedy split into days. A brute-force solver measures how good it is: on average 2-opt is
 within 1.5% of the best route for 8 places ([algorithms/route.py](../backend/app/algorithms/route.py),
-[route_gap.md](route_gap.md)). Only the owner can see a trip.
+[route_gap.md](../backend/docs/benchmarks/route_gap.md)). Only the owner can see a trip.
 
 **What holds it back**
 - The API accepts a start point (the phone's location or the hotel), but the app always sends

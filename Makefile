@@ -70,7 +70,7 @@ seed: services ## Reload data/ into the database (overwrites admin edits to seed
 train: services ## Retrain the risk model
 	$(UV) python -m app.ml.train
 
-evaluate: ## Rebuild the model comparison and figures in docs/ml/
+evaluate: ## Rebuild the model comparison and figures in backend/docs/ml/
 	$(UV) python -m app.ml.evaluate
 
 create-admin: services ## Create an admin account: make create-admin EMAIL=you@example.com PASSWORD='long-password'

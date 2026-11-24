@@ -10,7 +10,7 @@ Steps:
 4. train our DecisionTree and RandomForest, evaluate both on the test part
 5. save each with joblib to backend/models/, insert ml_model rows, and mark the one with the
    higher macro F1 as active (the API picks it up on the next request)
-6. write the numbers to docs/ml/metrics.json (used by app.ml.evaluate and the report)
+6. write the numbers to backend/docs/ml/metrics.json (used by app.ml.evaluate and the report)
 """
 
 import argparse
@@ -35,7 +35,7 @@ from app.models.enums import MlAlgorithm
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 MODELS_DIR = BACKEND_DIR / "models"
-METRICS_FILE = BACKEND_DIR.parent / "docs" / "ml" / "metrics.json"
+METRICS_FILE = BACKEND_DIR / "docs" / "ml" / "metrics.json"
 SEED = 42
 DEPTHS = range(3, 9)
 

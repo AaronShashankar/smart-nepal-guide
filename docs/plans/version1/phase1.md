@@ -3,7 +3,7 @@
 **Weeks:** about 4–6 of the semester (Gantt "Sprint 1: auth, profile, explore, map")
 **Goal:** a working app on a real phone where a traveller can sign up, fill in a profile, browse and search places and treks, and see them on a map, in English or Nepali.
 
-Next: [phase2.md](phase2.md) · Plan sources: [feature.md](../../design/feature.md), [techstack.md](../../design/techstack.md), [database.md](../../design/database.md), [algorithm.md](../../design/algorithm.md)
+Next: [phase2.md](phase2.md) · Plan sources: [feature.md](../../design/feature.md), [techstack.md](../../design/techstack.md), [database.md](../../../backend/docs/database.md), [algorithm.md](../../../backend/docs/algorithm.md)
 
 ---
 
@@ -45,7 +45,7 @@ Next: [phase2.md](phase2.md) · Plan sources: [feature.md](../../design/feature.
 
 ## 2. Database (Alembic migrations)
 
-Create these tables from [database.md](../../design/database.md) (everything Explore needs, including trek stages so Phase 2 can start straight away):
+Create these tables from [database.md](../../../backend/docs/database.md) (everything Explore needs, including trek stages so Phase 2 can start straight away):
 
 - [x] Extension `pg_trgm`; all enums
 - [x] `user`, `traveller_profile`, `interest` + `interest_translation`, `user_interest`

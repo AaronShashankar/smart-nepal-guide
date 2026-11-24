@@ -1,7 +1,7 @@
 # Bato (Smart Nepal Tourist & Trek Guide) — Tech Stack
 
 Drafted 2026-11-05. Languages: **English (primary)**, **Nepali (secondary)**.
-See also: [feature.md](feature.md) · [algorithm.md](algorithm.md) · [project-notes.md](project-notes.md)
+See also: [feature.md](feature.md) · [algorithm.md](../../backend/docs/algorithm.md) · [project-notes.md](project-notes.md)
 
 ---
 

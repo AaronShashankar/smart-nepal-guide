@@ -26,18 +26,18 @@
 One app for travelling in Nepal: discover places, plan trips, and check how hard and risky a trek is for *you*.
 
 👉 Full feature list (all features kept): [feature.md](feature.md)
-👉 Algorithms, functions & protocols: [algorithm.md](algorithm.md)
+👉 Algorithms, functions & protocols: [algorithm.md](../../backend/docs/algorithm.md)
 👉 Tech stack & bilingual (EN/NE) design: [techstack.md](techstack.md)
 👉 **Project proposal (Google Doc, TU format, main version):** https://docs.google.com/document/d/1ItoAqAYN_T6jpiHhWCCFgAL4HXguSMz05pMJYDvOo_I/edit
 👉 Earlier proposal draft (Claude Doc): https://claude.ai/artifact/7EkBuAA5aXwQUqiYopfJKL
 👉 Architecture diagram image for Figure 1: [docs/diagrams/architecture.png](../diagrams/architecture.png)
-👉 Database design (full schema): [database.md](database.md) · ER diagram image: [docs/diagrams/er_diagram.png](../diagrams/er_diagram.png)
+👉 Database design (full schema): [database.md](../../backend/docs/database.md) · ER diagram image: [docs/diagrams/er_diagram.png](../diagrams/er_diagram.png)
 👉 Use case diagram: [docs/diagrams/use_case_diagram.png](../diagrams/use_case_diagram.png) (source: docs/diagrams/make_use_case_diagram.py)
 👉 **UI redesign (design canvas: 8 screens + style sheet, private until shared from its Share menu):** https://claude.ai/artifact/XyZ7XFUVMygZw38axdfPK2
 👉 **Project tracker (Google Sheet, source of truth for every task, bug, test case and decision):** https://docs.google.com/spreadsheets/d/1LWie4PGyiRj2xzo-zmTeK6Zd2-Rd_LAcVR2xOdkE33I/edit
 👉 **Version 1 implementation plan:** [Phase 1 — setup, users, explore](../plans/version1/phase1.md) · [Phase 2 — itinerary & AI risk predictor](../plans/version1/phase2.md) · [Phase 3 — trip planner, admin, release](../plans/version1/phase3.md)
 👉 **Version 2 implementation plan:** [Overview](../plans/version2/README.md) · [Phase 1 — smart trek features](../plans/version2/phase1.md) · [Phase 2 — personalisation & community](../plans/version2/phase2.md) · [Phase 3 — safety & offline](../plans/version2/phase3.md)
-👉 **Search & recommendations, college → real product:** [plan and status (Stage 1–3)](../product/search-recommendation.md) · measured: [search quality](../search_quality.md) · [recommendation variety](../recommend_quality.md)
+👉 **Search & recommendations, college → real product:** [plan and status (Stage 1–3)](../product/search-recommendation.md) · measured: [search quality](../../backend/docs/benchmarks/search_quality.md) · [recommendation variety](../../backend/docs/benchmarks/recommend_quality.md)
 👉 **Beyond college (after the defense):** [Product scope report](../product/beyond-college.md) · Version 3 plan: [Overview](../plans/version3/README.md) · [Phase 1 — validate](../plans/version3/phase1.md) · [Phase 2 — launch-ready](../plans/version3/phase2.md) · [Phase 3 — agency pilot & business](../plans/version3/phase3.md)
 👉 DFD: [Level 0 / context](../diagrams/dfd_level0.png) · [Level 1](../diagrams/dfd_level1.png) (source: docs/diagrams/make_dfd.py, Yourdon/DeMarco notation)
   - Level 1 processes: 1.0 Explore & Recommend, 2.0 Register & Manage Profile, 3.0 Predict Trek Risk, 4.0 Plan Trip, 5.0 Handle Safety, 6.0 Translate Content, 7.0 Manage Content, 8.0 Train & Evaluate Model

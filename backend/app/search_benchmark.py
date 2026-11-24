@@ -1,6 +1,6 @@
 """Search quality test set (V2-SR-10): does the right place or trek come up, and how high?
 
-    uv run python -m app.search_benchmark      # writes docs/search_quality.md
+    uv run python -m app.search_benchmark  # writes backend/docs/benchmarks/search_quality.md
 
 Each case is a query someone could really type, and the place or trek that should come back.
 For each case we look up the expected item's position (rank) in the results of its type:
@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 from app.models.enums import Lang
 from app.services.search import search_places, search_treks
 
-OUT = Path(__file__).resolve().parents[2] / "docs" / "search_quality.md"
+OUT = Path(__file__).resolve().parents[1] / "docs" / "benchmarks" / "search_quality.md"
 LIMIT = 10
 # The same cases run once against the search code before V2 (plain Levenshtein on names only,
 # MIN_SCORE 0.6, no transliteration / district / category / village / initials), 2026-11-23.

@@ -1,6 +1,6 @@
 """How close is nearest neighbour + 2-opt to the exact answer? (for the report)
 
-    uv run python -m app.algorithms.route_benchmark      # writes docs/route_gap.md
+    uv run python -m app.algorithms.route_benchmark  # writes backend/docs/benchmarks/route_gap.md
 
 For 5-8 random places in the Kathmandu valley area (200 trips each, fixed seeds) it compares
 the route length of nearest neighbour, nearest neighbour + 2-opt, and brute force (exact).
@@ -17,7 +17,7 @@ from app.algorithms.route import (
     two_opt,
 )
 
-OUT = Path(__file__).resolve().parents[3] / "docs" / "route_gap.md"
+OUT = Path(__file__).resolve().parents[2] / "docs" / "benchmarks" / "route_gap.md"
 TRIPS = 200
 
 

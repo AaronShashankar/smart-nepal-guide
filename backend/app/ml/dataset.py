@@ -8,7 +8,7 @@ Three sources, recorded in the `source` column (write these rules in the report)
 1. agency  - each trek's published difficulty (treks.json `base_difficulty`) for a typical
              trekker: age 30, medium fitness, some experience (beginner), no health issue,
              in the main seasons (Mar, Apr, Oct, Nov).
-2. survey  - answers to docs/survey/trekker-survey.md. Label = "How hard was it?", raised to
+2. survey  - answers to backend/docs/survey/trekker-survey.md. Label = "How hard was it?", raised to
              `risky` for severe altitude sickness or turning back, and easy -> moderate for
              strong symptoms.
 3. rule    - generated people/months on our 8 treks, labelled with the scoring rule below, then
@@ -191,7 +191,7 @@ MONTHS = {
 
 
 def survey_label(hard: str, symptoms: str, finished: str) -> str:
-    """The labelling rule from docs/survey/trekker-survey.md."""
+    """The labelling rule from backend/docs/survey/trekker-survey.md."""
     label = hard.strip().lower().split()[0]  # "Risky (unsafe for me)" -> "risky"
     symptoms, finished = symptoms.lower(), finished.lower()
     if symptoms.startswith("severe") or finished.startswith("turned back"):
@@ -202,7 +202,7 @@ def survey_label(hard: str, symptoms: str, finished: str) -> str:
 
 
 def survey_rows(path: Path, treks: list[TrekInfo]) -> list[dict]:
-    """Google Form CSV export, columns in the order of docs/survey/trekker-survey.md.
+    """Google Form CSV export, columns in the order of backend/docs/survey/trekker-survey.md.
 
     The first column is the Timestamp; the 11 answers follow.
 

@@ -1,4 +1,4 @@
-"""Figures and tables for the report and the defense (saved in docs/ml/).
+"""Figures and tables for the report and the defense (saved in backend/docs/ml/).
 
     uv run python -m app.ml.evaluate
 
@@ -33,7 +33,7 @@ from app.ml.metrics import Report, evaluate, stratified_split  # noqa: E402
 from app.ml.train import SEED, cross_validate_depth, load_dataset  # noqa: E402
 from app.ml.tree import DecisionTree  # noqa: E402
 
-OUT_DIR = Path(__file__).resolve().parents[3] / "docs" / "ml"
+OUT_DIR = Path(__file__).resolve().parents[2] / "docs" / "ml"
 N_TREES = 50
 FOREST_DEPTH = 8
 

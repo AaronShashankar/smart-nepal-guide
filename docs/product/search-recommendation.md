@@ -3,8 +3,8 @@
 **Date:** 2026-11-23 · **Status:** Stage 1 core built (V2-SR-01 … V2-SR-10, V2-SR-14); 04, 07 and 09 wait for a last manual check; the rest is planned.
 **Tracker:** rows `V2-SR-00` … `V2-SR-14` and `V3-SR-01` … `V3-SR-12` in the
 [Bato Project Tracker](https://docs.google.com/spreadsheets/d/1LWie4PGyiRj2xzo-zmTeK6Zd2-Rd_LAcVR2xOdkE33I/edit).
-**How the algorithms work:** [algorithm.md → V2-SR](../design/algorithm.md#v2-sr-better-search-and-recommendations).
-**Measured results:** [search_quality.md](../search_quality.md), [recommend_quality.md](../recommend_quality.md).
+**How the algorithms work:** [algorithm.md → V2-SR](../../backend/docs/algorithm.md#v2-sr-better-search-and-recommendations).
+**Measured results:** [search_quality.md](../../backend/docs/benchmarks/search_quality.md), [recommend_quality.md](../../backend/docs/benchmarks/recommend_quality.md).
 
 ---
 
@@ -45,7 +45,7 @@ active users, and a search engine like Meilisearch is not needed for 69 places a
 
 ### Results we measured
 
-**Search** (same 51 queries, [search_quality.md](../search_quality.md); "before" = the old search code run on the same queries):
+**Search** (same 51 queries, [search_quality.md](../../backend/docs/benchmarks/search_quality.md); "before" = the old search code run on the same queries):
 
 | | Before V2-SR | After |
 |---|---|---|
@@ -54,7 +54,7 @@ active users, and a search engine like Meilisearch is not needed for 69 places a
 | MRR | 0.604 | **0.906** |
 | Made-up words that return nothing | 67% | **100%** |
 
-**Recommendations** (6 typical new users, top 10, [recommend_quality.md](../recommend_quality.md)):
+**Recommendations** (6 typical new users, top 10, [recommend_quality.md](../../backend/docs/benchmarks/recommend_quality.md)):
 MMR with λ = 0.75 raises variety by about 37% and the kinds of item in a list from 2.2 to 3.3,
 and costs only about 2% of relevance; λ = 0.6 costs over 6%.
 
@@ -87,7 +87,7 @@ and costs only about 2% of relevance; λ = 0.6 costs over 6%.
   always searched too.
 - Category and tag weights are set by hand (tables in algorithm.md), not learned.
 - The risk factor uses the same model as the risk screen: it is only as good as that model,
-  which is still trained mostly on rule-labelled rows (see [ml/](../ml/)).
+  which is still trained mostly on rule-labelled rows (see [ml/](../../backend/docs/ml/)).
 - Nearby bonus without GPS uses the latest trip, which may be an old one.
 - hit@1 is lower than for the first 43 queries (92%) because a city query ("pokhara") has several right answers: only one of them can be first, so the city cases are judged on hit@3.
 - Places in one city or region are listed in name order; nothing yet says which is the most important (V2-SR-11 could use ratings).

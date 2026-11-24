@@ -61,10 +61,10 @@ Builds on the V2 offline trek pack (`V2-P3-06`), which has everything except the
 
 ## 6. Real data for the risk model (`V3-P2-06`) — Core
 
-- [ ] After a trip's end date, ask "How did your trek go?" with the same questions as the [survey](../../survey/trekker-survey.md); **ask for consent** to use the answer for training
+- [ ] After a trip's end date, ask "How did your trek go?" with the same questions as the [survey](../../../backend/docs/survey/trekker-survey.md); **ask for consent** to use the answer for training
 - [ ] Answers → `training_sample` with `source = app_survey`
 - [ ] Retrain once there are **200+ real answers**; report accuracy on **real rows only** next to the old numbers
-- [ ] `docs/ml/model-card.md`: training data (real vs rule-generated share), accuracy, known limits, "not medical advice"
+- [ ] `backend/docs/ml/model-card.md`: training data (real vs rule-generated share), accuracy, known limits, "not medical advice"
 - [ ] In the app, show "based on N trekkers" next to the rating once N is real
 
 ## 7. Content freshness (`V3-P2-07`) — Extra

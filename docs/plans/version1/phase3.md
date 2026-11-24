@@ -3,7 +3,7 @@
 **Weeks:** about 10–12 (Gantt "Sprint 3"), then testing and release before Version 2 work starts
 **Goal:** a traveller can build a trip and get the best visiting order split into days; an admin can manage all content from the web panel; Version 1 is tested and installed as an APK.
 
-Previous: [phase2.md](phase2.md) · Algorithms: [algorithm.md](../../design/algorithm.md)
+Previous: [phase2.md](phase2.md) · Algorithms: [algorithm.md](../../../backend/docs/algorithm.md)
 
 **Status (2026-11-06): code done.** Trip planner (backend + mobile), admin API and admin panel are
 built; 129 backend tests pass, and the mobile and admin typecheck, lint and build are clean. Still open (yours): app icon,

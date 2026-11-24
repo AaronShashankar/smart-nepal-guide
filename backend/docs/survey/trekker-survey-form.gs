@@ -12,7 +12,7 @@
  * IMPORTANT: do not reorder the questions or rename the answer options. The import script
  * (backend/app/ml/dataset.py, survey_rows) reads the CSV columns by position and matches
  * the answers by their text (for example "EBC", "Jan", "None", "Severe", "Turned back").
- * Questions are in the same order as docs/survey/trekker-survey.md.
+ * Questions are in the same order as backend/docs/survey/trekker-survey.md.
  */
 function createTrekkerSurvey() {
   var form = FormApp.create('Trekking in Nepal: how hard was it?');

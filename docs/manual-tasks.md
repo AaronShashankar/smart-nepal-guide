@@ -5,7 +5,7 @@ your presence. Each task says **how to do it on this laptop**, **how to check it
 **where to record it**. The code work that remains (V2 Phase 1 and Phase 3) is not listed here.
 
 Run every command from the repository root (`smart-nepal-guide/`) unless a step says otherwise.
-Starting the servers is covered in [../runlocal.md](../runlocal.md), and the 40 test cases in
+Starting the servers is covered in [../runlocal.md](runlocal.md), and the 40 test cases in
 [testing-guide.md](testing/testing-guide.md).
 
 **Tracker** means the **Bato Project Tracker** Google Sheet. Update it as you go: set the task to
@@ -81,7 +81,7 @@ laptop's real address.
 
 **Do:**
 1. Open https://script.google.com → **New project**. Delete the sample code and paste all of
-   [trekker-survey-form.gs](survey/trekker-survey-form.gs). Save.
+   [trekker-survey-form.gs](../backend/docs/survey/trekker-survey-form.gs). Save.
 2. Choose `createTrekkerSurvey` at the top → **Run**. Allow the permissions the first time
    (Advanced → Go to project → Allow; it is your own script).
 3. Open **Execution log**: it prints the link to share, the edit link and the responses sheet.
@@ -171,7 +171,7 @@ text. After data changes, run `cd backend && uv run python -m app.seed`.
 ## 6. Phase 1 demo on a phone
 
 **Do:** follow the **Check the demo (the Phase 1 "Done when" list)** checklist in
-[../runlocal.md](../runlocal.md), section 3, on a **real Android phone**. It is the same as Sessions A and B in
+[../runlocal.md](runlocal.md), section 3, on a **real Android phone**. It is the same as Sessions A and B in
 [testing-guide.md](testing/testing-guide.md), so you can do both at once.
 
 **Check:** every box in that checklist behaves as written.
@@ -192,8 +192,8 @@ cd backend && uv run python -m app.ml.evaluate
 **Check:**
 - EBC → itinerary shows 11 days; days 3 and 6 are rest days; days 2, 5 and 7 have **Caution**.
 - Fitness *Medium*, experience *None*, EBC, January → **Risky** with 3 reasons.
-- `docs/ml/comparison.md` and the `.png` figures have today's modification time:
-  `ls -l docs/ml`.
+- `backend/docs/ml/comparison.md` and the `.png` figures have today's modification time:
+  `ls -l backend/docs/ml`.
 
 **Record:** V1-P2-13 → **Done**. Practise the demo twice; time it (aim for under 10 minutes).
 
@@ -320,8 +320,8 @@ uv run python -m app.ml.evaluate
 **Check:**
 - The dataset step prints `sources: … survey=N`. N should equal the number of responses. If it's
   lower, some rows didn't match a trek or had a missing answer: check the CSV's column order.
-- `docs/ml/data_sources.png` now shows a **survey** bar.
-- `docs/ml/comparison.md`: compare the accuracy with the old value (forest 0.814). It may go up or
+- `backend/docs/ml/data_sources.png` now shows a **survey** bar.
+- `backend/docs/ml/comparison.md`: compare the accuracy with the old value (forest 0.814). It may go up or
   down. Either is fine; write down why.
 - In the app, **Check my risk** still works (no "No trained model yet" error).
 - `./scripts/verify.sh` passes.
@@ -495,8 +495,8 @@ These are scope decisions for V2 Phase 3. Claude can build either option once yo
 |---|---|
 | System design | ER, use case, DFD and class diagrams (`docs/diagrams/`) |
 | Algorithms | Levenshtein search, Haversine, CART and random forest, nearest neighbour + 2-opt, cosine similarity, Bayesian average |
-| ML results | `docs/ml/comparison.md` and the figures (after #12) |
-| Route results | `docs/route_gap.md` |
+| ML results | `backend/docs/ml/comparison.md` and the figures (after #12) |
+| Route results | `backend/docs/benchmarks/route_gap.md` |
 | Testing | `docs/testing/testing.md` with results (#10) and the Bugs tab |
 | Screenshots | `docs/screenshots/` (#8) |
 | References | Sources from `data/README.md` (#3, #4) |

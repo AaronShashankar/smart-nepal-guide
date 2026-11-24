@@ -1,6 +1,6 @@
 # Bato (Smart Nepal Tourist & Trek Guide) — Algorithms, Functions & Protocols
 
-Drafted 2026-11-05. See [feature.md](feature.md) for the feature list (all features kept).
+Drafted 2026-11-05. See [feature.md](../../docs/design/feature.md) for the feature list (all features kept).
 
 ---
 
@@ -60,7 +60,7 @@ Drafted 2026-11-05. See [feature.md](feature.md) for the feature list (all featu
 
 ### Version 2 Phase 2: how they were built (with worked examples for the report)
 
-**1. Reviews: Bayesian average** ([rating.py](../../backend/app/algorithms/rating.py)).
+**1. Reviews: Bayesian average** ([rating.py](../app/algorithms/rating.py)).
 `score = (C·m + Σ ratings) / (C + n)`, where n = visible reviews of the item, m = mean of all visible
 reviews in the app (3.0 before the first review), C = 5. Hidden reviews are not counted. Worked example
 with m = 4.0: one 5★ review → (5·4 + 5) / 6 = **4.17**; twenty reviews averaging 4.6★ → (5·4 + 92) / 25 =
@@ -69,8 +69,8 @@ pulls both items towards m.) Lists get the rating from one grouped query (`GROUP
 `sort=rating` uses the same formula in SQL.
 
 **2. Recommended for you: content-based filtering + cosine similarity**
-([similarity.py](../../backend/app/algorithms/similarity.py),
-[recommend.py](../../backend/app/services/recommend.py)).
+([similarity.py](../app/algorithms/similarity.py),
+[recommend.py](../app/services/recommend.py)).
 Every item is a vector `[nature, culture, adventure, religious, season_fit, budget_fit]`.
 
 | Category | nature | culture | adventure | religious |
@@ -100,11 +100,11 @@ u = [0, 1, 0, 1, 1, 1], ‖u‖ = 2.
 
 So the temple comes first and the lake last (`test_cosine_worked_example_for_the_report`).
 
-**3. Near me: bounding box + Haversine** ([geo_box.py](../../backend/app/algorithms/geo_box.py)).
+**3. Near me: bounding box + Haversine** ([geo_box.py](../app/algorithms/geo_box.py)).
 Box half-size Δlat = r / 111 km, Δlng = r / (111 km · cos lat) → indexed `BETWEEN` filter in SQL →
 exact Haversine for each candidate → drop the box corners (distance > r) → sort by distance.
 
-**4. Budget estimate: formula-based** ([budget.py](../../backend/app/services/budget.py)).
+**4. Budget estimate: formula-based** ([budget.py](../app/services/budget.py)).
 Per person, NPR, rates from `budget_rate`:
 - **Trip** = days × (food + stay)[level, city] + total_km × transport rate[level, city] + Σ entry fees[nationality]
 - **Trek** = days × (food + stay)[level, region] + Σ permits[nationality] + trailhead return trip[level, region]
@@ -118,10 +118,10 @@ the token is the only key; a wrong token, a stopped share and a deleted trip all
 
 ### V2-SR: better search and recommendations
 
-Plan and status: [search-recommendation.md](../product/search-recommendation.md). Measured with our own
-test sets: [search_quality.md](../search_quality.md), [recommend_quality.md](../recommend_quality.md).
+Plan and status: [search-recommendation.md](../../docs/product/search-recommendation.md). Measured with our own
+test sets: [search_quality.md](benchmarks/search_quality.md), [recommend_quality.md](benchmarks/recommend_quality.md).
 
-**1. Devanagari → Latin transliteration** ([transliterate.py](../../backend/app/algorithms/transliterate.py)).
+**1. Devanagari → Latin transliteration** ([transliterate.py](../app/algorithms/transliterate.py)).
 Each word is split into syllables: a consonant carries the inherent "a" (क = ka), a vowel sign replaces
 it (कि = ki), the virama ् removes it (क्त = kt). Then **schwa deletion** drops the "a" Nepali does not
 say: at the end of a word (नगरकोट → nagarkot) unless it follows a consonant cluster (क्षेत्र → kshetra),
@@ -129,12 +129,12 @@ and inside a word in the pattern vowel + C(a) + C + vowel, scanning right to lef
 सगरमाथा → sagarmatha). Every place and trek name also gets a saved `name_latin`, and a Devanagari query
 is searched in both scripts.
 
-**2. Word-by-word similarity** ([levenshtein.py](../../backend/app/algorithms/levenshtein.py)).
+**2. Word-by-word similarity** ([levenshtein.py](../app/algorithms/levenshtein.py)).
 Plain Levenshtein punishes extra words: "chitwan nikunja" vs "chitwan rashtriya nikunja" scores 0.6.
 Word similarity matches each query word with its best word in the name and averages, weighted by word
 length (here 1.0). Score = max(plain, 0.95 × word similarity) → 0.95.
 
-**3. Search over more than names** ([search.py](../../backend/app/services/search.py)).
+**3. Search over more than names** ([search.py](../app/services/search.py)).
 Candidates also come from districts (score × 0.9), cities and trek regions (× 0.88, below), categories
 (× 0.85), villages on a trek (× 0.95, shown as "Passes through …") and trek initials ("ebc"). Rules from
 the test set: anything below 0.7 is dropped, and a query shorter than 5 letters needs 0.85 ("lake" must
@@ -151,7 +151,7 @@ same match also finds the treks there. 0.88 is just below the district weight, s
 the Kathmandu district places first, then Patan and Bhaktapur. The app shows the area under each hit
 ("Viewpoints · Pokhara").
 
-**4. Recommendations, step by step** ([recommend.py](../../backend/app/services/recommend.py)).
+**4. Recommendations, step by step** ([recommend.py](../app/services/recommend.py)).
 
 1. *Vectors with tags.* Item = 4 interests + 12 tags × 0.5 + season_fit + budget_fit (18 numbers).
    The user gets the tags their interests suggest, e.g. religious → pilgrimage 1, unesco 0.3.
@@ -180,7 +180,7 @@ while Bhaktapur Durbar Square (heritage, score 0.888, sim 0.384) gets 0.75 × 0.
 ### Version 2 Phase 1: how they were built (with worked examples for the report)
 
 **1. Altitude graph: linear interpolation**
-([altitude_profile.py](../../backend/app/algorithms/altitude_profile.py)).
+([altitude_profile.py](../app/algorithms/altitude_profile.py)).
 Each day gives up to three known points: where it starts, the day's highest point (only when it is
 higher than both ends, placed in the middle of the day) and where you sleep. Between two known points
 the altitude is assumed to change in a straight line:
@@ -192,8 +192,8 @@ sleeping place at *d*, so rest days stay visible as flat steps. Each segment tak
 day's acclimatisation status, so the chart and the day badges always agree.
 
 **2. Safer alternatives: K-nearest neighbours + the risk model**
-([knn.py](../../backend/app/algorithms/knn.py),
-[alternatives.py](../../backend/app/services/alternatives.py)).
+([knn.py](../app/algorithms/knn.py),
+[alternatives.py](../app/services/alternatives.py)).
 1. Every published trek becomes a vector `[max sleeping altitude, max daily gain, total days, km per day]`.
 2. **Min-max normalisation** per column, `x' = (x − min) / (max − min)`, so metres don't outweigh days
    (a column where every trek is equal becomes 0).
@@ -210,7 +210,7 @@ Annapurna Base Camp (Hard, *lower altitude* 5,644 → 4,130 m) and Annapurna Cir
 Nothing is saved to the risk history.
 
 **3. Weather forecast: cache-aside with a time-to-live (Redis)**
-([cache.py](../../backend/app/core/cache.py), [weather.py](../../backend/app/services/weather.py)).
+([cache.py](../app/core/cache.py), [weather.py](../app/services/weather.py)).
 1. Look in Redis under `weather:{lat:.2f}:{lng:.2f}`. Rounding to 2 decimals (about 1 km) lets nearby
    places share one entry. Found → **HIT**.
 2. Not found → call Open-Meteo (free, no key, 5 s timeout), save the answer for **3,600 s** → **MISS**.
@@ -223,8 +223,8 @@ sleeping place** (the coldest night), e.g. Gorak Shep (5,164 m) for EBC. Checked
 MISS, then HIT; TTL 3,600 s and 86,400 s.
 
 **4. Packing checklist: rule-based expert system**
-([packing.py](../../backend/app/algorithms/packing.py),
-[services/packing.py](../../backend/app/services/packing.py)).
+([packing.py](../app/algorithms/packing.py),
+[services/packing.py](../app/services/packing.py)).
 - **Knowledge base:** one rule per item in `packing_item` (34 rules, `data/packing_items.csv`). A rule
   is either `always`, or has up to three conditions: `min_altitude_m` (the trek's highest point is at
   least this), `months` (the chosen month is one of these) and `min_days`.

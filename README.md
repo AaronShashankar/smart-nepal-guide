@@ -27,15 +27,15 @@ Redesign" canvas. V2 Phase 3 (safety & offline) is not started. All work happens
 | [docs/](docs/) | Design docs, diagrams, phase plans, testing, survey, ML results, screenshots | Markdown, see [docs/README.md](docs/README.md) |
 | [scripts/](scripts/) | `start-demo.sh` (start everything), `verify.sh` (all checks) | Bash |
 
-**To run and check everything locally, follow [runlocal.md](runlocal.md).** One command runs all automated checks: `./scripts/verify.sh`.
+**To run and check everything locally, follow [runlocal.md](docs/runlocal.md).** One command runs all automated checks: `./scripts/verify.sh`.
 
 The phase plans are in `docs/plans/` (Version 1: [phase1](docs/plans/version1/phase1.md), [phase2](docs/plans/version1/phase2.md), [phase3](docs/plans/version1/phase3.md); [Version 2](docs/plans/version2/README.md)).
-Every folder and important file is described in **[filestructure.md](filestructure.md)**.
+Every folder and important file is described in **[filestructure.md](docs/filestructure.md)**.
 
 ---
 
 > **Quick start on this laptop (V1 is hosted here):** after the first-time setup below, `./scripts/start-demo.sh`
-> starts the database, API, admin panel and Metro in one go (see [runlocal.md](runlocal.md) → Day-to-day).
+> starts the database, API, admin panel and Metro in one go (see [runlocal.md](docs/runlocal.md) → Day-to-day).
 
 ## 1. Backend
 
@@ -107,15 +107,15 @@ use the matching `*_translation` row, and fall back to English for a missing row
 - Haversine + nearest places: [backend/app/algorithms/haversine.py](backend/app/algorithms/haversine.py)
 - Levenshtein edit distance: [backend/app/algorithms/levenshtein.py](backend/app/algorithms/levenshtein.py)
 - Best time to visit (weighted scoring): [backend/app/algorithms/best_time.py](backend/app/algorithms/best_time.py)
-- Fuzzy search (trigram candidates → Levenshtein ranking, districts, cities and trek regions, categories, villages, initials): [backend/app/services/search.py](backend/app/services/search.py); test set: [search_benchmark.py](backend/app/search_benchmark.py) → [docs/search_quality.md](docs/search_quality.md)
+- Fuzzy search (trigram candidates → Levenshtein ranking, districts, cities and trek regions, categories, villages, initials): [backend/app/services/search.py](backend/app/services/search.py); test set: [search_benchmark.py](backend/app/search_benchmark.py) → [backend/docs/benchmarks/search_quality.md](backend/docs/benchmarks/search_quality.md)
 - Devanagari → Latin transliteration: [backend/app/algorithms/transliterate.py](backend/app/algorithms/transliterate.py)
-- Recommendations (cosine, learning from feedback, risk-aware, nearby, MMR): [backend/app/services/recommend.py](backend/app/services/recommend.py); λ benchmark: [recommend_benchmark.py](backend/app/recommend_benchmark.py) → [docs/recommend_quality.md](docs/recommend_quality.md)
+- Recommendations (cosine, learning from feedback, risk-aware, nearby, MMR): [backend/app/services/recommend.py](backend/app/services/recommend.py); λ benchmark: [recommend_benchmark.py](backend/app/recommend_benchmark.py) → [backend/docs/benchmarks/recommend_quality.md](backend/docs/benchmarks/recommend_quality.md)
 - Acclimatisation checker (rule-based): [backend/app/algorithms/acclimatisation.py](backend/app/algorithms/acclimatisation.py)
 - **CART decision tree (Gini), from scratch:** [backend/app/ml/tree.py](backend/app/ml/tree.py)
 - **Random forest (bootstrap + √n features + vote), from scratch:** [backend/app/ml/forest.py](backend/app/ml/forest.py)
 - "Why this rating?" (decision-path tracing): [backend/app/ml/reasons.py](backend/app/ml/reasons.py)
 - Metrics, stratified split, k-fold CV (hand-written): [backend/app/ml/metrics.py](backend/app/ml/metrics.py)
-- **Trip planner (distance matrix, nearest neighbour, 2-opt, brute force, greedy day split):** [backend/app/algorithms/route.py](backend/app/algorithms/route.py); 2-opt vs exact benchmark: [route_benchmark.py](backend/app/algorithms/route_benchmark.py) → [docs/route_gap.md](docs/route_gap.md)
+- **Trip planner (distance matrix, nearest neighbour, 2-opt, brute force, greedy day split):** [backend/app/algorithms/route.py](backend/app/algorithms/route.py); 2-opt vs exact benchmark: [route_benchmark.py](backend/app/algorithms/route_benchmark.py) → [backend/docs/benchmarks/route_gap.md](backend/docs/benchmarks/route_gap.md)
 - **V2 P2 · Bayesian average rating:** [backend/app/algorithms/rating.py](backend/app/algorithms/rating.py) (SQL version for `sort=rating`: [services/rating.py](backend/app/services/rating.py))
 - **V2 P2 · Cosine similarity (hand-written) + content-based recommender:** [algorithms/similarity.py](backend/app/algorithms/similarity.py), [services/recommend.py](backend/app/services/recommend.py) (the category → interest weight table is at the top)
 - **V2 P2 · Bounding box for Near me:** [algorithms/geo_box.py](backend/app/algorithms/geo_box.py), used in [api/places.py](backend/app/api/places.py)
@@ -128,7 +128,7 @@ cd backend
 uv run python -m app.ml.dataset    # rebuild data/training_samples.csv (add --survey form.csv for survey answers)
 uv run python -m app.seed          # load it into training_sample
 uv run python -m app.ml.train      # 5-fold CV for depth, train tree + forest, save to backend/models/, activate the better
-uv run python -m app.ml.evaluate   # figures + comparison with scikit-learn → docs/ml/
+uv run python -m app.ml.evaluate   # figures + comparison with scikit-learn → backend/docs/ml/
 ```
 
 - **Features (10):** max altitude, biggest one-day sleeping gain above 3,000 m, total days, km per
@@ -136,7 +136,7 @@ uv run python -m app.ml.evaluate   # figures + comparison with scikit-learn → 
   issue (heart condition or asthma). **Label:** easy / moderate / hard / risky.
 - **Data:** 592 rows = 32 agency ratings + 560 rule-generated rows (scoring rule and 8% label noise
   documented in [dataset.py](backend/app/ml/dataset.py)); survey answers are added with `--survey`.
-- **Current results** (118-row test set, seed 42), see [docs/ml/comparison.md](docs/ml/comparison.md):
+- **Current results** (118-row test set, seed 42), see [backend/docs/ml/comparison.md](backend/docs/ml/comparison.md):
 
   | Model | Accuracy | Macro F1 |
   |---|---|---|
@@ -228,7 +228,7 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
    heritage sites ("Because you like religious places"). Change to *Nature + Adventure*, pull to refresh →
    lakes, viewpoints and treks first. A new account with no interests sees **Popular now**.
 2. **Poon Hill** → **Write a review** → 4★ → it appears at once under "Your review". Admin panel →
-   Reviews → **Hide** → gone from the app. Ranking example: [algorithm.md](docs/design/algorithm.md) (4.17 vs 4.48).
+   Reviews → **Hide** → gone from the app. Ranking example: [algorithm.md](backend/docs/algorithm.md) (4.17 vs 4.48).
 3. Explore → **Near me** → allow location (emulator: Extended controls → Location → Thamel 27.7154, 85.3123)
    → Kathmandu Durbar Square first, "1.3 km away".
 4. Trips → **Valley** → Optimise → **Estimate budget** → food, stay, transport, entry fees for 2 days.
@@ -248,7 +248,7 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
 4. Settings → profile: experience *Experienced*, fitness *High* → check October → **Hard**, with
    different reasons (altitude and daily gain only).
 5. Settings → **My risk checks** shows both results.
-6. Show `docs/ml/comparison.md`, the confusion matrices and `feature_importance.png` (or run
+6. Show `backend/docs/ml/comparison.md`, the confusion matrices and `feature_importance.png` (or run
    `ml/evaluation.ipynb`): our tree and forest against scikit-learn on the same split.
 
 ## Demo script (Phase 3, final defense)
@@ -261,4 +261,4 @@ treks** (it never deletes what the admin added), so after the panel is in use, e
 4. Admin → **Treks → Everest Base Camp** → remove the two rest days → save → in the app the itinerary
    has 9 days and shows **Add rest** warnings. (Put them back afterwards, or run `app.seed`.)
 5. Admin → **Users** → block the traveller → the app logs out, and logging in says the account is blocked.
-6. Show [docs/route_gap.md](docs/route_gap.md) (2-opt vs exact answer) and [docs/testing/testing.md](docs/testing/testing.md).
+6. Show [backend/docs/benchmarks/route_gap.md](backend/docs/benchmarks/route_gap.md) (2-opt vs exact answer) and [docs/testing/testing.md](docs/testing/testing.md).

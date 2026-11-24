@@ -5,7 +5,7 @@
 Bato (बाटो) is a bilingual (English / नेपाली) app for travelling in Nepal. You can discover places,
 plan a trip, and check how hard and risky a trek is **for you**, with the reasons shown.
 This page sums up what has been built and checked so far, and what is still left.
-To set up and run the project, see [README.md](README.md) and [runlocal.md](runlocal.md).
+To set up and run the project, see [README.md](README.md) and [runlocal.md](docs/runlocal.md).
 Every task, bug, test case and decision is tracked in the
 [Bato Project Tracker](https://docs.google.com/spreadsheets/d/1LWie4PGyiRj2xzo-zmTeK6Zd2-Rd_LAcVR2xOdkE33I/edit).
 
@@ -42,6 +42,7 @@ admin panel ≈ 3,500 lines.
 | 2026-11-23 | UI redesign. Merged every branch into `main`. Fixed BUG-16 (Render Error on tappable cards). Feature ratings report. Login and register forms: placeholders, show-password button, keyboard no longer covers the form (BUG-17) | `f448f33`, `66cea3b` |
 | 2026-11-23 | Search and recommendations, Stage 1 (V2-SR-01 … 10): transliteration, search by village/district/category/initials, a 43-query search test set; recommendations learn from feedback, use the risk model, nearby bonus, MMR variety, "Not interested" with Undo, place tags. Migration 0006 | `ea72cef` |
 | 2026-11-23 | Search by city and trek region (V2-SR-14): `area` table and `data/areas.csv`, "pokhara" lists all 3 Pokhara sights, "kathmandu valley" all 8, "khumbu" the EBC Trek; area shown in the app and editable in the admin panel; 8 new search test cases (51 in all). Migration 0007. Search opens the tab that has results and shows counts ("Places · 8", BUG-18) | not committed yet |
+| 2026-11-24 | Docs reorganised (V2-DOC-03): backend-only docs (algorithm, database, ML results, survey, benchmark reports) moved to `backend/docs/`; `runlocal.md` and `filestructure.md` moved into `docs/`; every link and every script output path updated | not committed yet |
 
 ---
 
@@ -139,7 +140,7 @@ All of these are written by hand. scikit-learn is used only to compare the risk 
 | Bayesian average | Ratings | [rating.py](backend/app/algorithms/rating.py) |
 | Bounding box | Near me | [geo_box.py](backend/app/algorithms/geo_box.py) |
 
-**Risk model results** on a test set of 118 rows (seed 42). Full details are in [docs/ml/comparison.md](docs/ml/comparison.md).
+**Risk model results** on a test set of 118 rows (seed 42). Full details are in [docs/ml/comparison.md](backend/docs/ml/comparison.md).
 
 | Model | Accuracy | Macro F1 |
 |---|---|---|
@@ -202,18 +203,18 @@ The database is PostgreSQL 16 with 7 migrations: Phase 1, Phase 2, Phase 3, V2 P
 - **Design** ([docs/design/](docs/design/)):
   - [project-notes.md](docs/design/project-notes.md) (start here)
   - [feature.md](docs/design/feature.md)
-  - [algorithm.md](docs/design/algorithm.md)
+  - [algorithm.md](backend/docs/algorithm.md)
   - [techstack.md](docs/design/techstack.md)
-  - [database.md](docs/design/database.md)
+  - [database.md](backend/docs/database.md)
 - **Diagrams** ([docs/diagrams/](docs/diagrams/)): architecture, ER, use case, DFD level 0 and level 1, and the class diagram. They are drawn by Python scripts.
-- **Machine learning** ([docs/ml/](docs/ml/)): confusion matrices, feature importance, the CV depth chart and the data sources chart. There is also the [evaluation notebook](ml/evaluation.ipynb).
-- **Route benchmark** ([docs/route_gap.md](docs/route_gap.md)): how close 2-opt gets to the exact best route.
-- **Search and recommendation quality** ([docs/search_quality.md](docs/search_quality.md), [docs/recommend_quality.md](docs/recommend_quality.md)): search hit@1 60% → 83%, hit@3 60% → 100%, MRR 0.604 → 0.906 (51 queries); MMR adds 37% variety for 1.7% less relevance. Plan: [search-recommendation.md](docs/product/search-recommendation.md).
+- **Machine learning** ([docs/ml/](backend/docs/ml/)): confusion matrices, feature importance, the CV depth chart and the data sources chart. There is also the [evaluation notebook](ml/evaluation.ipynb).
+- **Route benchmark** ([docs/route_gap.md](backend/docs/benchmarks/route_gap.md)): how close 2-opt gets to the exact best route.
+- **Search and recommendation quality** ([docs/search_quality.md](backend/docs/benchmarks/search_quality.md), [docs/recommend_quality.md](backend/docs/benchmarks/recommend_quality.md)): search hit@1 60% → 83%, hit@3 60% → 100%, MRR 0.604 → 0.906 (51 queries); MMR adds 37% variety for 1.7% less relevance. Plan: [search-recommendation.md](docs/product/search-recommendation.md).
 - **Plans:**
   - Version 1 phases [1](docs/plans/version1/phase1.md), [2](docs/plans/version1/phase2.md) and [3](docs/plans/version1/phase3.md)
   - [Version 2](docs/plans/version2/README.md)
   - [Version 3](docs/plans/version3/README.md), with the [product scope report](docs/product/beyond-college.md)
-- **Survey:** [trekker survey](docs/survey/trekker-survey.md), and an Apps Script that builds the Google Form.
+- **Survey:** [trekker survey](backend/docs/survey/trekker-survey.md), and an Apps Script that builds the Google Form.
 - **Tooling:**
   - `make dev` starts the database and the API
   - [`scripts/start-demo.sh`](scripts/start-demo.sh) starts everything for a demo

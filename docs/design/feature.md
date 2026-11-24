@@ -113,5 +113,5 @@ Draft feature list (2026-11-05). Algorithms will be decided after the feature li
 
 ## Next step
 - [x] Finalise which features to keep or drop: **decided to keep every feature** (2026-11-05). The versions above are now the build order, not cuts.
-- [x] Match an algorithm to each smart feature, see [algorithm.md](algorithm.md)
-- [x] Decide main functions/APIs and protocols, see [algorithm.md](algorithm.md)
+- [x] Match an algorithm to each smart feature, see [algorithm.md](../../backend/docs/algorithm.md)
+- [x] Decide main functions/APIs and protocols, see [algorithm.md](../../backend/docs/algorithm.md)

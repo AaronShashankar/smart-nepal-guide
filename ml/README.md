@@ -12,7 +12,7 @@ The model code lives in the backend, so the API can load saved models:
 | `dataset.py` | Builds `data/training_samples.csv` (agency + survey + rule rows; the scoring rule is documented here) |
 | `metrics.py` | Accuracy, per-class precision/recall/F1, confusion matrix, stratified split, k-fold (hand-written) |
 | `train.py` | CV for `max_depth`, trains tree + forest, saves with joblib to `backend/models/`, activates the better |
-| `evaluate.py` | Report figures and the comparison with scikit-learn → `docs/ml/` |
+| `evaluate.py` | Report figures and the comparison with scikit-learn → `backend/docs/ml/` |
 | `registry.py` | Loads the active model for the API |
 
 [`evaluation.ipynb`](evaluation.ipynb) runs `evaluate.py` and shows every figure, plus one decision path.

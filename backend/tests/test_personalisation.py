@@ -526,7 +526,7 @@ def test_admin_place_has_three_fees(client, admin):
 
 
 def test_mmr_adds_variety_for_little_relevance(db):
-    """The λ choice (docs/recommend_quality.md) stays true when the data changes."""
+    """The λ choice (backend/docs/benchmarks/recommend_quality.md) holds when the data changes."""
     from app.recommend_benchmark import measure
 
     plain, used = measure(db, 1.0), measure(db, MMR_LAMBDA)

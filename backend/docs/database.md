@@ -1,8 +1,8 @@
 # Bato (Smart Nepal Tourist & Trek Guide) — Database Design
 
-Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](techstack.md), [algorithm.md](algorithm.md)
+Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](../../docs/design/techstack.md), [algorithm.md](algorithm.md)
 
-**ER diagram (core entities, for the report):** [docs/diagrams/er_diagram.png](../diagrams/er_diagram.png) · source: [docs/diagrams/er_diagram.svg](../diagrams/er_diagram.svg), regenerate with `python3 docs/diagrams/make_er_diagram.py`
+**ER diagram (core entities, for the report):** [docs/diagrams/er_diagram.png](../../docs/diagrams/er_diagram.png) · source: [docs/diagrams/er_diagram.svg](../../docs/diagrams/er_diagram.svg), regenerate with `python3 docs/diagrams/make_er_diagram.py`
 
 ---
 

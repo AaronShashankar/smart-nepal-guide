@@ -57,7 +57,7 @@ Version 2 work then happens on a branch (`git switch -c v2`), so `v1.0` always s
 3. **One migration per phase:** `0004_v2_phase1_…`, `0005_v2_phase2_…`, `0006_v2_phase3_…`. Autogenerate it, read it, then run `alembic upgrade head`.
 4. **Both languages.** Every new string goes into `en.json` and `ne.json`. Every new content table gets a `*_translation` table with the same English fallback as Version 1.
 5. **New native package = rebuild.** Use `npx expo install <pkg>`, then `npx expo run:android`. Group the native packages for each phase and install them on the first day of that phase.
-6. **Finish with** `./scripts/verify.sh`. Then update README.md, runlocal.md (add a "Check the V2 Phase N demo" list), [algorithm.md](../../design/algorithm.md) and [database.md](../../design/database.md), and commit once per phase.
+6. **Finish with** `./scripts/verify.sh`. Then update README.md, runlocal.md (add a "Check the V2 Phase N demo" list), [algorithm.md](../../../backend/docs/algorithm.md) and [database.md](../../../backend/docs/database.md), and commit once per phase.
 
 ## Open decisions (Decisions tab)
 

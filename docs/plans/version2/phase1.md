@@ -5,7 +5,7 @@
 an easier trek when the chosen one is too risky, shows the weather forecast, and makes a packing list
 for the trek and the month.
 
-Overview: [README.md](README.md) · Next: [phase2.md](phase2.md) · Algorithms: [algorithm.md](../../design/algorithm.md)
+Overview: [README.md](README.md) · Next: [phase2.md](phase2.md) · Algorithms: [algorithm.md](../../../backend/docs/algorithm.md)
 
 **Status:** code done 2026-11-19, not committed yet. 209 backend tests, `./scripts/verify.sh` passes,
 checked on the emulator (mostly in Nepali). Tracker rows `V2-P1-01` … `V2-P1-08` are in *Testing* until the commit.

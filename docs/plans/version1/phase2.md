@@ -3,7 +3,7 @@
 **Weeks:** about 7–9 (Gantt "Sprint 2: trek module, ML risk model"). **The mid-term defense falls here**, so this phase is what you will demo.
 **Goal:** day-by-day trek itineraries with acclimatisation warnings, and a personal difficulty and risk rating with a "Why this rating?" explanation, made by a decision tree and random forest written from scratch.
 
-Previous: [phase1.md](phase1.md) · Next: [phase3.md](phase3.md) · Algorithms: [algorithm.md](../../design/algorithm.md)
+Previous: [phase1.md](phase1.md) · Next: [phase3.md](phase3.md) · Algorithms: [algorithm.md](../../../backend/docs/algorithm.md)
 
 **Status (2026-11-06): code done.** Backend, ML, mobile screens and tests are built (81 backend tests
 pass). Still open: real survey answers, running the demo on a phone, and the report write-up (see
@@ -17,7 +17,7 @@ the API can import the classes it unpickles; `smart-nepal-guide/ml/` holds only 
 2. Days with more than 500 m sleeping gain (EBC days 2, 5, 7: +830, +550, +530 m) show a **Caution** badge. Annapurna Base Camp (no rest day) shows **Add rest** on day 5 and suggests a rest day at Deurali.
 3. Profile: medium fitness, no experience. Tap "Check my risk" → choose January → **Risky**, with up to 3 reasons from the model, e.g. "no multi-day trekking experience", "goes up to 5,644 m", "gains 830 m on day 2" (or "cold winter month").
 4. Change the profile to experienced + high fitness, choose October → **Hard**, with different reasons (altitude and daily gain only).
-5. Show the evaluation: our tree's and forest's accuracy and confusion matrices next to scikit-learn's (`docs/ml/`).
+5. Show the evaluation: our tree's and forest's accuracy and confusion matrices next to scikit-learn's (`backend/docs/ml/`).
 
 ---
 
@@ -75,7 +75,7 @@ File: `backend/app/ml/tree.py` (NumPy).
 - [x] Accuracy, precision, recall and F1 per class; confusion matrix image
 - [x] Our decision tree vs our random forest vs scikit-learn `DecisionTreeClassifier` / `RandomForestClassifier` in one table — tree 0.669 / forest **0.814** / sklearn tree 0.661 / sklearn forest 0.805 accuracy
 - [x] Feature importance chart (total Gini gain per feature)
-- [x] Notebook `ml/evaluation.ipynb` that makes all the figures (it runs `python -m app.ml.evaluate`; output in `docs/ml/`)
+- [x] Notebook `ml/evaluation.ipynb` that makes all the figures (it runs `python -m app.ml.evaluate`; output in `backend/docs/ml/`)
 
 ## 7. Serving the model
 
@@ -118,14 +118,14 @@ Map conditions in the decision path to codes, then to sentences in `en.json` / `
 
 ## Done when
 - [ ] The mid-term demo above works on a phone (checklist in `smart-nepal-guide/runlocal.md`)
-- [x] Evaluation table, confusion matrix and feature importance figures are saved in `docs/` (`docs/ml/`)
+- [x] Evaluation table, confusion matrix and feature importance figures are saved in `backend/docs/ml/`
 - [x] The data sources and labelling rules are written down (`backend/app/ml/dataset.py` docstring; copy into the report's "Data collection" section)
 - [ ] Real survey answers collected and added (`python -m app.ml.dataset --survey form.csv`), model retrained
 
 ## Risks
 | Risk | What to do |
 |---|---|
-| Not enough real survey data | Be honest: real + rule-generated, show the split in the report (`docs/ml/data_sources.png`) |
+| Not enough real survey data | Be honest: real + rule-generated, show the split in the report (`backend/docs/ml/data_sources.png`) |
 | Only 8 treks, so the 4 trek features have few distinct values | Say so in the report; survey answers vary `total_days`; the model mostly learns "which trek" + personal factors |
 | The tree overfits | Limit depth, use cross-validation, prefer the forest if it scores better |
 | Reasons look random | Show only the top 3 conditions, and only ones that point towards the predicted level |

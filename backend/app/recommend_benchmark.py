@@ -1,6 +1,6 @@
 """Recommendation variety check (V2-SR-05): how MMR's λ trades relevance for variety.
 
-    uv run python -m app.recommend_benchmark      # writes docs/recommend_quality.md
+    uv run python -m app.recommend_benchmark  # writes backend/docs/benchmarks/recommend_quality.md
 
 For a few typical interest sets (a new user who chose only interests, no feedback, October),
 we build the top 10 with different λ values and measure:
@@ -25,7 +25,7 @@ from app.models import Interest, User
 from app.models.enums import Lang, Nationality
 from app.services.recommend import MMR_LAMBDA, _candidates, item_similarity, recommend
 
-OUT = Path(__file__).resolve().parents[2] / "docs" / "recommend_quality.md"
+OUT = Path(__file__).resolve().parents[1] / "docs" / "benchmarks" / "recommend_quality.md"
 INTEREST_SETS = [
     ("culture", "religious"),
     ("nature", "adventure"),
