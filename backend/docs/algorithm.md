@@ -315,9 +315,26 @@ says "ask a doctor".
 |---|---|
 | Passwords | **bcrypt** hashing with a salt |
 | Login session | **JWT** with an HMAC-SHA256 signature |
-| Offline sync | **Timestamp-based delta sync**, where the newest change wins |
-| Daily check-in | **Scheduled job (cron)**: no check-in by the deadline → alert the family |
-| Map route display | **Dijkstra / A\*** (from a routing service, or your own implementation on a small graph) |
+
+## Planned, not built
+
+*Checked against the code on 2026-11-25.* These algorithms have been part of the design from the
+start, but the code does not have them yet. Put them under "Future scope" in the report, and do not
+describe them as working in the viva.
+
+| Algorithm | What it is for | Where it is planned | What the app does today |
+|---|---|---|---|
+| **Scheduled job** (cron-style, APScheduler) | Daily check-in: every 10 minutes, find check-ins that are past their deadline and still `pending`, mark them `missed` and email the emergency contacts once | [V2 Phase 3](../../docs/plans/version2/phase3.md) §4, `V2-P3-04` and `V2-P3-05` (Stretch, not started) | There is no check-in. The traveller can send an SOS by SMS themselves |
+| **Timestamp-based delta sync** (the server's change wins) | Offline treks: the phone keeps a downloaded trek in SQLite and asks only for rows with `updated_at > last_sync`, including deleted ones | [V2 Phase 3](../../docs/plans/version2/phase3.md) §5, `V2-P3-06` (Stretch, not started) | The trek screens need the internet. Only the SOS and symptom-check **outbox** works offline: it sends queued items in order, which makes it a queue, not a sync |
+| **Dijkstra / A\*** (shortest path on a road graph) | Drawing the real road route between trip stops on the map | No plan task | The map joins the stops with straight dashed lines ([TripMap.tsx](../../mobile/src/components/TripMap.tsx)). Travel time uses the Haversine distance × 1.4 road factor |
+| **WebSocket** live location | Sharing the traveller's position with family in real time ("SOS with live location tracking" in [feature.md](../../docs/design/feature.md)) | No plan task | The SOS SMS carries one GPS fix, with its time and a map link |
+
+Other parts of this file belong to the same planned features:
+- **Part 2:** `checkIn()`, `missedCheckInJob()`, `downloadTrekPack()` and `syncChanges()`.
+- **Part 3 and the architecture overview:** **WebSocket**, **SMTP** (check-in emails), **FCM** (the V2 plan
+  chose local notifications instead) and **SQLite + sync** (offline treks).
+
+None of these is in the code yet.
 
 ---
 
