@@ -18,11 +18,12 @@ Every task, bug, test case and decision is tracked in the
 | **Version 1:** users, explore, search, map, itinerary, acclimatisation, AI risk predictor, trip planner, admin panel | Code done. Demos run on a real phone and the APK works (2026-11-23). The video and the `v1.0` tag are still to do |
 | **Version 2 Phase 1:** altitude chart, safer alternatives, weather, packing list | Done: tested on the emulator and a real phone |
 | **Version 2 Phase 2:** recommendations, reviews, Near me, budget, share a trip, teahouses | Done: *Near me* passes on a real phone (TC-47) |
+| **Map (V2-MAP-01 … 07)** | Built 2026-11-27: trek lines coloured by your risk (`GET /treks/routes`), you-are-here dot, OpenFreeMap vector base map with Nepali labels, hillshade, preview card, clustering, itinerary route map linked to the altitude chart. Tried on the emulator; TC-78 to TC-84 not run yet. Offline maps still to do |
 | **UI redesign:** "Bato App Redesign" canvas | Done: checked on a real phone in both languages (V2-UI-01) |
 | **Search & recommendations (V2-SR):** college → real product | Stage 1 core built (V2-SR-01 … 10, plus 14: search by city and trek region): smarter search and recommendations, measured; tested on the emulator in English. Left: TC-66 (admin tags, Nepali labels) and NEAR_YOU on a real phone. Stage 1 extras (V2-SR-11 … 13) and Stages 2–3 planned in [search-recommendation.md](docs/product/search-recommendation.md) |
 | **Version 2 Phase 3:** safety & offline | Core built (2026-11-24): emergency contacts, SOS by SMS with GPS and an offline queue, the Lake Louise symptom checker, 53 new tests. The backend is tested; the app screens still need a real-phone run with mobile data off (TC-68 to TC-76). Stretch (daily check-in, offline treks) not started |
-| **Automated checks** | 306 backend tests; the app's Lake Louise copy passes the same 17 cases; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
-| **Manual test cases** | 77 written; 65 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66, the 9 safety cases (TC-68 to TC-76) and TC-77 (health questions) not run yet |
+| **Automated checks** | 309 backend tests; the app's Lake Louise copy passes the same 17 cases; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
+| **Manual test cases** | 84 written; 65 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66, the 9 safety cases (TC-68 to TC-76), TC-77 (health questions) and TC-78 to TC-84 (map) not run yet |
 | **Bugs** | 18 logged; 17 fixed; BUG-06 fixed a second time and waiting for a phone re-test |
 
 **Size of the code** (Python and TypeScript only, 2026-11-24): backend ≈ 10,300 lines, mobile app ≈ 10,300 lines,
@@ -45,6 +46,7 @@ admin panel ≈ 3,600 lines.
 | 2026-11-24 | Docs reorganised (V2-DOC-03): backend-only docs (algorithm, database, ML results, survey, benchmark reports) moved to `backend/docs/`; `runlocal.md` and `filestructure.md` moved into `docs/`; every link and every script output path updated | not committed yet |
 | 2026-11-24 | V2 Phase 3 Core (V2-P3-01, 02, 03, 07): emergency contacts, SOS by SMS with GPS and an offline queue, the Lake Louise symptom checker with history, sourced emergency numbers, safety test mode, admin counts. Migration 0008, 53 new tests (302 in all), TC-68 to TC-76 written | not committed yet |
 | 2026-11-27 | Health questions (V2-PROF-01): the traveller profile also asks about high blood pressure, significant anemia and an injury in the last 3 months, in English and Nepali. A Yes to any of the 5 health questions counts as a health issue for the risk model (its input is unchanged, no retraining). Migration 0009, 4 new tests (306 in all), TC-77 written | not committed yet |
+| 2026-11-27 | Map (V2-MAP-01 … 07): every trek drawn as a line through its villages, coloured by your own risk this month (or by difficulty when signed out), new `GET /treks/routes`; you-are-here dot and locate button; OpenFreeMap vector tiles in the Bato colours with Nepali labels instead of tile.openstreetmap.org; hillshade from AWS Terrain Tiles; preview card on tap; clustered sights; a route map on the itinerary that follows the altitude chart. 3 new tests (309 in all), TC-78 to TC-84 written | not committed yet |
 
 ---
 
@@ -56,7 +58,7 @@ admin panel ≈ 3,600 lines.
 - **Explore:** category chips, a list of treks and a list of places.
 - **Place page:** photos, best months to visit, entry fees, how to get there, and the 5 nearest places.
 - **Trek page:** route, permits and stats.
-- **Map:** OpenStreetMap through MapLibre, with markers coloured by category. Tapping a marker opens its page.
+- **Map:** MapLibre with OpenFreeMap vector tiles in the Bato colours, shaded mountains and labels in the app language. Every trek is a line coloured by your own risk this month (or by difficulty when signed out); sights are clustered when zoomed out and trek villages appear from zoom 9. A blue dot shows where you are, with a locate button. Tapping a marker or line opens a preview card with the distance from you and an Open button (V2-MAP, 2026-11-27).
 - **Fuzzy search:** "punhill" finds Poon Hill. You can filter treks by region, duration and difficulty.
 - **Language:** every screen is translated, numbers are shown in Devanagari digits, and anything missing in Nepali falls back to English.
 
@@ -78,7 +80,7 @@ admin panel ≈ 3,600 lines.
   - V2 additions: teahouses and budget rates
 
 ### Version 2 Phase 1: smart trek features
-- **Altitude profile chart:** the itinerary shows a line chart, and the sections that climb too fast are coloured.
+- **Altitude profile chart:** the itinerary shows a line chart, and the sections that climb too fast are coloured. Below it, a route map of the trek follows the chart: tap a day and that day's stage is highlighted and shown (V2-MAP-06).
 - **Safer alternatives:** for a *hard* or *risky* result, Bato suggests similar treks (KNN) that the risk model rates lower for you.
 - **Weather forecast** on trek and place pages, from Open-Meteo. Forecasts are kept in Redis for 1 hour, and a 24-hour stale copy is used if the service is down.
 - **Packing checklist** worked out from the trek's top altitude, the season and the number of days. Your ticks are remembered.
@@ -129,7 +131,7 @@ All of these are written by hand. scikit-learn is used only to compare the risk 
 
 | Algorithm | Used for | Code |
 |---|---|---|
-| Haversine distance | Nearest places, trip distances, Near me | [haversine.py](backend/app/algorithms/haversine.py) |
+| Haversine distance | Nearest places, trip distances, Near me, "km away" on the map card (same formula in [geo.ts](mobile/src/lib/geo.ts)) | [haversine.py](backend/app/algorithms/haversine.py) |
 | Levenshtein edit distance (after pg_trgm finds candidates) | Fuzzy search | [levenshtein.py](backend/app/algorithms/levenshtein.py), [search.py](backend/app/services/search.py) |
 | Weighted scoring | Best time to visit | [best_time.py](backend/app/algorithms/best_time.py) |
 | Rule-based checker | Acclimatisation (more than 500 m gained in a day above 3,000 m; rest days) | [acclimatisation.py](backend/app/algorithms/acclimatisation.py) |
@@ -192,11 +194,11 @@ The database is PostgreSQL 16 with 9 migrations: Phase 1, Phase 2, Phase 3, V2 P
 - **Automated:** [`./scripts/verify.sh`](scripts/verify.sh) runs all of these:
   - backend ruff lint and format check
   - a check that the migrations match the models
-  - 306 pytest tests
+  - 309 pytest tests
   - the app's copy of the Lake Louise score against the same 17 cases as the backend
   - mobile typecheck and lint
   - admin typecheck, build and lint
-- **Manual test cases:** 77 cases, TC-01 to TC-77, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
+- **Manual test cases:** 84 cases, TC-01 to TC-84, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
   - All were run on the emulator (Phone 1). The layout cases, TC-47 (Near me, real GPS) and TC-51 were run on a
     real phone (Phone 2: Samsung Galaxy A07, 720 × 1600) on 2026-11-23.
   - TC-59 to TC-61 (login and register forms) were added on 2026-11-23 and pass on both phones.

@@ -292,7 +292,7 @@ and treks to the files in `data/` (admin edits to them are lost; places the admi
 | Problem | Fix |
 |---|---|
 | App says "No internet connection…" though the backend runs (a development build adds the address it tried, e.g. `(http://10.0.2.2:8000)`; a release build does not) | Is the backend running with `--host 0.0.0.0`? On a phone: same Wi-Fi as the Mac. `mobile/.env` should *not* set `EXPO_PUBLIC_API_URL` (check **Settings → API server** in the app), then `npx expo start -c`. If the macOS firewall asks about Python, allow incoming connections. Test from the phone's browser: `http://<ipconfig getifaddr en0>:8000/health` |
-| Map is blank (no streets) | The phone needs internet access for the OpenStreetMap tiles. The markers come from your API. |
+| Map is blank (no streets) | The phone needs internet access for the map tiles (tiles.openfreemap.org) and the hillshade (AWS Terrain Tiles). The markers and trek lines come from your API. |
 | "Expo Go" opens / the map crashes | Open the **Bato** app (the dev build), not Expo Go. |
 | `expo run:android` fails with an SDK/Java error | Open Android Studio once and install the SDK it suggests. Check that `java -version` shows 17 and that `ANDROID_HOME` is set. |
 | Login works in the app but `/me` returns 401 later | The access token expires after 30 minutes and should refresh automatically. If it still fails, log out and in again. |

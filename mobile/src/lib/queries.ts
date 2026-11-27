@@ -36,6 +36,7 @@ import type {
   SymptomCheckOut,
   Teahouse,
   TrekDetail,
+  TrekRoute,
   TrekSummary,
   TripDetail,
   TripSummary,
@@ -107,6 +108,17 @@ export function useTreks(filters: TrekFilters = {}, enabled = true) {
     queryFn: () => get<Page<TrekSummary>>('/treks', { ...filters, page_size: 50 }),
     placeholderData: keepPreviousData,
     enabled,
+  });
+}
+
+/** Every trek as a map line; `my_risk` comes only for a signed-in user with a full profile. */
+export function useTrekRoutes() {
+  const lang = useLang();
+  const signedIn = useAuth((s) => !!s.accessToken);
+  return useQuery({
+    queryKey: ['trek-routes', lang, signedIn],
+    queryFn: () => get<TrekRoute[]>('/treks/routes'),
+    staleTime: 10 * 60 * 1000,
   });
 }
 
@@ -232,6 +244,8 @@ export function useSaveProfile() {
       // Interests, budget level and nationality change these:
       client.invalidateQueries({ queryKey: ['recommendations'] });
       client.invalidateQueries({ queryKey: ['trek-budget'] });
+      // Fitness, experience and health change the map's "your risk" colours:
+      client.invalidateQueries({ queryKey: ['trek-routes'] });
     },
   });
 }

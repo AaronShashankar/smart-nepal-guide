@@ -117,6 +117,12 @@ export interface TrekSummary {
   rating?: Rating | null;
 }
 
+/** A trek as a line for the main map (V2-MAP-01). */
+export interface TrekRoute extends TrekSummary {
+  coordinates: [number, number][]; // [lng, lat] through the stage villages, in order
+  my_risk: RiskLevel | null; // the risk model's level for the signed-in user this month
+}
+
 export interface Permit {
   code: string;
   name: string;

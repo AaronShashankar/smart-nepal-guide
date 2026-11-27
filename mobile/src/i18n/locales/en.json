@@ -169,7 +169,15 @@
     "treksFound_other": "{{value}} treks found"
   },
   "map": {
-    "attribution": "© OpenStreetMap contributors",
+    "locate": "Show my location",
+    "locationDenied": "Location is off for Bato. Allow it in your phone's settings to see where you are.",
+    "locationError": "Could not find your location. Is location turned on?",
+    "legendRisk": "Treks · your risk this month",
+    "legendDifficulty": "Treks · difficulty",
+    "forYou": "For you",
+    "open": "Open",
+    "close": "Close",
+    "attribution": "© OpenFreeMap © OpenMapTiles © OpenStreetMap contributors",
     "loadingMarkers": "Loading places…"
   },
   "profile": {
@@ -223,6 +231,8 @@
     "symptomHistory": "My symptom checks"
   },
   "itinerary": {
+    "mapHint": "The map shows the day you pick on the chart. Lines join the villages; they are not the exact trail.",
+    "mapDay": "Day {{day}}: {{from}} → {{to}}",
     "title": "Itinerary",
     "day": "Day {{day}}",
     "rest": "Rest / acclimatisation day",

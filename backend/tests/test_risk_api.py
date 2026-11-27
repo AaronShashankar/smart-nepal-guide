@@ -139,3 +139,44 @@ def test_no_health_answers_means_no_health_issue(client, user, trained_model):
     set_profile(client, headers, fitness_level="medium", trek_experience="beginner")
     r = client.post("/predict-risk", json={"trek_id": EBC, "month": 4}, headers=headers).json()
     assert r["input"]["has_health_issue"] is False
+
+
+# ------------------------------------------------------------ map routes (V2-MAP-01)
+def test_routes_draw_every_trek_through_its_villages(client):
+    r = client.get("/treks/routes")
+    assert r.status_code == 200
+    routes = {t["id"]: t for t in r.json()}
+    assert len(routes) == 8
+    ebc = routes[EBC]
+    assert ebc["my_risk"] is None  # not signed in
+    stages = client.get(f"/treks/{EBC}/stages").json()["stages"]
+    first = stages[0]["from_place"]
+    last = stages[-1]["to_place"]
+    assert ebc["coordinates"][0] == [first["longitude"], first["latitude"]]
+    assert ebc["coordinates"][-1] == [last["longitude"], last["latitude"]]
+    # rest days stay in the same village, so they add no point
+    for a, b in zip(ebc["coordinates"], ebc["coordinates"][1:], strict=False):
+        assert a != b
+    assert len(ebc["coordinates"]) <= len(stages) + 1
+
+
+def test_routes_names_follow_language(client):
+    ne = client.get("/treks/routes", headers={"Accept-Language": "ne"}).json()
+    en = client.get("/treks/routes").json()
+    assert {t["id"] for t in ne} == {t["id"] for t in en}
+    assert any(a["name"] != b["name"] for a, b in zip(ne, en, strict=True))
+
+
+def test_routes_my_risk_needs_a_complete_profile(client, user, trained_model):
+    _, _, headers = user
+    no_profile = client.get("/treks/routes", headers=headers).json()
+    assert all(t["my_risk"] is None for t in no_profile)
+
+    set_profile(client, headers, fitness_level="low", trek_experience="none")
+    mine = {
+        t["id"]: t["my_risk"] for t in client.get("/treks/routes?month=4", headers=headers).json()
+    }
+    assert set(mine.values()) <= set(LEVELS)
+    assert None not in mine.values()
+    single = client.post("/predict-risk", json={"trek_id": EBC, "month": 4}, headers=headers).json()
+    assert mine[EBC] == single["level"]

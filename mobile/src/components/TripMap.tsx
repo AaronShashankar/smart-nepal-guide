@@ -3,7 +3,7 @@ import type { LngLatBounds } from '@maplibre/maplibre-react-native';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { MAP_FONT, OSM_STYLE } from '@/lib/mapStyle';
+import { MAP_FONT, useMapStyle } from '@/lib/mapStyle';
 import type { TripStop } from '@/lib/types';
 import { colors, radii } from '@/theme';
 
@@ -16,6 +16,7 @@ export const dayColor = (day: number | null) => DAY_COLORS[((day ?? 1) - 1) % DA
  * (real road routing is future scope).
  */
 export function TripMap({ stops }: { stops: TripStop[] }) {
+  const mapStyle = useMapStyle();
   const { points, line, bounds } = useMemo(() => {
     const coords = stops.map((s) => [s.place.longitude, s.place.latitude]);
     const lngs = coords.map((c) => c[0]);
@@ -56,7 +57,7 @@ export function TripMap({ stops }: { stops: TripStop[] }) {
         // Re-create the map when the stops change so the camera fits the new bounds.
         key={stops.map((s) => s.id).join(',')}
         style={StyleSheet.absoluteFill}
-        mapStyle={OSM_STYLE}
+        mapStyle={mapStyle}
         logo={false}
         attribution={false}
       >

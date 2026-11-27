@@ -11,7 +11,7 @@ from app.core.i18n import get_lang, pick
 from app.models import Review, Teahouse, Trek, TrekStage, TrekTranslation, User
 from app.models.enums import Lang, RiskLevel
 from app.schemas.community import BudgetOut
-from app.schemas.content import Page, PermitOut, TrekDetail, TrekSummary
+from app.schemas.content import Page, PermitOut, TrekDetail, TrekRoute, TrekSummary
 from app.schemas.risk import AcclimatisationOut, ItineraryOut
 from app.schemas.smart import (
     AltitudeProfileOut,
@@ -30,8 +30,10 @@ from app.services.itinerary import (
     load_trek,
     stage_facts,
 )
+from app.services.map_routes import trek_routes
 from app.services.packing import trek_packing
 from app.services.rating import rating_order, ratings
+from app.services.recommend import current_month
 from app.services.weather import forecast
 
 router = APIRouter(prefix="/treks", tags=["treks"])
@@ -81,6 +83,18 @@ def list_regions(db: Session = Depends(get_db)) -> list[str]:
     return list(
         db.scalars(select(Trek.region).where(published_treks()).distinct().order_by(Trek.region))
     )
+
+
+@router.get("/routes", response_model=list[TrekRoute])
+def list_routes(
+    month: int | None = Query(None, ge=1, le=12, description="for my_risk; default this month"),
+    db: Session = Depends(get_db),
+    lang: Lang = Depends(get_lang),
+    user: User | None = Depends(get_optional_user),
+) -> list[TrekRoute]:
+    """Every published trek as a line for the map; `my_risk` only for a signed-in user with a
+    complete profile (V2-MAP-01)."""
+    return trek_routes(db, user, month or current_month(), lang)
 
 
 @router.get("/{trek_id}", response_model=TrekDetail)

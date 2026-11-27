@@ -178,8 +178,8 @@ Checks: `npx tsc --noEmit`, `npx expo lint` (ESLint + Prettier), `npx expo-docto
 
 Screens: language choice (first launch) · login / register / Continue with Google · traveller profile
 (with optional health questions) · Explore (category chips, treks, places) · place detail (photo carousel,
-best season, fee, how to reach, nearby) · trek overview (stats, route, permits) · map (OSM tiles,
-markers coloured by category, tap → detail) · search with trek filters (region, duration, difficulty)
+best season, fee, how to reach, nearby) · trek overview (stats, route, permits) · map (OpenFreeMap vector tiles with hillshade and Nepali labels, trek lines coloured by your risk,
+clustered markers coloured by category, you-are-here dot, tap → preview card → detail) · search with trek filters (region, duration, difficulty)
 · settings (language switch, profile, risk history, log out). **Phase 2:** day-by-day itinerary with a
 coloured acclimatisation badge per day and a summary box · "Check my risk" (month picker → level,
 confidence, "Why this rating?", acclimatisation warnings; asks to complete the profile first) · risk

@@ -24,7 +24,14 @@ const LABEL_H = 16;
  */
 const xOf = (p: AltitudePoint) => (p.kind === 'high' ? p.day - 0.5 : p.day);
 
-export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
+export function AltitudeChart({
+  profile,
+  onSelect,
+}: {
+  profile: AltitudeProfile;
+  /** Called with the point the user taps or drags to (V2-MAP-06: the route map follows it). */
+  onSelect?: (point: AltitudePoint) => void;
+}) {
   const { t } = useTranslation();
   const box = useRef<ComponentRef<typeof View>>(null);
   const [width, setWidth] = useState(0);
@@ -62,6 +69,7 @@ export function AltitudeChart({ profile }: { profile: AltitudeProfile }) {
     const x = ((e.nativeEvent.pageX - originX - PAD.left) / plotW) * dayCount;
     const nearest = points.reduce((a, b) => (Math.abs(xOf(b) - x) < Math.abs(xOf(a) - x) ? b : a));
     setSelected(nearest);
+    if (nearest !== selected) onSelect?.(nearest);
   }
 
   const where =

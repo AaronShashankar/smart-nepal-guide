@@ -2,6 +2,7 @@
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import { PageHeader, StatTiles } from '@/components/Layout';
 import { Button } from '@/components/Button';
 import { AcclimatisationBox, signedMeters, StatusBadge } from '@/components/Risk';
 import { QueryState } from '@/components/StateViews';
+import { TrekRouteMap } from '@/components/TrekRouteMap';
 import { formatNumber, km, meters } from '@/lib/format';
 import { useAcclimatisation, useAltitudeProfile, useItinerary, useTrek } from '@/lib/queries';
 import type { Acclimatisation, Itinerary, Stage } from '@/lib/types';
@@ -155,6 +157,7 @@ export default function ItineraryScreen() {
   const itinerary = useItinerary(id);
   const report = useAcclimatisation(id);
   const profile = useAltitudeProfile(id);
+  const [mapDay, setMapDay] = useState<number | null>(null);
 
   return (
     <SafeAreaView style={styles.fill} edges={['top']}>
@@ -172,7 +175,21 @@ export default function ItineraryScreen() {
               ListHeaderComponent={
                 <View style={{ gap: 18, marginBottom: spacing(5) }}>
                   <PageHeader title={t('itinerary.title')} subtitle={trek.data?.name} />
-                  {profile.data && <AltitudeChart profile={profile.data} />}
+                  {profile.data && (
+                    <AltitudeChart profile={profile.data} onSelect={(p) => setMapDay(p.day)} />
+                  )}
+                  <View style={{ gap: spacing(2) }}>
+                    <TrekRouteMap stages={it.stages} day={mapDay} />
+                    <AppText variant="caption" muted>
+                      {mapDay
+                        ? t('itinerary.mapDay', {
+                            day: formatNumber(mapDay),
+                            from: it.stages.find((s) => s.day === mapDay)?.from_place.name ?? '',
+                            to: it.stages.find((s) => s.day === mapDay)?.to_place.name ?? '',
+                          })
+                        : t('itinerary.mapHint')}
+                    </AppText>
+                  </View>
                   <Summary itinerary={it} />
                   {report.data && <AcclimatisationBox report={report.data} />}
                   <Button

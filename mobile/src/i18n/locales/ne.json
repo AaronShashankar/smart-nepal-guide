@@ -169,7 +169,15 @@
     "treksFound_other": "{{value}} पदयात्रा भेटिए"
   },
   "map": {
-    "attribution": "© OpenStreetMap योगदानकर्ताहरू",
+    "locate": "मेरो स्थान देखाउनुहोस्",
+    "locationDenied": "Bato लाई स्थान हेर्ने अनुमति छैन। आफू कहाँ हुनुहुन्छ हेर्न फोनको सेटिङमा अनुमति दिनुहोस्।",
+    "locationError": "तपाईंको स्थान पत्ता लागेन। फोनको लोकेसन खुला छ?",
+    "legendRisk": "पदयात्रा · यो महिना तपाईंको जोखिम",
+    "legendDifficulty": "पदयात्रा · कठिनाइ",
+    "forYou": "तपाईंका लागि",
+    "open": "खोल्नुहोस्",
+    "close": "बन्द गर्नुहोस्",
+    "attribution": "© OpenFreeMap © OpenMapTiles © OpenStreetMap योगदानकर्ताहरू",
     "loadingMarkers": "ठाउँहरू लोड हुँदैछन्…"
   },
   "profile": {
@@ -223,6 +231,8 @@
     "symptomHistory": "मेरा लेक जाँचहरू"
   },
   "itinerary": {
+    "mapHint": "चार्टमा छानेको दिन नक्सामा देखिन्छ। रेखाले गाउँहरू जोड्छ, ठ्याक्कै पदमार्ग होइन।",
+    "mapDay": "दिन {{day}}: {{from}} → {{to}}",
     "title": "कार्यक्रम",
     "day": "दिन {{day}}",
     "rest": "आराम / उचाइ अनुकूलन दिन",

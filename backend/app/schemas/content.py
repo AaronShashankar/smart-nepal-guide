@@ -84,6 +84,13 @@ class TrekSummary(BaseModel):
     rating: RatingOut | None = None  # V2: filled in trek lists and detail
 
 
+class TrekRoute(TrekSummary):
+    """A trek as a line for the main map (V2-MAP-01)."""
+
+    coordinates: list[tuple[float, float]]  # [lng, lat] through the stage villages, in order
+    my_risk: RiskLevel | None = None  # the risk model's level for the signed-in user this month
+
+
 class PermitOut(BaseModel):
     code: str
     name: str

@@ -47,7 +47,7 @@ Draft feature list (2026-11-05). Algorithms will be decided after the feature li
 | Automatically find the best visiting order and split it into days | Must-have |
 | Estimated budget (transport, food, stay, permits) | Good |
 | Save, edit and share a trip plan | Good |
-| Show the planned route on the map | Good |
+| Show the planned route on the map | Good (trek lines on the main map and a route map on the itinerary: V2-MAP, 2026-11-27) |
 
 ## 5. Smart & Recommendation Features
 | Feature | Priority |

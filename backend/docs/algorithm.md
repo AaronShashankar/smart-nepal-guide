@@ -315,6 +315,9 @@ says "ask a doctor".
 |---|---|
 | Passwords | **bcrypt** hashing with a salt |
 | Login session | **JWT** with an HMAC-SHA256 signature |
+| Trek lines on the map (V2-MAP-01) | **Polyline through the stage villages** in day order (first stage's start, then each stage's end; a rest day adds no point), coloured by the **random forest's level for this user and month** ([map_routes.py](../app/services/map_routes.py)) |
+| Marker clustering (V2-MAP-07) | MapLibre's built-in **grid-based point clustering** (supercluster); not our code |
+| Hillshade (V2-MAP-04) | MapLibre shades a **digital elevation model** (AWS Terrain Tiles, Terrarium encoding); not our code |
 
 ## Planned, not built
 

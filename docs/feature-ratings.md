@@ -175,6 +175,11 @@ filter, and tapping a marker opens the place ([app/(tabs)/map.tsx](../mobile/src
 **To raise the score:** show the user's location, draw each trek's stages as a line, and
 cluster markers. Offline tiles belong to V2 Phase 3 and V3.
 
+*Update 2026-11-27 (V2-MAP-01 to 07):* trek lines coloured by your own risk, a "you are here" dot with a
+locate button, an OpenFreeMap vector base map in the Bato colours with Nepali labels, hillshade,
+a preview card, clustering, and a route map on the itinerary that follows the altitude chart. Offline
+maps are still the main gap. Not re-rated until the manual cases TC-78 to TC-84 are run.
+
 ### Near me: 8 / 10
 
 **What works well:** a bounding box in SQL first (uses the index), then the exact Haversine
