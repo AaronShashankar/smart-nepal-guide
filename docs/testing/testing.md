@@ -34,7 +34,8 @@ Two kinds of testing. **Step-by-step order, test counts and how to check each ca
    (TC-62 now shows "Temples & Stupas · Kathmandu Valley").
    Safety (V2 Phase 3 Core, 2026-11-24): TC-68 to TC-76 were added. They need a real phone (SMS app,
    GPS, mobile data off), so they are not run yet.
-   Now: **65 Pass, 1 Fail (TC-01, re-test on Phone 2), 10 Not run (TC-66, TC-68 to TC-76)**.
+   Now: **65 Pass, 1 Fail (TC-01, re-test on Phone 2), 11 Not run (TC-66, TC-68 to TC-77)**.
+   Health questions (V2-PROF-01, 2026-11-27): TC-77 was added.
 
 The **Auto** column names the pytest test that checks the same behaviour through the API, where
 there is one. The manual case still checks the screen.
@@ -166,6 +167,7 @@ before 2026-11-24 has no `expo-sms`: the SMS app still opens (through an `sms:` 
 | TC-74 | Symptom checker: the three demo results | Trek → EBC → Itinerary → How do you feel? → answer → See my result; Check again for each row; on the result "Descend now", tap SOS | (a) 2,1,1,0 at Namche; (b) 3,2,3,2; (c) all 0 + "Confusion or unsteady walking" | (a) **Rest: don't go higher today**, score 4, mild; (b) **Descend now and get help**, score 10, severe, with an SOS button; (c) Descend now, with the confusion reason. Leaving a question out shows "Answer all four questions first." | | Not run | `test_lake_louise_shared_cases`, `test_symptom_check_is_scored_by_the_server` |
 | TC-75 | Symptom check offline + history | Mobile data and Wi-Fi off → do a check → Settings → My symptom checks; back online → pull down to refresh; admin → Dashboard | 2,1,1,0, altitude from a stop | Offline: the result shows at once, "Saved on this phone. It will be sent when you are online."; the history says "1 check is waiting to be sent."; online: the check is in the history with the trek, the altitude and its real time; the dashboard's **Symptom checks** count is 1 higher | | Not run | `test_symptom_history_is_own_and_newest_first`, `test_admin_stats_count_sos_and_symptom_checks` |
 | TC-76 | Safety screens in Nepali | Settings → भाषा: नेपाली → open the safety screens; hold SOS | – | Every safety screen has the disclaimer in Nepali; the questions and results are in Nepali with no cut-off words; the SMS is in Nepali, but the coordinates, link and time use Latin digits so the link works | | Not run | – |
+| TC-77 | Health questions (V2-PROF-01) | Settings → profile → Health: answer High blood pressure = Yes, the others No → Save → reopen the profile; then Check my risk on EBC; then switch to नेपाली and open the profile again | Yes / No / Prefer not to say on 5 questions | The Health section shows 5 questions (heart, asthma, high blood pressure, significant anemia, recent injury); the answers come back after reopening; the risk check lists "A health condition or recent injury you reported" under "Why this rating?"; in Nepali all 5 questions and the reason are in Nepali with no cut-off words | | Not run | `test_profile_save_and_load`, `test_new_health_questions_feed_the_model` |
 
 ## Bugs found and fixed
 

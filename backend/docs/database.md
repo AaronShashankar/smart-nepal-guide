@@ -71,6 +71,9 @@ Drafted 2026-11-05 · PostgreSQL · See also [techstack.md](../../docs/design/te
 | trek_experience | trek_experience | |
 | has_heart_condition | boolean | optional |
 | has_asthma | boolean | optional |
+| has_high_blood_pressure | boolean | optional (V2-PROF-01, migration 0009) |
+| has_anemia | boolean | optional: significant anemia (V2-PROF-01) |
+| has_recent_injury | boolean | optional: injury in the last 3 months (V2-PROF-01) |
 | budget_level | budget_level | |
 | travel_style | travel_style | |
 | updated_at | timestamptz | |

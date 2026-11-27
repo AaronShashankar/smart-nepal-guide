@@ -97,6 +97,8 @@ Map conditions in the decision path to codes, then to sentences in `en.json` / `
 | BEGINNER | trek_experience = beginner | You have little trekking experience |
 | LOW_FITNESS | fitness_level = low | Low fitness level |
 | HEALTH_ISSUE | has_health_issue | Heart or breathing condition |
+
+*Note (2026-11-27, V2-PROF-01):* the profile now also asks about high blood pressure, significant anemia and a recent injury. A Yes to any of the five questions sets `has_health_issue`, so the model input is unchanged; the label now reads "A health condition or recent injury you reported".
 | AGE_RISK | age > 60 or < 14 | Age {age} increases altitude risk |
 | LONG_DAYS | distance_per_day_km > 12 | Long walking days (about {km} a day) |
 

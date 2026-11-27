@@ -66,6 +66,9 @@ class TravellerProfile(Base):
     # Optional health questions: only used for risk prediction; the user may skip them.
     has_heart_condition: Mapped[bool | None] = mapped_column(Boolean)
     has_asthma: Mapped[bool | None] = mapped_column(Boolean)
+    has_high_blood_pressure: Mapped[bool | None] = mapped_column(Boolean)
+    has_anemia: Mapped[bool | None] = mapped_column(Boolean)
+    has_recent_injury: Mapped[bool | None] = mapped_column(Boolean)
     budget_level: Mapped[BudgetLevel | None] = mapped_column(pg_enum(BudgetLevel, "budget_level"))
     travel_style: Mapped[TravelStyle | None] = mapped_column(pg_enum(TravelStyle, "travel_style"))
     # Version 2: picks the permit / entry-fee rate in the budget estimate.

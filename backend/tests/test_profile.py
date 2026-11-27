@@ -20,6 +20,9 @@ def test_profile_save_and_load(client, user):
         "trek_experience": "beginner",
         "has_heart_condition": False,
         "has_asthma": None,  # user skipped this question
+        "has_high_blood_pressure": True,
+        "has_anemia": False,
+        "has_recent_injury": None,
         "budget_level": "low",
         "travel_style": "group",
         "interests": ["nature", "adventure"],
@@ -31,6 +34,9 @@ def test_profile_save_and_load(client, user):
     assert loaded["date_of_birth"] == "1998-04-14"
     assert loaded["fitness_level"] == "medium"
     assert loaded["has_asthma"] is None
+    assert loaded["has_high_blood_pressure"] is True
+    assert loaded["has_anemia"] is False
+    assert loaded["has_recent_injury"] is None
     assert [i["code"] for i in loaded["interests"]] == ["adventure", "nature"]
     assert client.get("/me", headers=headers).json()["has_profile"] is True
 

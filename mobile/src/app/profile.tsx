@@ -139,6 +139,15 @@ function ProfileForm({ initial, isNew }: { initial: ProfileInput; isNew: boolean
         <YesNo value={form.has_heart_condition} onChange={(v) => set('has_heart_condition', v)} />
         <AppText variant="label">{t('profile.asthma')}</AppText>
         <YesNo value={form.has_asthma} onChange={(v) => set('has_asthma', v)} />
+        <AppText variant="label">{t('profile.bloodPressure')}</AppText>
+        <YesNo
+          value={form.has_high_blood_pressure}
+          onChange={(v) => set('has_high_blood_pressure', v)}
+        />
+        <AppText variant="label">{t('profile.anemia')}</AppText>
+        <YesNo value={form.has_anemia} onChange={(v) => set('has_anemia', v)} />
+        <AppText variant="label">{t('profile.injury')}</AppText>
+        <YesNo value={form.has_recent_injury} onChange={(v) => set('has_recent_injury', v)} />
       </Section>
 
       <Section title={t('profile.budget')}>

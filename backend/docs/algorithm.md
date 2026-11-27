@@ -9,7 +9,7 @@ Drafted 2026-11-05. See [feature.md](../../docs/design/feature.md) for the featu
 ## Core algorithms (the ones the viva will focus on)
 
 ### 1. Trek Difficulty & Risk Prediction: Decision Tree (CART) → Random Forest
-- **Inputs:** max altitude, biggest one-day altitude gain, total days, distance per day, month/season, user age, fitness level, trekking experience, health conditions
+- **Inputs:** max altitude, biggest one-day altitude gain, total days, distance per day, month/season, user age, fitness level, trekking experience, health conditions (a Yes to any of: heart condition, asthma, high blood pressure, significant anemia, recent injury → one `has_health_issue` input)
 - **Output:** Easy / Moderate / Hard / Risky
 - **How it works:** CART splits the data on the question that best separates the classes, measured by **Gini impurity**:
 

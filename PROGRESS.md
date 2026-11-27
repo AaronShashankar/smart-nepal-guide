@@ -1,6 +1,6 @@
 # Bato: progress so far
 
-*Status on 2026-11-24. Everything below is on the `main` branch, and all new work happens there.*
+*Status on 2026-11-27. Everything below is on the `main` branch, and all new work happens there.*
 
 Bato (बाटो) is a bilingual (English / नेपाली) app for travelling in Nepal. You can discover places,
 plan a trip, and check how hard and risky a trek is **for you**, with the reasons shown.
@@ -21,8 +21,8 @@ Every task, bug, test case and decision is tracked in the
 | **UI redesign:** "Bato App Redesign" canvas | Done: checked on a real phone in both languages (V2-UI-01) |
 | **Search & recommendations (V2-SR):** college → real product | Stage 1 core built (V2-SR-01 … 10, plus 14: search by city and trek region): smarter search and recommendations, measured; tested on the emulator in English. Left: TC-66 (admin tags, Nepali labels) and NEAR_YOU on a real phone. Stage 1 extras (V2-SR-11 … 13) and Stages 2–3 planned in [search-recommendation.md](docs/product/search-recommendation.md) |
 | **Version 2 Phase 3:** safety & offline | Core built (2026-11-24): emergency contacts, SOS by SMS with GPS and an offline queue, the Lake Louise symptom checker, 53 new tests. The backend is tested; the app screens still need a real-phone run with mobile data off (TC-68 to TC-76). Stretch (daily check-in, offline treks) not started |
-| **Automated checks** | 302 backend tests; the app's Lake Louise copy passes the same 17 cases; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
-| **Manual test cases** | 76 written; 65 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66 and the 9 safety cases (TC-68 to TC-76) not run yet |
+| **Automated checks** | 306 backend tests; the app's Lake Louise copy passes the same 17 cases; mobile and admin typecheck and lint pass (`./scripts/verify.sh`) |
+| **Manual test cases** | 77 written; 65 pass; TC-01 failed on the real phone (BUG-06 again), fixed again and waiting for a phone re-test; TC-66, the 9 safety cases (TC-68 to TC-76) and TC-77 (health questions) not run yet |
 | **Bugs** | 18 logged; 17 fixed; BUG-06 fixed a second time and waiting for a phone re-test |
 
 **Size of the code** (Python and TypeScript only, 2026-11-24): backend ≈ 10,300 lines, mobile app ≈ 10,300 lines,
@@ -44,6 +44,7 @@ admin panel ≈ 3,600 lines.
 | 2026-11-23 | Search by city and trek region (V2-SR-14): `area` table and `data/areas.csv`, "pokhara" lists all 3 Pokhara sights, "kathmandu valley" all 8, "khumbu" the EBC Trek; area shown in the app and editable in the admin panel; 8 new search test cases (51 in all). Migration 0007. Search opens the tab that has results and shows counts ("Places · 8", BUG-18) | not committed yet |
 | 2026-11-24 | Docs reorganised (V2-DOC-03): backend-only docs (algorithm, database, ML results, survey, benchmark reports) moved to `backend/docs/`; `runlocal.md` and `filestructure.md` moved into `docs/`; every link and every script output path updated | not committed yet |
 | 2026-11-24 | V2 Phase 3 Core (V2-P3-01, 02, 03, 07): emergency contacts, SOS by SMS with GPS and an offline queue, the Lake Louise symptom checker with history, sourced emergency numbers, safety test mode, admin counts. Migration 0008, 53 new tests (302 in all), TC-68 to TC-76 written | not committed yet |
+| 2026-11-27 | Health questions (V2-PROF-01): the traveller profile also asks about high blood pressure, significant anemia and an injury in the last 3 months, in English and Nepali. A Yes to any of the 5 health questions counts as a health issue for the risk model (its input is unchanged, no retraining). Migration 0009, 4 new tests (306 in all), TC-77 written | not committed yet |
 
 ---
 
@@ -51,7 +52,7 @@ admin panel ≈ 3,600 lines.
 
 ### Version 1 Phase 1: users and explore
 - **First launch:** you pick English or नेपाली. Then you register with email or *Continue with Google*. Passwords are hashed with bcrypt, and sessions use JWT access and refresh tokens. The forms have placeholders, a show/hide password button, and stay above the keyboard.
-- **Traveller profile:** age, fitness, trekking experience, interests and nationality, plus optional health questions.
+- **Traveller profile:** age, fitness, trekking experience, interests and nationality, plus optional health questions (heart condition, asthma, high blood pressure, significant anemia, a recent injury).
 - **Explore:** category chips, a list of treks and a list of places.
 - **Place page:** photos, best months to visit, entry fees, how to get there, and the 5 nearest places.
 - **Trek page:** route, permits and stats.
@@ -184,18 +185,18 @@ All seed data is in [data/](data/), with a source and date for each item in [dat
 | `climate_baseline.csv` and `climate_regions.csv` | Kathmandu's monthly weather plus a rain factor for each district, used for the best-time scores |
 | `emergency_numbers.csv` | Police 100, Tourist Police 1144, Ambulance 102, Fire 101, each with its source; the app ships a copy so they show offline |
 
-The database is PostgreSQL 16 with 8 migrations: Phase 1, Phase 2, Phase 3, V2 Phase 2, V2 Phase 1, V2-SR (place tags, `name_latin`, `dismissed_item`), V2-SR-14 (`area`, `place.area_id`), then V2 Phase 3 (`emergency_contact`, `sos_event`, `symptom_check`).
+The database is PostgreSQL 16 with 9 migrations: Phase 1, Phase 2, Phase 3, V2 Phase 2, V2 Phase 1, V2-SR (place tags, `name_latin`, `dismissed_item`), V2-SR-14 (`area`, `place.area_id`), V2 Phase 3 (`emergency_contact`, `sos_event`, `symptom_check`), then V2-PROF-01 (three health columns on `traveller_profile`).
 
 ## Testing and quality
 
 - **Automated:** [`./scripts/verify.sh`](scripts/verify.sh) runs all of these:
   - backend ruff lint and format check
   - a check that the migrations match the models
-  - 302 pytest tests
+  - 306 pytest tests
   - the app's copy of the Lake Louise score against the same 17 cases as the backend
   - mobile typecheck and lint
   - admin typecheck, build and lint
-- **Manual test cases:** 76 cases, TC-01 to TC-76, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
+- **Manual test cases:** 77 cases, TC-01 to TC-77, listed in [docs/testing/testing.md](docs/testing/testing.md) and run in the order set by [docs/testing/testing-guide.md](docs/testing/testing-guide.md).
   - All were run on the emulator (Phone 1). The layout cases, TC-47 (Near me, real GPS) and TC-51 were run on a
     real phone (Phone 2: Samsung Galaxy A07, 720 × 1600) on 2026-11-23.
   - TC-59 to TC-61 (login and register forms) were added on 2026-11-23 and pass on both phones.

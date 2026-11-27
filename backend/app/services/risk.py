@@ -34,9 +34,22 @@ def missing_profile_fields(profile: TravellerProfile | None) -> list[str]:
     return [f for f in REQUIRED_PROFILE_FIELDS if getattr(profile, f) is None]
 
 
+HEALTH_FIELDS = (
+    "has_heart_condition",
+    "has_asthma",
+    "has_high_blood_pressure",
+    "has_anemia",
+    "has_recent_injury",
+)
+
+
 def has_health_issue(profile: TravellerProfile) -> bool:
-    """Heart condition OR asthma. An unanswered question counts as 'no'."""
-    return bool(profile.has_heart_condition) or bool(profile.has_asthma)
+    """A Yes to any health question. An unanswered question counts as 'no'.
+
+    All five feed the model's single has_health_issue input, so adding a question
+    does not change the model or need retraining.
+    """
+    return any(bool(getattr(profile, f)) for f in HEALTH_FIELDS)
 
 
 def require_profile(user: User) -> TravellerProfile:

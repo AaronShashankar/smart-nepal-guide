@@ -30,7 +30,8 @@ CLASSES = {
     "Interest": (C[0], 110, 240, None, ["+code: str"], []),
     "TravellerProfile": (C[1], 360, 240, None, [
         "+date_of_birth: date", "+fitness_level: FitnessLevel", "+trek_experience: TrekExperience",
-        "+has_heart_condition: bool", "+has_asthma: bool", "+budget_level: BudgetLevel",
+        "+has_heart_condition: bool", "+has_asthma: bool", "+has_high_blood_pressure: bool",
+        "+has_anemia: bool", "+has_recent_injury: bool", "+budget_level: BudgetLevel",
         "+travel_style: TravelStyle", "+nationality: Nationality"], []),
     "EmergencyContact": (C[0], 330, 240, None, [
         "+name: str", "+phone: str", "+email: str", "+relation: str", "+sort_order: int"], []),

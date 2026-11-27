@@ -121,3 +121,21 @@ def test_health_answers_feed_the_model(client, user, trained_model):
     )
     r = client.post("/predict-risk", json={"trek_id": EBC, "month": 4}, headers=headers).json()
     assert r["input"]["has_health_issue"] is True
+
+
+@pytest.mark.parametrize("field", ["has_high_blood_pressure", "has_anemia", "has_recent_injury"])
+def test_new_health_questions_feed_the_model(client, user, trained_model, field):
+    """V2-PROF-01: a Yes to any of the newer questions counts as a health issue too."""
+    _, _, headers = user
+    set_profile(
+        client, headers, fitness_level="medium", trek_experience="beginner", **{field: True}
+    )
+    r = client.post("/predict-risk", json={"trek_id": EBC, "month": 4}, headers=headers).json()
+    assert r["input"]["has_health_issue"] is True
+
+
+def test_no_health_answers_means_no_health_issue(client, user, trained_model):
+    _, _, headers = user
+    set_profile(client, headers, fitness_level="medium", trek_experience="beginner")
+    r = client.post("/predict-risk", json={"trek_id": EBC, "month": 4}, headers=headers).json()
+    assert r["input"]["has_health_issue"] is False

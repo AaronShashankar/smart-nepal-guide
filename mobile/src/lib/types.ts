@@ -39,6 +39,9 @@ export interface Profile {
   trek_experience: TrekExperience | null;
   has_heart_condition: boolean | null;
   has_asthma: boolean | null;
+  has_high_blood_pressure: boolean | null;
+  has_anemia: boolean | null;
+  has_recent_injury: boolean | null;
   budget_level: BudgetLevel | null;
   travel_style: TravelStyle | null;
   nationality: Nationality;

@@ -13,7 +13,7 @@ Draft feature list (2026-11-05). Algorithms will be decided after the feature li
 | Feature | Priority |
 |---|---|
 | Sign up / login (email or Google) | Must-have |
-| Traveller profile: age, fitness level, trekking experience, health conditions (asthma, heart, etc.) | Must-have (input to the risk predictor) |
+| Traveller profile: age, fitness level, trekking experience, health conditions (heart, asthma, high blood pressure, significant anemia, recent injury) | Must-have (input to the risk predictor) |
 | Preferences: budget, interests (nature, culture, adventure, religious), travel style (solo, family, group) | Good |
 | Language: English / Nepali | Good |
 

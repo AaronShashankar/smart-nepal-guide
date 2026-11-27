@@ -40,6 +40,9 @@ class ProfileIn(BaseModel):
     trek_experience: TrekExperience | None = None
     has_heart_condition: bool | None = None
     has_asthma: bool | None = None
+    has_high_blood_pressure: bool | None = None
+    has_anemia: bool | None = None
+    has_recent_injury: bool | None = None
     budget_level: BudgetLevel | None = None
     travel_style: TravelStyle | None = None
     nationality: Nationality = Nationality.foreign
@@ -57,6 +60,9 @@ class ProfileOut(BaseModel):
     trek_experience: TrekExperience | None = None
     has_heart_condition: bool | None = None
     has_asthma: bool | None = None
+    has_high_blood_pressure: bool | None = None
+    has_anemia: bool | None = None
+    has_recent_injury: bool | None = None
     budget_level: BudgetLevel | None = None
     travel_style: TravelStyle | None = None
     nationality: Nationality = Nationality.foreign
